@@ -116,7 +116,7 @@ function SetupNotice() {
           Database → Create database → keep the database ID <code className="font-mono text-ink">(default)</code> →
           choose a location → Start in <strong className="font-medium text-ink">production mode</strong>. Never test
           mode: it leaves every enquiry publicly readable. Then run{" "}
-          <code className="font-mono text-ink">firebase deploy --only firestore</code> (rules and TTL policies) before
+          <code className="font-mono text-ink">firebase deploy --only firestore</code> (security rules) before
           any build that writes to it goes live.
         </li>
         <li>
@@ -133,9 +133,8 @@ function SetupNotice() {
           </strong>
         </li>
         <li>
-          Firestore → TTL policies: check that <code className="font-mono text-ink">pageviews.expireAt</code> and{" "}
-          <code className="font-mono text-ink">events.expireAt</code> are listed, so records are deleted after about 26
-          months.
+          Open this dashboard at least once a month: each visit deletes page views and clicks older than about 26
+          months, as the privacy policy states.
         </li>
         <li>
           Google Cloud console → APIs &amp; Services → Credentials → the browser key: restrict it to HTTP referrers (your

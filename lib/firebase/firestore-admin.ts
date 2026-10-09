@@ -11,6 +11,11 @@
  * - updateDocument(collection, id, fields, idToken, mask?, { serverTimestamp? })
  *                                           Masked update via :commit (document must exist). Throws FirestoreError.
  * - deleteDocument(collection, id, idToken) Throws FirestoreError.
+ * - deleteDocuments(collection, ids, idToken)
+ *                                           Deletes in batched :commit calls of up to 500. Throws FirestoreError.
+ * - purgeOlderThan(collection, cutoff, idToken, max?)
+ *                                           Retention clean-up: deletes up to `max` documents created before `cutoff`,
+ *                                           oldest first. Returns the number deleted. Throws FirestoreError.
  * - FirestoreError                          Error with HTTP `status` and Firestore `code` (e.g. PERMISSION_DENIED).
  */
 
@@ -188,4 +193,41 @@ export async function deleteDocument(collection: string, id: string, idToken: st
   }
   const response = await firestoreRequest(firestoreUrl(`/${collection}/${id}`), { method: "DELETE" }, idToken);
   if (!response.ok) throw await toError(response);
+}
+
+/** Deletes documents in batched :commit calls (Firestore accepts up to 500 writes per commit). */
+export async function deleteDocuments(collection: string, ids: string[], idToken: string): Promise<void> {
+  if (!isValidSegment(collection) || ids.some((id) => !isValidSegment(id))) {
+    throw new FirestoreError("Invalid document path", 400, "INVALID_ARGUMENT");
+  }
+  for (let start = 0; start < ids.length; start += 500) {
+    const writes = ids.slice(start, start + 500).map((id) => ({ delete: documentName(collection, id) }));
+    const response = await firestoreRequest(
+      firestoreUrl(":commit"),
+      { method: "POST", body: JSON.stringify({ writes }) },
+      idToken,
+    );
+    if (!response.ok) throw await toError(response);
+  }
+}
+
+/**
+ * Retention clean-up for analytics collections. Finds documents whose createdAt is before `cutoff`
+ * (oldest first, at most `max`), re-checks each one's createdAt against the cutoff, and deletes only
+ * those. Documents without a readable createdAt are never deleted. Returns how many were deleted.
+ */
+export async function purgeOlderThan(collection: string, cutoff: Date, idToken: string, max = 500): Promise<number> {
+  const cutoffMs = cutoff.getTime();
+  if (!Number.isFinite(cutoffMs)) return 0;
+  const candidates = await runQuery<{ createdAt?: unknown }>(
+    collection,
+    { until: cutoff, limit: max, direction: "ASCENDING" },
+    idToken,
+  );
+  const expired = candidates
+    .filter((doc) => doc.createdAt instanceof Date && doc.createdAt.getTime() < cutoffMs)
+    .map((doc) => doc.id);
+  if (expired.length === 0) return 0;
+  await deleteDocuments(collection, expired, idToken);
+  return expired.length;
 }

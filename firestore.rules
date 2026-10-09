@@ -76,8 +76,8 @@ service cloud.firestore {
 
     // -------------------------------------------------------------- pageviews
 
-    // TTL field: about 26 months ahead (client sends now + 790 days; window allows clock skew).
-    // Firestore TTL policies on pageviews.expireAt and events.expireAt do the deletion.
+    // Expiry field: about 26 months ahead (client sends now + 790 days; window allows clock skew).
+    // The admin dashboard deletes page views and events older than 790 days each time it is opened.
     function validExpiry(d) {
       return d.expireAt is timestamp
         && d.expireAt > request.time + duration.value(760, 'd')

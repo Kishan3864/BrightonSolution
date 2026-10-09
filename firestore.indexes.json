@@ -1,17 +1,4 @@
 {
   "indexes": [],
-  "fieldOverrides": [
-    {
-      "collectionGroup": "pageviews",
-      "fieldPath": "expireAt",
-      "ttl": true,
-      "indexes": []
-    },
-    {
-      "collectionGroup": "events",
-      "fieldPath": "expireAt",
-      "ttl": true,
-      "indexes": []
-    }
-  ]
+  "fieldOverrides": []
 }

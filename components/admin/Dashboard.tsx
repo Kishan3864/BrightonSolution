@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { COLLECTIONS, type ContactStatus } from "@/lib/firebase/schema";
-import { FirestoreError, runQuery, updateDocument } from "@/lib/firebase/firestore-admin";
+import { COLLECTIONS, RETENTION_DAYS, type ContactStatus } from "@/lib/firebase/schema";
+import { FirestoreError, purgeOlderThan, runQuery, updateDocument } from "@/lib/firebase/firestore-admin";
 import {
   bySession,
   computeKpis,
@@ -177,6 +177,28 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
   useEffect(() => {
     void load(range);
   }, [load, range]);
+
+  // Retention: page views and events older than RETENTION_DAYS (about 26 months, as the privacy policy
+  // states) are deleted each time the dashboard is opened. Runs once per visit in the background;
+  // a failure is ignored and simply retried on the next visit.
+  const purgedRef = useRef(false);
+  useEffect(() => {
+    if (purgedRef.current) return;
+    purgedRef.current = true;
+    void (async () => {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * HOUR);
+        await Promise.all([
+          purgeOlderThan(COLLECTIONS.pageviews, cutoff, token),
+          purgeOlderThan(COLLECTIONS.events, cutoff, token),
+        ]);
+      } catch {
+        /* retried on the next visit */
+      }
+    })();
+  }, [getToken]);
 
   const report = useMemo(() => {
     if (!data) return null;

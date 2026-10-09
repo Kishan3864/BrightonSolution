@@ -162,14 +162,15 @@ export type PageviewRecord = {
   os?: string;
   isNewVisitor?: boolean;
   pageIndex?: number;
-  /** Deletion time for the Firestore TTL policy (see RETENTION_DAYS). */
+  /** Expiry time, about 26 months after creation (see RETENTION_DAYS). */
   expireAt: Date;
 };
 
 /**
  * Page views and events are kept for about 26 months (privacy policy). Each record carries
- * expireAt = now + RETENTION_DAYS; Firestore TTL policies on pageviews.expireAt and
- * events.expireAt delete them. firestore.rules accepts 760–820 days to tolerate clock skew.
+ * expireAt = now + RETENTION_DAYS; the admin dashboard deletes records older than RETENTION_DAYS
+ * each time it is opened (Firestore TTL policies would need a billing-enabled project and can be
+ * added on expireAt later). firestore.rules accepts 760–820 days to tolerate clock skew.
  */
 export const RETENTION_DAYS = 790;
 
@@ -207,7 +208,7 @@ export type EventRecord = {
   label?: string;
   href?: string;
   path: string;
-  /** Deletion time for the Firestore TTL policy (see RETENTION_DAYS). */
+  /** Expiry time, about 26 months after creation (see RETENTION_DAYS). */
   expireAt: Date;
 };
 
