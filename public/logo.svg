@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="236" height="40" viewBox="0 0 236 40" role="img" aria-labelledby="t">
+  <title id="t">BrightonSolution</title>
+  <rect width="236" height="40" fill="#FAFAF7"/>
+  <g transform="translate(6 6)" fill="none" stroke="#0A1220" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+    <rect x="0.75" y="0.75" width="26.5" height="26.5"/>
+    <path d="M9 6.5v15"/>
+    <path d="M9 6.5h7v6.5H9"/>
+    <path d="M9 13h8.5v8.5H9"/>
+  </g>
+  <rect x="26" y="24" width="3.5" height="3.5" fill="#2447F9"/>
+  <text x="46" y="26" font-family="Manrope, ui-sans-serif, system-ui, sans-serif" font-size="18" letter-spacing="-0.4" fill="#0A1220"><tspan font-weight="600">Brighton</tspan><tspan font-weight="400">Solution</tspan></text>
+</svg>

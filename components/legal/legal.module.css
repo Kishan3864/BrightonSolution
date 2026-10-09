@@ -1,0 +1,102 @@
+/* Legal pages: prose body and table of contents.
+   Theme tokens come from app/globals.css (@theme); hex fallbacks keep the
+   module correct even if a token is not emitted. */
+
+.prose {
+  max-width: 68ch;
+  font-size: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  line-height: 1.65;
+  color: var(--color-ink, #0a1220);
+  overflow-wrap: anywhere;
+}
+
+/* Zero-specificity reset so the block rhythm below always wins. */
+.prose :where(p, ul, dl) {
+  margin: 0;
+}
+
+.prose > * + * {
+  margin-top: 1.15em;
+}
+
+.prose ul {
+  padding: 0;
+  list-style: none;
+}
+
+.prose li {
+  position: relative;
+  padding-left: 1.625rem;
+}
+
+.prose li + li {
+  margin-top: 0.55em;
+}
+
+.prose li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 0.875rem;
+  height: 1.5px;
+  background-color: var(--color-accent, #2447f9);
+}
+
+.prose dl {
+  border-top: 1px solid var(--color-line, #e3e3dd);
+}
+
+.prose dl > div {
+  display: grid;
+  gap: 0.3rem 1.5rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--color-line, #e3e3dd);
+}
+
+@media (min-width: 640px) {
+  .prose dl > div {
+    grid-template-columns: minmax(9rem, 11rem) minmax(0, 1fr);
+  }
+}
+
+.prose dt {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.prose dd {
+  margin: 0;
+  color: var(--color-muted, #5b6170);
+}
+
+.prose a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--color-accent, #2447f9);
+  text-underline-offset: 0.22em;
+  transition: color 0.2s ease;
+}
+
+.prose a:hover {
+  color: var(--color-accent, #2447f9);
+}
+
+/* Table of contents */
+.toc {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line, #e3e3dd) transparent;
+}
+
+.tocLink {
+  border-left: 2px solid transparent;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.tocLink[aria-current="location"] {
+  border-left-color: var(--color-accent, #2447f9);
+  color: var(--color-ink, #0a1220);
+}

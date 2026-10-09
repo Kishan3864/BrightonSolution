@@ -1,0 +1,238 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #fafaf7;
+  --color-ink: #0a1220;
+  --color-accent: #2447f9;
+  --color-accent-soft: #7d93ff;
+  --color-muted: #5b6170;
+  --color-muted-dark: rgba(250, 250, 247, 0.68);
+  --color-line: #e3e3dd;
+  --color-line-dark: rgba(250, 250, 247, 0.14);
+  --radius-sharp: 2px;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ---------- Base ---------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    min-width: 320px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  .section-dark :focus-visible {
+    outline-color: var(--color-paper);
+  }
+
+  svg {
+    display: block;
+  }
+
+  img,
+  svg,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ---------- Fluid typography ---------- */
+.text-display {
+  font-size: clamp(2.5rem, 1.3rem + 4.8vw, 5.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+
+.text-h1 {
+  font-size: clamp(2.25rem, 1.3rem + 3.8vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+.text-h2 {
+  font-size: clamp(1.75rem, 1.1rem + 2.6vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+
+.text-h3 {
+  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.625rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+
+.text-lead {
+  font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.3125rem);
+  line-height: 1.5;
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+@media (min-width: 640px) {
+  .eyebrow {
+    font-size: 0.75rem;
+  }
+}
+
+/* ---------- Spacing & surfaces ---------- */
+.py-section {
+  padding-block: clamp(4rem, 2rem + 8vw, 9rem);
+}
+
+.section-dark {
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.hairline {
+  border-top: 1px solid var(--color-line);
+}
+
+.section-dark .hairline {
+  border-color: var(--color-line-dark);
+}
+
+/* ---------- Scroll reveal (only when JS runs) ---------- */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.7s cubic-bezier(0.2, 0.65, 0.2, 1),
+    transform 0.7s cubic-bezier(0.2, 0.65, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+html.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Fallback: if the JS bundle never hydrates (blocked, failed, very slow),
+   content appears on its own after 2.5s. The first mounted Reveal adds
+   html.hydrated, which switches this off so scroll reveals keep working. */
+@keyframes reveal-fallback {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+html.js:not(.hydrated) .reveal {
+  animation: reveal-fallback 0s 2.5s forwards;
+}
+
+/* ---------- Hero art motion ---------- */
+@keyframes ha-dash {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -240;
+  }
+}
+
+@keyframes ha-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 6px, 0);
+  }
+}
+
+@keyframes ha-pulse {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hero-art .ha-dash {
+  stroke-dasharray: 6 10;
+  animation: ha-dash 30s linear infinite;
+}
+
+.hero-art .ha-drift {
+  animation: ha-drift 18s ease-in-out infinite alternate;
+}
+
+.hero-art .ha-pulse {
+  animation: ha-pulse 4s ease-in-out infinite alternate;
+}
+
+.hero-art .ha-delay-1 {
+  animation-delay: -1.5s;
+}
+
+.hero-art .ha-delay-2 {
+  animation-delay: -3s;
+}
+
+.hero-art .ha-delay-3 {
+  animation-delay: -6s;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
