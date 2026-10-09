@@ -3,21 +3,20 @@ export type NextStep = { number: string; text: string };
 export const contactHero = {
   eyebrow: "Contact",
   title: "Tell us about your project",
-  lead: "A few lines about what you want to build, when you need it and what already exists are enough to start. We reply by email with questions or a proposed next step.",
+  lead: "A few lines about what you want to build, when you need it and what already exists are enough to start.",
 };
 
-export const emailNote =
-  "For new projects, existing systems that need attention and general questions.";
+export const emailNote = "New projects, existing systems that need attention, or general questions.";
 
 export const nextSteps: NextStep[] = [
-  { number: "01", text: "We read your brief and reply by email." },
-  { number: "02", text: "A short call to clarify scope, timeline and budget." },
-  { number: "03", text: "A written proposal with scope, team and pricing." },
+  { number: "01", text: "We read your brief and reply by email, with questions or a suggested next step." },
+  { number: "02", text: "If it helps, a short call to clarify scope, timeline and budget." },
+  { number: "03", text: "A written proposal with scope, approach and pricing before any work begins." },
 ];
 
 export const workingTogether = {
   eyebrow: "Working together",
-  text: "We work with clients worldwide and collaborate remotely by default. Calls are scheduled around your time zone, decisions are written down and progress is visible on a shared board, so the work keeps moving even when our working hours do not overlap with yours.",
+  text: "We work with clients worldwide and remotely by default. Calls are scheduled around your time zone and decisions are written down, so work keeps moving even when our hours do not overlap.",
 };
 
 export const contactFormCopy = {

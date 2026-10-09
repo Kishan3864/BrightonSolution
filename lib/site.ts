@@ -4,12 +4,6 @@ export type IconName =
   | "plus"
   | "minus"
   | "check"
-  | "build"
-  | "modernize"
-  | "scale"
-  | "automate"
-  | "secure"
-  | "maintain"
   | "mail"
   | "menu"
   | "close"
@@ -34,14 +28,6 @@ export type Service = {
   icon: IconName;
 };
 
-export type HelpItem = {
-  title: string;
-  description: string;
-  icon: IconName;
-};
-
-export type Industry = { name: string; line: string };
-
 export type TechnologyGroup = { name: string; items: string[] };
 
 export type ProcessStep = {
@@ -50,8 +36,6 @@ export type ProcessStep = {
   description: string;
   output: string;
 };
-
-export type Reason = { title: string; description: string };
 
 export type EngagementModel = {
   title: string;
@@ -72,6 +56,8 @@ export type SiteInfo = {
   description: string;
   tagline: string;
   locale: string;
+  /** Google Play developer page for the company's Android apps. */
+  playStoreUrl: string;
 };
 
 export const site: SiteInfo = {
@@ -84,10 +70,12 @@ export const site: SiteInfo = {
     "BrightonSolution is a software development and IT services company. We design, build and maintain custom software, web and mobile applications, cloud infrastructure and AI-powered features for startups, small businesses and enterprises worldwide.",
   tagline: "Software built properly, for companies that depend on it.",
   locale: "en_GB",
+  playStoreUrl: "https://play.google.com/store/apps/developer?id=Brighton+Solution",
 };
 
 export const nav: NavItem[] = [
   { label: "Services", href: "/services" },
+  { label: "Work", href: "/work" },
   { label: "Industries", href: "/#industries" },
   { label: "Technologies", href: "/#technologies" },
   { label: "About", href: "/about" },
@@ -140,7 +128,7 @@ export const services: Service[] = [
     number: "03",
     title: "Mobile App Development",
     summary:
-      "iOS and Android applications, native or cross-platform, with the back end to match.",
+      "Android and iOS applications, native or cross-platform, with the back end to match.",
     description:
       "We build mobile apps that are designed for the platform they run on and the people who use them. Depending on your product and budget, that can mean a single cross-platform codebase with React Native or Flutter, or fully native Swift and Kotlin. We handle the whole lifecycle from store listings and release builds to crash reporting and updates.",
     deliverables: [
@@ -237,88 +225,6 @@ export const services: Service[] = [
   },
 ];
 
-export const howWeHelp: HelpItem[] = [
-  {
-    title: "Build",
-    description:
-      "Turn an idea, a specification or a pile of requirements into working software. We scope it carefully, build it in short increments and ship something usable early.",
-    icon: "build",
-  },
-  {
-    title: "Modernize",
-    description:
-      "Replace or refactor legacy systems that are slow, hard to change or impossible to hire for. We migrate in stages so the business keeps running throughout.",
-    icon: "modernize",
-  },
-  {
-    title: "Scale",
-    description:
-      "Prepare a product for more users, more data and more teams. We remove bottlenecks in the code and the infrastructure before they become outages.",
-    icon: "scale",
-  },
-  {
-    title: "Automate",
-    description:
-      "Take repetitive manual work out of your operations with integrations, workflows and, where it genuinely helps, AI. Your people keep the judgement calls.",
-    icon: "automate",
-  },
-  {
-    title: "Secure",
-    description:
-      "Review access, data handling and infrastructure against current standards. We fix the gaps and set up practices that keep things secure as the product changes.",
-    icon: "secure",
-  },
-  {
-    title: "Maintain",
-    description:
-      "Keep production software healthy with monitoring, updates and a clear process for fixes. You always know who to call and what happens next.",
-    icon: "maintain",
-  },
-];
-
-export const industries: Industry[] = [
-  {
-    name: "Fintech & payments",
-    line: "Payment flows, ledgers, KYC onboarding and reporting that must be correct to the cent.",
-  },
-  {
-    name: "Healthcare",
-    line: "Patient portals, scheduling, clinical workflows and integrations that handle sensitive data carefully.",
-  },
-  {
-    name: "E-commerce & retail",
-    line: "Storefronts, catalogue and inventory systems, checkout and order management.",
-  },
-  {
-    name: "Logistics & supply chain",
-    line: "Tracking, dispatch, warehouse tools and dashboards that show where everything is right now.",
-  },
-  {
-    name: "Education",
-    line: "Learning platforms, student and course management, assessments and content delivery.",
-  },
-  {
-    name: "Real estate & property",
-    line: "Listings, tenant and owner portals, document workflows and maintenance tracking.",
-  },
-  {
-    name: "SaaS & technology",
-    line: "Multi-tenant products, billing, usage metering, admin tooling and public APIs.",
-  },
-  {
-    name: "Professional services",
-    line: "Client portals, time and project tracking, proposals, invoicing and reporting.",
-  },
-  {
-    name: "Manufacturing",
-    line: "Production planning, quality tracking, equipment data and supplier coordination.",
-  },
-  {
-    name: "Media & publishing",
-    line: "Content platforms, subscriptions, editorial tools and audience analytics.",
-  },
-];
-
 export const technologies: TechnologyGroup[] = [
   {
     name: "Frontend",
@@ -356,7 +262,7 @@ export const process: ProcessStep[] = [
   },
   {
     number: "02",
-    title: "Strategize",
+    title: "Strategise",
     description:
       "We define the scope, choose the technology and agree what ships first. You get a plan with real trade-offs, not a wish list.",
     output: "Scope, architecture outline, timeline and estimate",
@@ -398,39 +304,6 @@ export const process: ProcessStep[] = [
   },
 ];
 
-export const whyUs: Reason[] = [
-  {
-    title: "Senior engineers on every project",
-    description:
-      "The people who scope your project are the people who build it. Nothing is handed down to someone who was not in the room.",
-  },
-  {
-    title: "One accountable point of contact",
-    description:
-      "You have a single lead who knows your project in detail and answers for it. No ticket queues, no being passed around.",
-  },
-  {
-    title: "You own the code and the documentation",
-    description:
-      "Everything we produce lives in your repositories and accounts from day one. If you ever want to move on, nothing is held hostage.",
-  },
-  {
-    title: "A fixed communication rhythm",
-    description:
-      "Agreed check-ins, written updates and a shared board you can look at whenever you like. You never have to wonder what is happening.",
-  },
-  {
-    title: "Security and quality built in from day one",
-    description:
-      "Code review, automated tests, access control and dependency updates are part of how we work, not extras you pay for later.",
-  },
-  {
-    title: "Long-term thinking",
-    description:
-      "We make choices that are easy to maintain in three years, not just quick to ship this month. Boring, well-supported technology wins most of the time.",
-  },
-];
-
 export const engagementModels: EngagementModel[] = [
   {
     title: "Fixed Project",
@@ -442,14 +315,14 @@ export const engagementModels: EngagementModel[] = [
   },
   {
     title: "Dedicated Team",
-    summary: "Engineers and designers who work only on your product, led by us.",
+    summary: "Capacity reserved for your product, led by us.",
     bestFor: "Products under continuous development that need stable, full-time capacity.",
     howItWorks:
-      "We assemble a team around your needs, integrate with your tools and ways of working, and plan with you in regular sprints.",
-    billing: "Monthly, per team member.",
+      "We reserve capacity around your needs, integrate with your tools and ways of working, and plan with you in regular sprints.",
+    billing: "Monthly, based on the capacity reserved.",
   },
   {
-    title: "Time & Material",
+    title: "Time & Materials",
     summary: "Flexible capacity billed for the hours actually worked.",
     bestFor: "Evolving requirements, research-heavy work and ongoing improvements.",
     howItWorks:
@@ -484,10 +357,11 @@ export const footerColumns: FooterColumn[] = [
     title: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "Services", href: "/services" },
+      { label: "Work", href: "/work" },
       { label: "Industries", href: "/#industries" },
       { label: "Technologies", href: "/#technologies" },
       { label: "Contact", href: "/contact" },
+      { label: "Google Play", href: "https://play.google.com/store/apps/developer?id=Brighton+Solution" },
     ],
   },
   {

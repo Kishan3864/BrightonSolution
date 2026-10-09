@@ -14,22 +14,22 @@ export default function PageHero({ eyebrow, title, lead, children, id = "page-he
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className="pt-[clamp(3rem,2rem+4vw,6rem)] pb-[clamp(2.5rem,1.5rem+3vw,4.5rem)]"
+      className="pt-[clamp(2.75rem,1.75rem+3.5vw,5rem)] pb-[clamp(2.25rem,1.5rem+2.5vw,3.75rem)]"
     >
       <Container>
         <div className="grid gap-6 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-4 lg:col-span-3">
-            <p className="eyebrow text-accent">{eyebrow}</p>
+            <p className="eyebrow text-accent md:pt-3">{eyebrow}</p>
           </div>
           <div className="min-w-0 md:col-span-8 lg:col-span-9">
-            <h1 id={`${id}-title`} className="text-h1 max-w-[16ch] text-balance tracking-tight">
+            <h1 id={`${id}-title`} className="text-h1 max-w-[18ch] text-balance">
               {title}
             </h1>
-            {lead ? <p className="text-lead mt-6 max-w-[62ch] text-muted">{lead}</p> : null}
+            {lead ? <p className="text-lead mt-5 max-w-[60ch] text-muted">{lead}</p> : null}
             {children}
           </div>
         </div>
-        <div className="hairline mt-[clamp(2.5rem,1.5rem+3vw,4.5rem)]" />
+        <div className="hairline mt-[clamp(2.25rem,1.5rem+2.5vw,3.75rem)]" />
       </Container>
     </section>
   );

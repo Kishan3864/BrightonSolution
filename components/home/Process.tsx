@@ -6,7 +6,7 @@ import { processCopy, bodyGap } from "@/lib/content/home-b";
 
 export default function Process() {
   return (
-    <section id="process" className="section-dark py-section scroll-mt-24" aria-labelledby="process-title">
+    <section id="process" className="section-dark py-section scroll-mt-4" aria-labelledby="process-title">
       <Container>
         <Reveal>
           <SectionHeading
@@ -19,42 +19,38 @@ export default function Process() {
           />
         </Reveal>
 
-        <ol className={`${bodyGap} border-b border-line-dark xl:grid xl:grid-cols-7 xl:grid-rows-[auto_auto_1fr_auto] xl:border-t xl:border-b-0`}>
+        {/* Rows at every width. From lg the number sits in the heading's label
+            column and the step text in its title column (3 + 9 of 12). */}
+        <ol role="list" className={`${bodyGap} border-b border-line-dark`}>
           {process.map((step, i) => (
             <Reveal
               as="li"
               key={step.number}
-              delay={i * 60}
-              className="grid min-w-0 grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 border-t border-line-dark py-6 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:gap-x-6 md:py-8 xl:row-span-4 xl:grid-cols-1 xl:grid-rows-subgrid xl:gap-x-0 xl:border-t-0 xl:border-l xl:px-5 xl:pt-8 xl:pb-2 xl:first:border-l-0 xl:first:pl-0 xl:last:pr-0"
+              delay={i * 50}
+              className="grid min-w-0 grid-cols-[2.75rem_minmax(0,1fr)] gap-x-4 border-t border-line-dark py-5 sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-x-6 md:py-6 lg:grid-cols-12 lg:gap-x-8"
             >
               <span
-                className="block text-[clamp(1.75rem,1.2rem+2vw,3rem)] leading-none font-semibold tracking-tight tabular-nums text-accent-soft"
+                className="block font-mono text-[clamp(1.25rem,1rem+1vw,1.75rem)] leading-none font-normal tabular-nums text-accent-soft lg:col-span-3"
                 aria-hidden="true"
               >
                 {step.number}
               </span>
-              <div className="min-w-0 xl:contents">
-                <h3 className="text-[1.125rem] font-semibold tracking-tight text-paper sm:text-xl xl:mt-8 xl:text-lg">
-                  <span className="sr-only">Step {step.number}: </span>
-                  {step.title}
-                </h3>
-                <p className="mt-2.5 max-w-[56ch] text-[0.9375rem] leading-relaxed text-paper/90 xl:pb-5 xl:text-sm">
-                  {step.description}
-                </p>
-                <p className="mt-5 border-t border-line-dark pt-4 text-sm leading-relaxed xl:mt-0 text-muted-dark">
+              <div className="min-w-0 lg:col-span-9 lg:grid lg:grid-cols-9 lg:gap-x-8">
+                <div className="min-w-0 lg:col-span-6">
+                  <h3 className="text-base font-medium tracking-[-0.01em] text-paper sm:text-[1.0625rem]">
+                    <span className="sr-only">Step {step.number}: </span>
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 max-w-[56ch] text-sm leading-relaxed text-paper/85">{step.description}</p>
+                </div>
+                <p className="mt-4 border-t border-line-dark pt-3 text-[0.8125rem] leading-relaxed text-muted-dark lg:col-span-3 lg:mt-0 lg:border-t-0 lg:pt-1">
                   <span className="eyebrow block text-accent-soft">{processCopy.outputLabel}</span>
-                  <span className="mt-1.5 block">{step.output}</span>
+                  <span className="mt-1 block">{step.output}</span>
                 </p>
               </div>
             </Reveal>
           ))}
         </ol>
-
-        <Reveal delay={120} className="mt-10 grid gap-6 md:grid-cols-12 md:gap-8">
-          <p className="max-w-[52ch] text-[0.9375rem] leading-relaxed text-muted-dark md:col-span-8 md:col-start-5 lg:col-span-6 lg:col-start-4">
-            {processCopy.note}
-          </p>
-        </Reveal>
       </Container>
     </section>
   );

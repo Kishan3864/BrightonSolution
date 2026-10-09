@@ -1,13 +1,11 @@
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
-import Button from "@/components/ui/Button";
-import { whyUs } from "@/lib/site";
-import { whyUsCopy, bodyGap, pad } from "@/lib/content/home-b";
+import { whyUsCopy, whyUsItems, bodyGap, pad } from "@/lib/content/home-b";
 
 export default function WhyUs() {
   return (
-    <section id="why-us" className="py-section scroll-mt-24" aria-labelledby="why-us-title">
+    <section id="why-us" className="py-section scroll-mt-4" aria-labelledby="why-us-title">
       <Container>
         <Reveal>
           <SectionHeading
@@ -15,44 +13,28 @@ export default function WhyUs() {
             number={whyUsCopy.number}
             eyebrow={whyUsCopy.eyebrow}
             title={whyUsCopy.title}
+            lead={whyUsCopy.lead}
           />
         </Reveal>
 
-        <div className={`${bodyGap} grid gap-10 md:grid-cols-12 md:gap-8`}>
-          <Reveal delay={60} className="min-w-0 md:col-span-5 lg:col-span-4 lg:sticky lg:top-28 lg:self-start">
-            <div className="max-w-[40ch]">
-              {whyUsCopy.standing.map((paragraph, i) => (
-                <p
-                  key={i}
-                  className={`text-[1.0625rem] leading-relaxed ${i === 0 ? "text-ink" : "mt-4 text-muted"}`}
-                >
-                  {paragraph}
-                </p>
-              ))}
-              <div className="mt-8">
-                <Button href={whyUsCopy.link.href} variant="ghost">
-                  {whyUsCopy.link.label}
-                </Button>
-              </div>
-            </div>
-          </Reveal>
-
-          <ol className="min-w-0 border-b border-line md:col-span-7 lg:col-span-7 lg:col-start-6">
-            {whyUs.map((reason, i) => (
+        {/* Aligned to the heading column so the list reads as the answer to it. */}
+        <div className={`${bodyGap} md:grid md:grid-cols-12 md:gap-8`}>
+          <ol className="grid min-w-0 border-b border-line sm:grid-cols-2 sm:gap-x-10 md:col-span-8 md:grid-cols-1 lg:grid-cols-2 md:col-start-5 lg:col-span-9 lg:col-start-4 lg:gap-x-14">
+            {whyUsItems.map((reason, i) => (
               <Reveal
                 as="li"
                 key={reason.title}
-                delay={80 + i * 60}
-                className="grid min-w-0 grid-cols-[3rem_minmax(0,1fr)] gap-x-4 border-t border-line py-7 sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-x-6 md:py-8"
+                delay={i * 50}
+                className="grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] items-baseline gap-x-4 border-t border-line py-5 md:py-6"
               >
-                <span className="eyebrow pt-2 tabular-nums text-accent" aria-hidden="true">
+                <span className="eyebrow tabular-nums text-accent" aria-hidden="true">
                   {pad(i + 1)}
                 </span>
                 <div className="min-w-0">
-                  <h3 className="text-h3 max-w-[24ch] text-balance tracking-tight">{reason.title}</h3>
-                  <p className="mt-3 max-w-[56ch] text-[0.9375rem] leading-relaxed text-muted sm:text-base">
-                    {reason.description}
-                  </p>
+                  <h3 className="text-base font-medium tracking-[-0.01em] text-balance sm:text-[1.0625rem]">
+                    {reason.title}
+                  </h3>
+                  <p className="mt-1.5 max-w-[46ch] text-sm leading-relaxed text-muted">{reason.description}</p>
                 </div>
               </Reveal>
             ))}

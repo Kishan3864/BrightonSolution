@@ -10,6 +10,7 @@ export default function JsonLd() {
     email: site.email,
     description: site.description,
     areaServed: "Worldwide",
+    sameAs: [site.playStoreUrl],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",

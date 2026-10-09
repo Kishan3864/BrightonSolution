@@ -1,71 +1,107 @@
+import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import Icon from "@/components/ui/Icon";
 import Reveal from "@/components/ui/Reveal";
+import TrackCta from "@/components/services/TrackCta";
 import type { Service } from "@/lib/site";
-import { serviceFirstSteps, serviceLabels } from "@/lib/content/services";
+import { apps, countWord, playDeveloperName, webProjects } from "@/lib/work";
+import { serviceFirstSteps, serviceLabels, serviceRelatedWork } from "@/lib/content/services";
 
 type ServiceSectionProps = {
   service: Service;
+  total: number;
 };
 
-export default function ServiceSection({ service }: ServiceSectionProps) {
+/** Genuine project names from lib/work.ts that illustrate this service, as one line. */
+function relatedWorkLine(slug: string): string | null {
+  const related = serviceRelatedWork[slug];
+  if (!related) return null;
+  const parts: string[] = [];
+  if (related.projects) {
+    for (const projectSlug of related.projects) {
+      const project = webProjects.find((p) => p.slug === projectSlug);
+      if (project) parts.push(project.name);
+    }
+  }
+  if (related.apps && apps.length > 0) {
+    const n = countWord(apps.length);
+    parts.push(`${n.charAt(0).toUpperCase()}${n.slice(1)} Android apps published on Google Play as ${playDeveloperName}`);
+  }
+  return parts.length > 0 ? parts.join(", ") : null;
+}
+
+export default function ServiceSection({ service, total }: ServiceSectionProps) {
   const titleId = `${service.slug}-title`;
   const firstStep = serviceFirstSteps[service.slug];
+  const related = relatedWorkLine(service.slug);
 
   return (
-    <section id={service.slug} className="scroll-mt-24" aria-labelledby={titleId}>
+    <section id={service.slug} className="scroll-mt-4" aria-labelledby={titleId}>
       <Container>
         <div className="hairline" />
-        <div className="grid gap-10 py-[clamp(3.5rem,2rem+5vw,7rem)] md:grid-cols-12 md:gap-8">
+        <div className="grid gap-8 py-[clamp(3rem,1.75rem+4vw,5.5rem)] md:grid-cols-12 md:gap-8">
           <Reveal className="min-w-0 md:col-span-5 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
-            <p
-              className="text-[clamp(1.75rem,1.3rem+1.6vw,2.5rem)] font-semibold leading-none tracking-tight text-accent tabular-nums"
-              aria-hidden="true"
-            >
+            <p className="eyebrow tabular-nums text-accent" aria-hidden="true">
               {service.number}
+              <span className="text-muted"> / {String(total).padStart(2, "0")}</span>
             </p>
-            <h2
-              id={titleId}
-              className="mt-6 max-w-[14ch] text-balance text-[clamp(1.75rem,0.9rem+2.4vw,3.25rem)] font-semibold leading-[1.1] tracking-tight"
-            >
+            <h2 id={titleId} className="text-h2 mt-4 max-w-[14ch] text-balance">
               {service.title}
             </h2>
-            <dl className="mt-8 max-w-[36ch]">
+            <dl className="mt-6 max-w-[34ch] border-t border-line pt-4">
               <dt className="eyebrow text-muted">{serviceLabels.goodFor}</dt>
-              <dd className="mt-2 leading-relaxed text-ink">{service.goodFor}</dd>
+              <dd className="mt-2 text-[0.9375rem] leading-relaxed text-ink">{service.goodFor}</dd>
             </dl>
           </Reveal>
 
-          <Reveal delay={120} className="min-w-0 md:col-span-7 md:col-start-6">
-            <p className="text-lead max-w-[62ch] text-ink">{service.description}</p>
+          <Reveal delay={100} className="min-w-0 md:col-span-7 md:col-start-6">
+            <p className="text-lead max-w-[60ch] text-ink">{service.description}</p>
 
-            {firstStep ? (
-              <dl className="mt-10 grid gap-3 border-t border-line pt-6 sm:grid-cols-[9.5rem_minmax(0,1fr)] sm:gap-8">
-                <dt className="eyebrow text-muted">{serviceLabels.firstStep}</dt>
-                <dd className="max-w-[58ch] leading-relaxed text-ink">{firstStep}</dd>
-              </dl>
-            ) : null}
-
-            <div className="mt-10">
+            <div className="mt-8">
               <h3 className="eyebrow text-muted">{serviceLabels.deliverables}</h3>
-              <ul className="mt-4 border-t border-line">
+              <ul className="mt-3 grid border-t border-line sm:grid-cols-2 sm:gap-x-8">
                 {service.deliverables.map((item) => (
                   <li
                     key={item}
-                    className="flex items-start gap-4 border-b border-line py-3.5 leading-relaxed text-ink"
+                    className="flex min-w-0 items-start gap-3 border-b border-line py-3 text-[0.9375rem] leading-snug text-ink"
                   >
-                    <Icon name="check" size={18} className="mt-[5px] text-accent" />
+                    <Icon name="check" size={16} className="mt-[3px] text-accent" />
                     <span className="min-w-0">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="mt-8">
-              <Button href="/contact" variant="ghost">
-                {serviceLabels.cta}
-              </Button>
+            <dl className="mt-8 grid gap-y-5 text-[0.9375rem] leading-relaxed">
+              {firstStep ? (
+                <div className="grid gap-2 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8">
+                  <dt className="eyebrow whitespace-nowrap pt-[0.2em] text-muted">{serviceLabels.firstStep}</dt>
+                  <dd className="max-w-[58ch] text-ink">{firstStep}</dd>
+                </div>
+              ) : null}
+              {related ? (
+                <div className="grid gap-2 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8">
+                  <dt className="eyebrow whitespace-nowrap pt-[0.2em] text-muted">{serviceLabels.relatedWork}</dt>
+                  <dd className="max-w-[58ch] text-ink">
+                    {related}.{" "}
+                    <Link
+                      href="/work"
+                      className="inline-flex min-h-[44px] items-center text-accent underline decoration-1 underline-offset-4 hover:text-ink sm:min-h-0"
+                    >
+                      {serviceLabels.relatedWorkLink}
+                    </Link>
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+
+            <div className="mt-6">
+              <TrackCta label={`services_${service.slug}`}>
+                <Button href="/contact" variant="ghost">
+                  {serviceLabels.cta}
+                </Button>
+              </TrackCta>
             </div>
           </Reveal>
         </div>

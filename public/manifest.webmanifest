@@ -1,0 +1,19 @@
+{
+  "name": "BrightonSolution — Software Development & IT Services",
+  "short_name": "BrightonSolution",
+  "description": "Software development and IT services for startups, small businesses and enterprises worldwide.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#FAFAF7",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -84,7 +84,7 @@ export default function LegalPage({ doc }: { doc: LegalDocument }) {
 
       <section
         id={summaryId}
-        className="section-dark py-[clamp(3rem,2rem+4vw,6rem)]"
+        className="section-dark py-[clamp(2.75rem,1.75rem+3.5vw,5rem)]"
         aria-labelledby={`${summaryId}-title`}
       >
         <Container>
@@ -93,11 +93,11 @@ export default function LegalPage({ doc }: { doc: LegalDocument }) {
               <p className="eyebrow text-accent-soft">In short</p>
               <h2
                 id={`${summaryId}-title`}
-                className="text-h3 mt-4 max-w-[18ch] text-balance tracking-tight"
+                className="text-h3 mt-4 max-w-[18ch] text-balance"
               >
                 {doc.summaryTitle}
               </h2>
-              <p className="mt-4 max-w-[34ch] text-[0.9375rem] leading-relaxed text-muted-dark">
+              <p className="mt-4 max-w-[34ch] text-[0.875rem] leading-relaxed text-muted-dark">
                 {doc.summaryNote}
               </p>
             </Reveal>
@@ -109,8 +109,8 @@ export default function LegalPage({ doc }: { doc: LegalDocument }) {
                   delay={80 + i * 60}
                   className="min-w-0 border-t border-line-dark py-5"
                 >
-                  <p className="font-semibold tracking-tight text-paper">{point.title}</p>
-                  <p className="mt-2 max-w-[42ch] text-[0.9375rem] leading-relaxed text-muted-dark">
+                  <p className="font-medium text-paper">{point.title}</p>
+                  <p className="mt-1.5 max-w-[42ch] text-[0.875rem] leading-relaxed text-muted-dark">
                     {point.text}
                   </p>
                 </Reveal>
@@ -140,7 +140,7 @@ export default function LegalPage({ doc }: { doc: LegalDocument }) {
                     key={section.id}
                     id={section.id}
                     aria-labelledby={`${section.id}-title`}
-                    className={`scroll-mt-28 ${isFirst ? "" : "border-t border-line pt-[clamp(2rem,1.25rem+2.5vw,3.5rem)]"} ${isLast ? "" : "pb-[clamp(2rem,1.25rem+2.5vw,3.5rem)]"}`.trim()}
+                    className={`scroll-mt-8 ${isFirst ? "" : "border-t border-line pt-[clamp(2rem,1.25rem+2.5vw,3.5rem)]"} ${isLast ? "" : "pb-[clamp(2rem,1.25rem+2.5vw,3.5rem)]"}`.trim()}
                   >
                     <Reveal className="grid gap-x-6 gap-y-3 sm:grid-cols-[3rem_minmax(0,1fr)]">
                       <p className="eyebrow text-accent tabular-nums sm:pt-[0.3em]" aria-hidden="true">
@@ -149,7 +149,7 @@ export default function LegalPage({ doc }: { doc: LegalDocument }) {
                       <div className="min-w-0">
                         <h2
                           id={`${section.id}-title`}
-                          className="text-h3 max-w-[24ch] text-balance tracking-tight"
+                          className="text-h3 max-w-[28ch] text-balance"
                         >
                           {section.title}
                         </h2>

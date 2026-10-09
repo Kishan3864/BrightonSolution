@@ -21,7 +21,7 @@ export default function ServicesPage() {
       <PageHero eyebrow={servicesPage.eyebrow} title={servicesPage.title} lead={servicesPage.lead} />
       <ServiceIndex />
       {services.map((service) => (
-        <ServiceSection key={service.slug} service={service} />
+        <ServiceSection key={service.slug} service={service} total={services.length} />
       ))}
       <WaysToWork />
       <Included />

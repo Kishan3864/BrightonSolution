@@ -23,16 +23,16 @@ export default function SectionHeading({
   return (
     <div className={`grid gap-6 md:grid-cols-12 md:gap-8 ${className}`.trim()}>
       <div className="md:col-span-4 lg:col-span-3">
-        <p className={`eyebrow flex items-baseline gap-3 ${eyebrowColor}`}>
+        <p className={`eyebrow flex items-baseline gap-3 md:pt-2 ${eyebrowColor}`}>
           {number ? <span className="tabular-nums">{number}</span> : null}
           <span>{eyebrow}</span>
         </p>
       </div>
       <div className="min-w-0 md:col-span-8 lg:col-span-9">
-        <h2 id={id} className="text-h2 max-w-[20ch] text-balance tracking-tight">
+        <h2 id={id} className="text-h2 max-w-[22ch] text-balance">
           {title}
         </h2>
-        {lead ? <p className={`text-lead mt-5 max-w-[62ch] ${leadColor}`}>{lead}</p> : null}
+        {lead ? <p className={`text-lead mt-4 max-w-[60ch] ${leadColor}`}>{lead}</p> : null}
       </div>
     </div>
   );

@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "typecheck": "tsc --noEmit"
+    "build": "next build && node scripts/fix-export-segments.mjs",
+    "typecheck": "tsc --noEmit",
+    "build:maintenance": "node scripts/build-maintenance.mjs && node scripts/fix-export-segments.mjs"
   },
   "dependencies": {
     "next": "16.4.0",

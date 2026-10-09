@@ -8,7 +8,7 @@ export default function ServiceIndex() {
   return (
     <section
       id="services-index"
-      className="pb-[clamp(2rem,1rem+3vw,4rem)] scroll-mt-24"
+      className="pb-[clamp(2rem,1rem+3vw,4rem)] scroll-mt-4"
       aria-labelledby="services-index-title"
     >
       <Container>
@@ -25,18 +25,18 @@ export default function ServiceIndex() {
                 >
                   <a
                     href={`#${service.slug}`}
-                    className="group flex min-h-[44px] flex-col justify-between gap-5 py-4 text-ink xl:min-h-[6.5rem]"
+                    className="group flex min-h-[44px] flex-col justify-between gap-4 py-3.5 text-ink xl:min-h-[5.5rem]"
                   >
                     <span className="eyebrow text-accent tabular-nums" aria-hidden="true">
                       {service.number}
                     </span>
                     <span className="flex items-end justify-between gap-3">
-                      <span className="text-[0.9375rem] font-medium leading-snug tracking-tight decoration-1 underline-offset-4 group-hover:underline">
+                      <span className="text-[0.875rem] font-medium leading-snug decoration-1 underline-offset-4 group-hover:underline">
                         {serviceIndexLabels[service.slug] ?? service.title}
                       </span>
                       <Icon
                         name="arrow"
-                        size={16}
+                        size={14}
                         className="mb-0.5 rotate-90 text-muted transition-transform duration-200 group-hover:translate-y-0.5"
                       />
                     </span>

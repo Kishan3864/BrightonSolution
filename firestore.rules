@@ -1,0 +1,151 @@
+rules_version = '2';
+
+// BrightonSolution — Firestore security rules.
+// Field lists and limits mirror lib/firebase/schema.ts; change both together.
+// Public visitors may only CREATE validated documents; nothing is publicly readable.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------------- helpers
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['support@brightonsolution.com']
+        && request.auth.token.email_verified == true
+        && request.auth.token.firebase.sign_in_provider == 'password';
+    }
+
+    function reqStr(d, k, minLen, maxLen) {
+      return d[k] is string && d[k].size() >= minLen && d[k].size() <= maxLen;
+    }
+
+    function optStr(d, k, maxLen) {
+      return !(k in d) || (d[k] is string && d[k].size() <= maxLen);
+    }
+
+    function optInt(d, k, minVal, maxVal) {
+      return !(k in d) || (d[k] is int && d[k] >= minVal && d[k] <= maxVal);
+    }
+
+    function optBool(d, k) {
+      return !(k in d) || d[k] is bool;
+    }
+
+    function isId(d, k) {
+      return d[k] is string && d[k].matches('^[A-Za-z0-9_-]{8,64}$');
+    }
+
+    function optId(d, k) {
+      return !(k in d) || d[k] == '' || isId(d, k);
+    }
+
+    // --------------------------------------------------------------- contacts
+
+    function validContact(d) {
+      return d.keys().hasOnly(['name', 'company', 'email', 'phone', 'service', 'budget', 'message',
+                               'page', 'referrer', 'userAgent', 'language', 'timeZone', 'visitorId',
+                               'status', 'createdAt'])
+        && d.keys().hasAll(['name', 'email', 'message', 'status', 'createdAt'])
+        && reqStr(d, 'name', 1, 120)
+        && reqStr(d, 'email', 3, 254)
+        && d.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && reqStr(d, 'message', 20, 5000)
+        && optStr(d, 'company', 160)
+        && optStr(d, 'phone', 40)
+        && optStr(d, 'service', 120)
+        && optStr(d, 'budget', 60)
+        && optStr(d, 'page', 300)
+        && optStr(d, 'referrer', 500)
+        && optStr(d, 'userAgent', 400)
+        && optStr(d, 'language', 35)
+        && optStr(d, 'timeZone', 64)
+        && optId(d, 'visitorId')
+        && d.status == 'new'
+        && d.createdAt == request.time;
+    }
+
+    match /contacts/{id} {
+      allow create: if validContact(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.status in ['new', 'handled', 'spam']
+        && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
+    }
+
+    // -------------------------------------------------------------- pageviews
+
+    // TTL field: about 26 months ahead (client sends now + 790 days; window allows clock skew).
+    // Firestore TTL policies on pageviews.expireAt and events.expireAt do the deletion.
+    function validExpiry(d) {
+      return d.expireAt is timestamp
+        && d.expireAt > request.time + duration.value(760, 'd')
+        && d.expireAt < request.time + duration.value(820, 'd');
+    }
+
+    function validPageview(d) {
+      return d.keys().hasOnly(['visitorId', 'sessionId', 'path', 'title', 'referrer',
+                               'utmSource', 'utmMedium', 'utmCampaign', 'durationMs', 'scrollDepth',
+                               'viewportW', 'viewportH', 'screenW', 'screenH', 'language', 'timeZone',
+                               'device', 'browser', 'os', 'isNewVisitor', 'pageIndex', 'expireAt', 'createdAt'])
+        && d.keys().hasAll(['visitorId', 'sessionId', 'path', 'durationMs', 'expireAt', 'createdAt'])
+        && isId(d, 'visitorId')
+        && isId(d, 'sessionId')
+        && reqStr(d, 'path', 1, 300)
+        && optStr(d, 'title', 300)
+        && optStr(d, 'referrer', 500)
+        && optStr(d, 'utmSource', 100)
+        && optStr(d, 'utmMedium', 100)
+        && optStr(d, 'utmCampaign', 100)
+        && d.durationMs is int && d.durationMs >= 0 && d.durationMs <= 21600000
+        && optInt(d, 'scrollDepth', 0, 100)
+        && optInt(d, 'viewportW', 0, 10000)
+        && optInt(d, 'viewportH', 0, 10000)
+        && optInt(d, 'screenW', 0, 10000)
+        && optInt(d, 'screenH', 0, 10000)
+        && optStr(d, 'language', 35)
+        && optStr(d, 'timeZone', 64)
+        && (!('device' in d) || d.device in ['mobile', 'tablet', 'desktop'])
+        && optStr(d, 'browser', 40)
+        && optStr(d, 'os', 40)
+        && optBool(d, 'isNewVisitor')
+        && optInt(d, 'pageIndex', 0, 1000)
+        && validExpiry(d)
+        && d.createdAt == request.time;
+    }
+
+    match /pageviews/{id} {
+      allow create: if validPageview(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // ----------------------------------------------------------------- events
+
+    function validEvent(d) {
+      return d.keys().hasOnly(['visitorId', 'sessionId', 'type', 'label', 'href', 'path', 'expireAt', 'createdAt'])
+        && d.keys().hasAll(['visitorId', 'sessionId', 'type', 'path', 'expireAt', 'createdAt'])
+        && isId(d, 'visitorId')
+        && isId(d, 'sessionId')
+        && d.type in ['cta_click', 'outbound', 'play', 'mailto', 'tel', 'form_submit', 'nav']
+        && optStr(d, 'label', 200)
+        && optStr(d, 'href', 500)
+        && reqStr(d, 'path', 1, 300)
+        && validExpiry(d)
+        && d.createdAt == request.time;
+    }
+
+    match /events/{id} {
+      allow create: if validEvent(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // ---------------------------------------------------------- default deny
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -5,7 +5,7 @@ import { includedPractices, includedSection } from "@/lib/content/services";
 
 export default function Included() {
   return (
-    <section id="included" className="py-section scroll-mt-24" aria-labelledby="included-title">
+    <section id="included" className="py-section scroll-mt-4" aria-labelledby="included-title">
       <Container>
         <Reveal>
           <SectionHeading
@@ -16,23 +16,26 @@ export default function Included() {
           />
         </Reveal>
 
-        <ul className="mt-[clamp(2.5rem,1.5rem+3vw,4.5rem)] border-t border-line">
+        <ol className="mt-[clamp(2.25rem,1.5rem+2.5vw,4rem)] grid border-t border-line md:grid-cols-2 md:gap-x-12">
           {includedPractices.map((practice, index) => (
             <Reveal
               key={practice.title}
               as="li"
-              delay={index * 60}
-              className="grid gap-3 border-b border-line py-6 md:grid-cols-12 md:gap-8 lg:py-7"
+              delay={(index % 2) * 60}
+              className="grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] gap-x-3 border-b border-line py-6"
             >
-              <h3 className="min-w-0 text-[clamp(1.125rem,1.05rem+0.4vw,1.375rem)] font-semibold leading-snug tracking-tight text-balance md:col-span-5">
-                {practice.title}
-              </h3>
-              <p className="min-w-0 max-w-[58ch] leading-relaxed text-muted md:col-span-7">
-                {practice.description}
-              </p>
+              <span className="eyebrow pt-[0.35em] tabular-nums text-accent" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-[1.0625rem] font-medium leading-snug tracking-[-0.01em] text-balance">
+                  {practice.title}
+                </h3>
+                <p className="mt-2 max-w-[52ch] text-[0.9375rem] leading-relaxed text-muted">{practice.description}</p>
+              </div>
             </Reveal>
           ))}
-        </ul>
+        </ol>
       </Container>
     </section>
   );

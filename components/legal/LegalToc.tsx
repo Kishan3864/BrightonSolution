@@ -55,7 +55,7 @@ export default function LegalToc({ sections, label = "On this page" }: LegalTocP
               <a
                 href={`#${s.id}`}
                 aria-current={current ? "location" : undefined}
-                className={`${styles.tocLink} flex min-h-[44px] items-baseline gap-3 py-[11px] pl-3 pr-2 text-[0.9375rem] leading-[1.45] text-muted hover:text-ink`}
+                className={`${styles.tocLink} flex min-h-[44px] items-baseline gap-3 py-[11px] pl-3 pr-2 text-[0.875rem] leading-[1.45] text-muted hover:text-ink`}
               >
                 <span
                   className={`eyebrow w-[2ch] shrink-0 tabular-nums ${current ? "text-accent" : "text-muted"}`}

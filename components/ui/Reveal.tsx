@@ -17,8 +17,9 @@ export default function Reveal({ children, delay = 0, className = "", as = "div"
     const el = ref.current;
     if (!el) return;
 
-    // Switches off the no-JS reveal fallback in globals.css.
-    document.documentElement.classList.add("hydrated");
+    // Tells the inline head script that reveals are running, so its 2.5s
+    // fail-safe (html.reveal-ready-fallback) is not applied.
+    (window as Window & { __bsRevealReady?: boolean }).__bsRevealReady = true;
 
     const show = () => el.classList.add("is-visible");
 

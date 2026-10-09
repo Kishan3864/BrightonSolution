@@ -3,8 +3,7 @@ import PageHero from "@/components/ui/PageHero";
 import WhoWeAre from "@/components/about/WhoWeAre";
 import Principles from "@/components/about/Principles";
 import WhoWeWorkWith from "@/components/about/WhoWeWorkWith";
-import Commitments from "@/components/about/Commitments";
-import HowWeWork from "@/components/about/HowWeWork";
+import WorkTeaser from "@/components/about/WorkTeaser";
 import CtaBand from "@/components/CtaBand";
 import { pageMetadata } from "@/lib/seo";
 import { aboutHero, aboutMeta } from "@/lib/content/about";
@@ -22,8 +21,7 @@ export default function AboutPage() {
       <WhoWeAre />
       <Principles />
       <WhoWeWorkWith />
-      <Commitments />
-      <HowWeWork />
+      <WorkTeaser />
       <CtaBand />
     </>
   );

@@ -3,6 +3,7 @@ import Hero from "@/components/home/Hero";
 import Intro from "@/components/home/Intro";
 import Services from "@/components/home/Services";
 import HowWeHelp from "@/components/home/HowWeHelp";
+import Work from "@/components/home/Work";
 import Industries from "@/components/home/Industries";
 import Technologies from "@/components/home/Technologies";
 import Process from "@/components/home/Process";
@@ -25,6 +26,7 @@ export default function HomePage() {
       <Intro />
       <Services />
       <HowWeHelp />
+      <Work />
       <Industries />
       <Technologies />
       <Process />

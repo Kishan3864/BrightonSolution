@@ -43,10 +43,10 @@ export function LogoMark({
 export default function Logo({ variant = "dark", compact = false, titled = false, className = "" }: LogoProps) {
   const color = variant === "light" ? "text-paper" : "text-ink";
   return (
-    <span className={`inline-flex items-center gap-3 ${color} ${className}`.trim()}>
+    <span className={`inline-flex items-center gap-2.5 ${color} ${className}`.trim()}>
       <LogoMark variant={variant} titled={titled} />
       {compact ? null : (
-        <span className="whitespace-nowrap text-[1.0625rem] leading-none tracking-tight" aria-hidden={titled ? "true" : undefined}>
+        <span className="whitespace-nowrap text-[1rem] leading-none tracking-[-0.02em]" aria-hidden={titled ? "true" : undefined}>
           <span className="font-semibold">Brighton</span>
           <span className="font-normal">Solution</span>
         </span>

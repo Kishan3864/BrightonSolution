@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Logo from "@/components/Logo";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
+import { isAdminPath } from "@/lib/analytics/env";
 import { nav, site } from "@/lib/site";
 
 export default function Header() {
@@ -106,106 +107,121 @@ export default function Header() {
     return undefined;
   }, [open, close]);
 
-  const isActive = (href: string) => !href.includes("#") && pathname === href;
+  // The private /admin tool keeps only the logo bar: no public navigation or CTA.
+  const admin = isAdminPath(pathname || "/");
+
+  const isActive = (href: string) =>
+    !href.includes("#") && (pathname === href || (href !== "/" && pathname.startsWith(`${href}/`)));
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-paper">
       <div
         className={`mx-auto flex w-full max-w-[1320px] items-center justify-between px-[clamp(1rem,0.5rem+2.5vw,3rem)] transition-[height] duration-200 ease-out ${
-          compact ? "h-14 md:h-16" : "h-16 md:h-20"
+          compact ? "h-14 md:h-[3.75rem]" : "h-16 md:h-[4.5rem]"
         }`}
       >
         <Link href="/" className="inline-flex min-h-[44px] items-center" aria-label="BrightonSolution home">
           <Logo variant="dark" titled />
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex xl:gap-2" aria-label="Primary">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={isActive(item.href) ? "page" : undefined}
-              className={`inline-flex min-h-[44px] items-center px-3 text-[0.9375rem] font-medium tracking-tight decoration-1 underline-offset-8 transition-colors hover:underline ${
-                isActive(item.href) ? "text-ink underline" : "text-ink/80 hover:text-ink"
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
-          <Button href="/contact" variant="dark" className="ml-3">
-            Let’s Talk
-          </Button>
-        </nav>
-
-        <button
-          ref={toggleRef}
-          type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-sharp text-ink lg:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <Icon name={open ? "close" : "menu"} />
-        </button>
-      </div>
-
-      <div
-        id="mobile-menu"
-        hidden={!open}
-        className={`fixed inset-0 z-[60] flex-col bg-ink text-paper lg:hidden ${open ? "flex" : "hidden"}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Site menu"
-      >
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-line-dark px-[clamp(1rem,0.5rem+2.5vw,3rem)]">
-          <Link href="/" className="inline-flex min-h-[44px] items-center" aria-label="BrightonSolution home" onClick={close}>
-            <Logo variant="light" />
-          </Link>
-          <button
-            type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-sharp text-paper"
-            aria-label="Close menu"
-            onClick={close}
-          >
-            <Icon name="close" />
-          </button>
-        </div>
-
-        <nav className="flex-1 overflow-y-auto px-[clamp(1rem,0.5rem+2.5vw,3rem)] py-8" aria-label="Mobile">
-          <ul className="flex flex-col">
-            {nav.map((item, i) => (
-              <li key={item.href} className="border-b border-line-dark">
+        {admin ? null : (
+          <>
+            <nav className="hidden items-center lg:flex" aria-label="Primary">
+              {nav.map((item) => (
                 <Link
-                  ref={i === 0 ? firstLinkRef : undefined}
+                  key={item.href}
                   href={item.href}
                   aria-current={isActive(item.href) ? "page" : undefined}
-                  onClick={close}
-                  className="flex min-h-[44px] items-center justify-between py-4 text-3xl font-semibold tracking-tight text-paper"
+                  className={`inline-flex min-h-[44px] items-center whitespace-nowrap px-2.5 text-[0.875rem] font-medium tracking-[-0.005em] decoration-1 underline-offset-[6px] transition-colors hover:underline xl:px-3.5 ${
+                    isActive(item.href) ? "text-ink underline" : "text-ink/75 hover:text-ink"
+                  }`}
                 >
-                  <span>{item.label}</span>
-                  <Icon name="arrow" className="text-accent-soft" />
+                  {item.label}
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+              ))}
+              <Button href="/contact" variant="dark" className="ml-3 xl:ml-5">
+                Let’s Talk
+              </Button>
+            </nav>
 
-        <div className="shrink-0 border-t border-line-dark px-[clamp(1rem,0.5rem+2.5vw,3rem)] py-6">
-          <p className="eyebrow text-accent-soft">Email</p>
-          <a
-            href={`mailto:${site.email}`}
-            className="mt-2 inline-flex min-h-[44px] items-center break-all text-paper underline-offset-8 decoration-1 hover:underline"
-          >
-            {site.email}
-          </a>
-          <div className="mt-4">
-            <Button href="/contact" variant="light" className="w-full">
-              Let’s Talk
-            </Button>
+            <button
+              ref={toggleRef}
+              type="button"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-sharp text-ink lg:hidden"
+              aria-expanded={open}
+              aria-controls="mobile-menu"
+              aria-label={open ? "Close menu" : "Open menu"}
+              onClick={() => setOpen((v) => !v)}
+            >
+              <Icon name={open ? "close" : "menu"} />
+            </button>
+          </>
+        )}
+      </div>
+
+      {admin ? null : (
+        <div
+          id="mobile-menu"
+          hidden={!open}
+          className={`section-dark fixed inset-0 z-[60] flex-col bg-ink text-paper lg:hidden ${open ? "flex" : "hidden"}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Site menu"
+        >
+          <div className="flex h-16 shrink-0 items-center justify-between border-b border-line-dark md:h-[4.5rem] px-[clamp(1rem,0.5rem+2.5vw,3rem)]">
+            <Link href="/" className="inline-flex min-h-[44px] items-center" aria-label="BrightonSolution home" onClick={close}>
+              <Logo variant="light" />
+            </Link>
+            <button
+              type="button"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-sharp text-paper"
+              aria-label="Close menu"
+              onClick={close}
+            >
+              <Icon name="close" />
+            </button>
+          </div>
+
+          <nav className="flex-1 overflow-y-auto px-[clamp(1rem,0.5rem+2.5vw,3rem)] py-8" aria-label="Mobile">
+            <ul className="flex flex-col">
+              {nav.map((item, i) => (
+                <li key={item.href} className="border-b border-line-dark">
+                  <Link
+                    ref={i === 0 ? firstLinkRef : undefined}
+                    href={item.href}
+                    aria-current={isActive(item.href) ? "page" : undefined}
+                    onClick={close}
+                    className="flex min-h-[44px] items-center justify-between gap-4 py-4 text-[1.625rem] font-medium tracking-[-0.03em] text-paper aria-[current=page]:text-accent-soft"
+                  >
+                    <span className="flex items-baseline gap-4">
+                      <span className="eyebrow text-muted-dark" aria-hidden="true">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span>{item.label}</span>
+                    </span>
+                    <Icon name="arrow" size={20} className="text-accent-soft" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="shrink-0 border-t border-line-dark px-[clamp(1rem,0.5rem+2.5vw,3rem)] py-6">
+            <p className="eyebrow text-accent-soft">Email</p>
+            <a
+              href={`mailto:${site.email}`}
+              className="mt-1 inline-flex min-h-[44px] items-center break-all text-[0.9375rem] text-paper underline-offset-[6px] decoration-1 hover:underline"
+            >
+              {site.email}
+            </a>
+            <div className="mt-4">
+              <Button href="/contact" variant="light" className="w-full">
+                Let’s Talk
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }

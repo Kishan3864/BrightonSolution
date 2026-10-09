@@ -10,21 +10,31 @@
   --color-line: #e3e3dd;
   --color-line-dark: rgba(250, 250, 247, 0.14);
   --radius-sharp: 2px;
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
 }
 
 /* ---------- Base ---------- */
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Keeps focused elements and anchor targets clear of the sticky header
+       (56–72px) — WCAG 2.4.11 Focus Not Obscured, technique C43. Section
+       anchors add scroll-mt-4 / scroll-mt-8 on top of this. */
+    scroll-padding-top: 5rem;
     overflow-x: clip;
     -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
     background-color: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
+    font-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+    line-height: 1.6;
     overflow-x: clip;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -62,60 +72,70 @@
   h3,
   h4 {
     overflow-wrap: anywhere;
+    font-weight: 500;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
   }
 }
 
 /* ---------- Fluid typography ---------- */
 .text-display {
-  font-size: clamp(2.5rem, 1.3rem + 4.8vw, 5.25rem);
-  line-height: 1.02;
-  letter-spacing: -0.035em;
-  font-weight: 600;
+  font-size: clamp(2.25rem, 1.45rem + 3.3vw, 4.25rem);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  font-weight: 500;
 }
 
 .text-h1 {
-  font-size: clamp(2.25rem, 1.3rem + 3.8vw, 4.5rem);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  font-weight: 600;
+  font-size: clamp(2rem, 1.4rem + 2.5vw, 3.5rem);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  font-weight: 500;
 }
 
 .text-h2 {
-  font-size: clamp(1.75rem, 1.1rem + 2.6vw, 3.25rem);
-  line-height: 1.1;
-  letter-spacing: -0.025em;
-  font-weight: 600;
+  font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  font-weight: 500;
 }
 
 .text-h3 {
-  font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.625rem);
-  line-height: 1.25;
+  font-size: clamp(1.125rem, 1.02rem + 0.45vw, 1.375rem);
+  line-height: 1.3;
   letter-spacing: -0.015em;
-  font-weight: 600;
+  font-weight: 550;
 }
 
 .text-lead {
-  font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.3125rem);
-  line-height: 1.5;
+  font-size: clamp(1rem, 0.94rem + 0.3vw, 1.1875rem);
+  line-height: 1.55;
+  letter-spacing: -0.005em;
 }
 
+/* Small uppercase labels and section numbers: Geist Mono. */
 .eyebrow {
+  font-family: var(--font-mono);
   font-size: 0.6875rem;
   line-height: 1.4;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-weight: 600;
-}
-
-@media (min-width: 640px) {
-  .eyebrow {
-    font-size: 0.75rem;
-  }
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Spacing & surfaces ---------- */
 .py-section {
-  padding-block: clamp(4rem, 2rem + 8vw, 9rem);
+  padding-block: clamp(3.5rem, 2rem + 6vw, 7.5rem);
+}
+
+.pt-section {
+  padding-top: clamp(3.5rem, 2rem + 6vw, 7.5rem);
 }
 
 .section-dark {
@@ -131,13 +151,34 @@
   border-color: var(--color-line-dark);
 }
 
+/* Thin hairline frame for genuine project visuals (screenshots, app icons).
+   No shadows, sharp corners. */
+.media-frame {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sharp);
+  background-color: #ffffff;
+}
+
+.section-dark .media-frame {
+  border-color: var(--color-line-dark);
+  background-color: rgba(250, 250, 247, 0.04);
+}
+
+.media-frame > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* ---------- Scroll reveal (only when JS runs) ---------- */
 html.js .reveal {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(14px);
   transition:
-    opacity 0.7s cubic-bezier(0.2, 0.65, 0.2, 1),
-    transform 0.7s cubic-bezier(0.2, 0.65, 0.2, 1);
+    opacity 0.65s cubic-bezier(0.2, 0.65, 0.2, 1),
+    transform 0.65s cubic-bezier(0.2, 0.65, 0.2, 1);
   transition-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
 }
@@ -148,18 +189,12 @@ html.js .reveal.is-visible {
   will-change: auto;
 }
 
-/* Fallback: if the JS bundle never hydrates (blocked, failed, very slow),
-   content appears on its own after 2.5s. The first mounted Reveal adds
-   html.hydrated, which switches this off so scroll reveals keep working. */
-@keyframes reveal-fallback {
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-html.js:not(.hydrated) .reveal {
-  animation: reveal-fallback 0s 2.5s forwards;
+/* Fail-safe: the inline head script adds .reveal-ready-fallback after 2.5s
+   unless the Reveal component has mounted (window.__bsRevealReady). If the
+   JS bundle is blocked, fails or is very slow, content still appears. */
+html.reveal-ready-fallback .reveal {
+  opacity: 1;
+  transform: none;
 }
 
 /* ---------- Hero art motion ---------- */
@@ -234,5 +269,19 @@ html.js:not(.hydrated) .reveal {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Print ---------- */
+@media print {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  header,
+  footer,
+  [data-no-print] {
+    display: none !important;
   }
 }

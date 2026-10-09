@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useEffect,
   useRef,
@@ -12,11 +13,22 @@ import {
 import Icon from "@/components/ui/Icon";
 import { budgets, services, site } from "@/lib/site";
 import { contactFormCopy as copy } from "@/lib/content/contact";
+import { analyticsAllowed } from "@/lib/analytics/env";
+import { createDocument } from "@/lib/firebase/firestore";
+import {
+  CONTACT_LIMITS,
+  COLLECTIONS,
+  ID_PATTERN,
+  clip,
+  cleanUrl,
+  type ContactRecord,
+  type TrackDetail,
+} from "@/lib/firebase/schema";
 
 type FieldName = "name" | "company" | "email" | "phone" | "service" | "budget" | "message";
 type Values = Record<FieldName, string>;
 type Errors = Partial<Record<FieldName, string>>;
-type Status = "idle" | "sending" | "sent" | "error" | "mailto";
+type Status = "idle" | "sending" | "sent" | "error";
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 const fieldOrder: FieldName[] = ["name", "company", "email", "phone", "service", "budget", "message"];
@@ -41,40 +53,131 @@ const initialValues: Values = {
   message: "",
 };
 
+/** Length caps — mirrored in firestore.rules (contacts) via lib/firebase/schema.ts. */
+const maxLengths: Record<FieldName, number> = {
+  name: CONTACT_LIMITS.name,
+  company: CONTACT_LIMITS.company,
+  email: CONTACT_LIMITS.email,
+  phone: CONTACT_LIMITS.phone,
+  service: CONTACT_LIMITS.service,
+  budget: CONTACT_LIMITS.budget,
+  message: CONTACT_LIMITS.message,
+};
+
 const serviceOptions = [...services.map((s) => s.title), "Something else"];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^\+?[\d\s().-]{6,}$/;
+/** Real people cannot fill in a 20-character brief faster than this. */
+const MIN_FILL_MS = 3000;
+/** Keep mailto links short enough for every mail client. */
+const MAILTO_MESSAGE_MAX = 1500;
 
 const controlBase =
   "block w-full min-w-0 rounded-sharp border bg-paper px-3.5 text-base text-ink transition-colors duration-200 focus:border-accent focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60";
 const controlBorder = "border-ink/50 hover:border-ink";
 const controlBorderInvalid = "border-[#B42318] hover:border-[#B42318]";
 
-function validate(values: Values): Errors {
+function charCount(value: string): number {
+  return Array.from(value).length;
+}
+
+function trimValues(values: Values): Values {
+  return fieldOrder.reduce((acc, field) => {
+    acc[field] = values[field].trim();
+    return acc;
+  }, { ...initialValues });
+}
+
+function validate(raw: Values): Errors {
+  const values = trimValues(raw);
   const errors: Errors = {};
-  if (!values.name.trim()) errors.name = "Please enter your name.";
-  if (!values.email.trim()) {
+  if (!values.name) errors.name = "Please enter your name.";
+  else if (values.name.length > CONTACT_LIMITS.name) errors.name = `Keep your name under ${CONTACT_LIMITS.name} characters.`;
+
+  if (values.company.length > CONTACT_LIMITS.company) {
+    errors.company = `Keep the company name under ${CONTACT_LIMITS.company} characters.`;
+  }
+
+  if (!values.email) {
     errors.email = "Please enter your email address.";
-  } else if (!EMAIL_RE.test(values.email.trim())) {
+  } else if (values.email.length > CONTACT_LIMITS.email || !EMAIL_RE.test(values.email)) {
     errors.email = "Enter a valid email address, for example name@company.com.";
   }
-  if (values.phone.trim() && !PHONE_RE.test(values.phone.trim())) {
+
+  if (values.phone && (values.phone.length > CONTACT_LIMITS.phone || !PHONE_RE.test(values.phone))) {
     errors.phone = "Enter a valid phone number, or leave this field empty.";
   }
-  if (values.message.trim().length < 20) {
+
+  if (values.service && !serviceOptions.includes(values.service)) errors.service = "Choose a service from the list.";
+  if (values.budget && !budgets.includes(values.budget)) errors.budget = "Choose a range from the list.";
+
+  if (charCount(values.message) < CONTACT_LIMITS.messageMin) {
     errors.message = "Tell us a little more about the project — at least 20 characters.";
+  } else if (values.message.length > CONTACT_LIMITS.message) {
+    errors.message = `Keep the message under ${CONTACT_LIMITS.message.toLocaleString("en-GB")} characters.`;
   }
   return errors;
 }
 
-function buildMailto(values: Values): string {
-  const subject = encodeURIComponent(`Project enquiry from ${values.name.trim()}`);
+function buildMailto(raw: Values): string {
+  const values = trimValues(raw);
+  const message =
+    values.message.length > MAILTO_MESSAGE_MAX ? `${values.message.slice(0, MAILTO_MESSAGE_MAX)}…` : values.message;
+  const subject = encodeURIComponent(`Project enquiry from ${values.name || "the website"}`);
   const body = fieldOrder
-    .map((field) => `${fieldLabels[field]}: ${values[field].trim() || "not provided"}`)
+    .map((field) => `${fieldLabels[field]}: ${(field === "message" ? message : values[field]) || "not provided"}`)
     .map((line) => encodeURIComponent(line))
     .join("%0D%0A");
   return `mailto:${site.email}?subject=${subject}&body=${body}`;
+}
+
+function readVisitorId(): string {
+  try {
+    const id = window.localStorage.getItem("bs_vid") ?? "";
+    return ID_PATTERN.test(id) ? id : "";
+  } catch {
+    return "";
+  }
+}
+
+function readTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function track(detail: TrackDetail) {
+  try {
+    window.dispatchEvent(new CustomEvent<TrackDetail>("bs:track", { detail }));
+  } catch {
+    /* analytics must never affect the form */
+  }
+}
+
+async function saveToFirestore(values: Values): Promise<boolean> {
+  const record: ContactRecord = {
+    name: clip(values.name, CONTACT_LIMITS.name),
+    company: clip(values.company, CONTACT_LIMITS.company),
+    email: clip(values.email, CONTACT_LIMITS.email),
+    phone: clip(values.phone, CONTACT_LIMITS.phone),
+    service: clip(values.service, CONTACT_LIMITS.service),
+    budget: clip(values.budget, CONTACT_LIMITS.budget),
+    message: clip(values.message, CONTACT_LIMITS.message),
+    page: clip(window.location.pathname, CONTACT_LIMITS.page),
+    referrer: cleanUrl(document.referrer, CONTACT_LIMITS.referrer),
+    userAgent: clip(navigator.userAgent, CONTACT_LIMITS.userAgent),
+    language: clip(navigator.language, CONTACT_LIMITS.language),
+    timeZone: clip(readTimeZone(), CONTACT_LIMITS.timeZone),
+    // No visitor id once tracking is off (GPC, build switch, bots): an id stored
+    // before GPC was turned on must not link the enquiry to past visits.
+    visitorId: analyticsAllowed() ? readVisitorId() : "",
+    status: "new",
+  };
+  const result = await createDocument(COLLECTIONS.contacts, record);
+  return result.ok;
 }
 
 function AlertIcon() {
@@ -147,7 +250,7 @@ function FieldShell({ name, required = false, hint, error, className = "", child
       ) : null}
       {children}
       {error ? (
-        <p id={`${id}-error`} role="alert" className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-[#B42318]">
+        <p id={`${id}-error`} className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-[#B42318]">
           <AlertIcon />
           <span>{error}</span>
         </p>
@@ -157,6 +260,7 @@ function FieldShell({ name, required = false, hint, error, className = "", child
 }
 
 export default function ContactForm() {
+  const router = useRouter();
   const [values, setValues] = useState<Values>(initialValues);
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>("idle");
@@ -164,15 +268,24 @@ export default function ContactForm() {
   const [honeypot, setHoneypot] = useState("");
   const controls = useRef<Partial<Record<FieldName, Control | null>>>({});
   const successHeading = useRef<HTMLHeadingElement | null>(null);
+  const errorPanel = useRef<HTMLDivElement | null>(null);
+  const renderedAt = useRef<number>(0);
+  const inFlight = useRef(false);
+
+  useEffect(() => {
+    renderedAt.current = Date.now();
+  }, []);
 
   useEffect(() => {
     if (status === "sent") successHeading.current?.focus();
+    if (status === "error") errorPanel.current?.focus();
   }, [status]);
 
   const handleChange = (event: ChangeEvent<Control>) => {
     const field = event.target.name as FieldName;
-    const value = event.target.value;
+    const value = event.target.value.slice(0, maxLengths[field]);
     setValues((prev) => ({ ...prev, [field]: value }));
+    if (status === "error") setStatus("idle");
     if (errors[field]) {
       const next = { ...errors };
       delete next[field];
@@ -204,7 +317,7 @@ export default function ContactForm() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (status === "sending") return;
+    if (inFlight.current || status === "sending") return;
     if (honeypot.trim()) return;
 
     const nextErrors = validate(values);
@@ -220,31 +333,35 @@ export default function ContactForm() {
       return;
     }
 
-    setErrors({});
-    setSummary(null);
-
-    const endpoint = process.env.NEXT_PUBLIC_FORM_ENDPOINT;
-    if (!endpoint) {
-      window.location.href = buildMailto(values);
-      setStatus("mailto");
+    if (!renderedAt.current || Date.now() - renderedAt.current < MIN_FILL_MS) {
+      setSummary("Please take a moment to check your details, then send again.");
       return;
     }
 
+    setErrors({});
+    setSummary(null);
     setStatus("sending");
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(values),
-      });
-      if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+    inFlight.current = true;
+
+    const clean = trimValues(values);
+    // Firestore is the only destination; on failure the error panel offers the mailto fallback.
+    const ok = await saveToFirestore(clean);
+
+    track({ type: "form_submit", label: "contact", ok });
+
+    if (ok) {
       setStatus("sent");
-    } catch {
-      setStatus("error");
+      router.push("/thank-you");
+      return;
     }
+
+    inFlight.current = false;
+    setStatus("error");
   };
 
   const reset = () => {
+    inFlight.current = false;
+    renderedAt.current = Date.now();
     setValues(initialValues);
     setErrors({});
     setSummary(null);
@@ -263,7 +380,7 @@ export default function ContactForm() {
         >
           {copy.successTitle}
         </h2>
-        <p className="mt-3 max-w-[48ch] text-[1.0625rem] leading-relaxed text-muted">{copy.successText}</p>
+        <p className="mt-3 max-w-[48ch] text-base leading-relaxed text-muted">{copy.successText}</p>
         <div className="mt-8 border-t border-line pt-5">
           <button
             type="button"
@@ -280,7 +397,18 @@ export default function ContactForm() {
   const sending = status === "sending";
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="relative min-w-0" aria-describedby="cf-required-note">
+    <form
+      // No-JS / pre-hydration fallback: hand the brief to the visitor's mail client instead of a native
+      // GET that would put personal data in the URL. With JS, handleSubmit prevents this and saves to Firestore.
+      method="post"
+      action={`mailto:${site.email}?subject=${encodeURIComponent("Project enquiry")}`}
+      encType="text/plain"
+      onSubmit={handleSubmit}
+      noValidate
+      className="relative min-w-0"
+      aria-describedby="cf-required-note"
+      aria-busy={sending || undefined}
+    >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
         <h2 className="eyebrow text-accent">{copy.heading}</h2>
         <p id="cf-required-note" className="text-sm text-muted">
@@ -297,6 +425,7 @@ export default function ContactForm() {
           type="text"
           tabIndex={-1}
           autoComplete="off"
+          maxLength={200}
           value={honeypot}
           onChange={(e) => setHoneypot(e.target.value)}
         />
@@ -306,10 +435,21 @@ export default function ContactForm() {
         <legend className="eyebrow float-left w-full pt-6 text-muted">{copy.groupDetails}</legend>
         <div className="clear-both grid gap-x-6 gap-y-6 pt-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
           <FieldShell name="name" required error={errors.name}>
-            <input {...control("name", { className: "h-12" })} type="text" autoComplete="name" aria-required="true" />
+            <input
+              {...control("name", { className: "h-12" })}
+              type="text"
+              autoComplete="name"
+              maxLength={maxLengths.name}
+              aria-required="true"
+            />
           </FieldShell>
           <FieldShell name="company" error={errors.company}>
-            <input {...control("company", { className: "h-12" })} type="text" autoComplete="organization" />
+            <input
+              {...control("company", { className: "h-12" })}
+              type="text"
+              autoComplete="organization"
+              maxLength={maxLengths.company}
+            />
           </FieldShell>
           <FieldShell name="email" required error={errors.email}>
             <input
@@ -317,18 +457,27 @@ export default function ContactForm() {
               type="email"
               inputMode="email"
               autoComplete="email"
+              spellCheck={false}
+              maxLength={maxLengths.email}
               aria-required="true"
             />
           </FieldShell>
           <FieldShell name="phone" error={errors.phone}>
-            <input {...control("phone", { className: "h-12" })} type="tel" inputMode="tel" autoComplete="tel" />
+            <input
+              {...control("phone", { className: "h-12" })}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              maxLength={maxLengths.phone}
+            />
           </FieldShell>
         </div>
       </fieldset>
 
       <fieldset className="m-0 mt-10 min-w-0 border-t border-line p-0">
         <legend className="eyebrow float-left w-full pt-6 text-muted">{copy.groupProject}</legend>
-        <div className="clear-both grid gap-x-6 gap-y-6 pt-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
+        {/* Always one column: two-up selects are too narrow for the longer service names once one is chosen. */}
+        <div className="clear-both grid gap-y-6 pt-6">
           <FieldShell name="service" error={errors.service}>
             <div className="relative">
               <select
@@ -363,10 +512,12 @@ export default function ContactForm() {
               <ChevronIcon />
             </div>
           </FieldShell>
-          <FieldShell name="message" required hint={copy.messageHint} error={errors.message} className="sm:col-span-2 md:col-span-1 lg:col-span-2">
+          <FieldShell name="message" required hint={copy.messageHint} error={errors.message}>
             <textarea
               {...control("message", { hint: true, className: "min-h-40 resize-y py-3" })}
               rows={6}
+              minLength={CONTACT_LIMITS.messageMin}
+              maxLength={maxLengths.message}
               aria-required="true"
             />
           </FieldShell>
@@ -397,33 +548,40 @@ export default function ContactForm() {
               <span>{summary}</span>
             </p>
           ) : null}
-          {status === "error" ? (
-            <div className="mt-4 flex items-start gap-2 text-sm leading-relaxed text-[#B42318]">
-              <AlertIcon />
-              <p>
-                {copy.errorText}{" "}
-                <a
-                  href={buildMailto(values)}
-                  className="break-all font-semibold text-ink underline decoration-1 underline-offset-4 transition-colors hover:text-accent"
-                >
-                  {site.email}
-                </a>
-              </p>
-            </div>
-          ) : null}
-          {status === "mailto" ? (
-            <p className="mt-4 max-w-[52ch] text-sm leading-relaxed text-ink">
-              {copy.mailtoText}{" "}
-              <a
-                href={`mailto:${site.email}`}
-                className="break-all font-semibold underline decoration-1 underline-offset-4 transition-colors hover:text-accent"
-              >
-                {site.email}
-              </a>
-              .
-            </p>
-          ) : null}
         </div>
+
+        {status === "error" ? (
+          <div
+            ref={errorPanel}
+            tabIndex={-1}
+            role="alert"
+            className="mt-6 border-l-2 border-[#B42318] pl-4 outline-offset-4"
+          >
+            <p className="flex items-start gap-2 text-sm font-medium leading-relaxed text-[#B42318]">
+              <AlertIcon />
+              <span>Your message could not be sent right now.</span>
+            </p>
+            <p className="mt-2 max-w-[52ch] text-sm leading-relaxed text-ink">
+              Your details are still in the form — try again in a moment, or send the same brief by email to{" "}
+              <span className="break-all font-medium">{site.email}</span>.
+            </p>
+            <div className="mt-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-6">
+              <a
+                href={buildMailto(values)}
+                className="inline-flex min-h-[44px] items-center gap-2 text-[0.9375rem] font-semibold tracking-tight text-ink decoration-1 underline-offset-8 transition-colors hover:text-accent hover:underline"
+              >
+                Email the brief instead
+                <Icon name="arrow" size={16} />
+              </a>
+              <button
+                type="submit"
+                className="inline-flex min-h-[44px] items-center text-[0.9375rem] font-medium tracking-tight text-muted decoration-1 underline-offset-8 transition-colors hover:text-ink hover:underline"
+              >
+                Try again
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </form>
   );
