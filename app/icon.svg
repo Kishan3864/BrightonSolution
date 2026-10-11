@@ -1,9 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <rect width="32" height="32" fill="#0A1220"/>
-  <g fill="none" stroke="#FAFAF7" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
-    <path d="M11 7v18"/>
-    <path d="M11 7h8v8h-8"/>
-    <path d="M11 15h10v10H11"/>
-  </g>
-  <rect x="23" y="21" width="4" height="4" fill="#2447F9"/>
+  <rect id="bg" width="32" height="32" rx="7" fill="#FFFFFF"/>
+  <circle id="sun-ring" cx="14" cy="18" r="6" fill="none" stroke="#ED943B" stroke-width="4"/>
+  <rect id="stem" x="6" y="2" width="4" height="24" rx="1" fill="#070707"/>
+  <rect id="ray-top" x="12" y="5" width="4" height="3" fill="#ED943B"/>
+  <rect id="ray-top-right" x="20" y="8" width="4" height="4" fill="#ED943B" transform="rotate(45 22 10)"/>
+  <rect id="ray-right" x="24" y="16" width="3" height="4" fill="#ED943B"/>
+  <rect id="ray-bottom-right" x="20" y="24" width="4" height="4" fill="#ED943B" transform="rotate(45 22 26)"/>
+  <rect id="ray-bottom" x="12" y="28" width="4" height="3" fill="#ED943B"/>
 </svg>

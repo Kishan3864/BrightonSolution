@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { site } from "@/lib/site";
 
@@ -6,7 +8,10 @@ export const alt = "BrightonSolution — Software Development & IT Services";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const svg = await readFile(join(process.cwd(), "public", "logo.svg"));
+  const logo = `data:image/svg+xml;base64,${svg.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -22,28 +27,8 @@ export default function OpenGraphImage() {
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              border: "2px solid #0A1220",
-              display: "flex",
-              position: "relative",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                right: 6,
-                bottom: 6,
-                width: 8,
-                height: 8,
-                background: "#2447F9",
-              }}
-            />
-          </div>
-          <div style={{ fontSize: 30, letterSpacing: -0.5, fontWeight: 600 }}>BrightonSolution</div>
+        <div style={{ display: "flex" }}>
+          <img src={logo} alt="" width={203} height={56} />
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
