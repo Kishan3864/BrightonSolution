@@ -1,4 +1,5 @@
 import Container from "@/components/ui/Container";
+import SectionTitle from "@/components/ui/SectionTitle";
 import Logo from "@/components/Logo";
 import { site } from "@/lib/site";
 
@@ -27,11 +28,9 @@ export default function MaintenanceScreen({ standalone = false }: MaintenanceScr
         </Container>
       ) : null}
       <Container className={standalone ? "flex flex-1 flex-col justify-center py-[clamp(3rem,2rem+5vw,6rem)]" : ""}>
-        <div className="grid gap-6 md:grid-cols-12 md:gap-8">
-          <div className="md:col-span-4 lg:col-span-3">
-            <p className="eyebrow text-accent md:pt-3">Scheduled maintenance</p>
-          </div>
-          <div className="min-w-0 md:col-span-8 lg:col-span-9">
+        <SectionTitle variant="page">Scheduled maintenance</SectionTitle>
+        <div className="mt-[clamp(1.5rem,1rem+2vw,3rem)] md:grid md:grid-cols-12 md:gap-8">
+          <div className="min-w-0 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
             <h1 id="maintenance-title" className="text-h1 max-w-[18ch] text-balance">
               We are making a few improvements
             </h1>

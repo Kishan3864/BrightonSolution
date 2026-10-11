@@ -1,6 +1,7 @@
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
+import SectionTitle from "@/components/ui/SectionTitle";
 import { site } from "@/lib/site";
 
 export default function CtaBand() {
@@ -11,10 +12,12 @@ export default function CtaBand() {
       aria-labelledby="cta-title"
     >
       <Container>
-        <div className="grid gap-10 md:grid-cols-12 md:gap-8">
+        <Reveal>
+          <SectionTitle variant="page">Start a project</SectionTitle>
+        </Reveal>
+        <div className="mt-[clamp(1.5rem,1rem+2vw,3rem)] grid gap-10 md:grid-cols-12 md:gap-8">
           <Reveal className="min-w-0 md:col-span-7">
-            <p className="eyebrow text-accent-soft">Start a project</p>
-            <h2 id="cta-title" className="text-h2 mt-4 max-w-[16ch] text-balance">
+            <h2 id="cta-title" className="text-h2 max-w-[16ch] text-balance">
               Tell us what you need to build.
             </h2>
           </Reveal>

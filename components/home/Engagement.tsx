@@ -4,14 +4,14 @@ import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
 import Track from "@/components/home/Track";
 import { engagementModels } from "@/lib/site";
-import { engagementCopy as copy, bodyGap, dividedSection, pad } from "@/lib/content/home-b";
+import { engagementCopy as copy, bodyGap, sectionSpace, pad } from "@/lib/content/home-b";
 
 /** Compact overview of the four engagement models; the full comparison lives on /services. */
 export default function Engagement() {
   return (
     <section id="engagement" className="scroll-mt-4" aria-labelledby="engagement-title">
       <Container>
-        <div className={dividedSection}>
+        <div className={sectionSpace}>
           <Reveal>
             <SectionHeading
               id="engagement-title"

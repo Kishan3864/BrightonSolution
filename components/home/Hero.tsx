@@ -16,7 +16,7 @@ export default function Hero() {
       <Container>
         <div className="grid items-center gap-10 md:grid-cols-12 md:gap-8 lg:gap-10">
           <div className="min-w-0 md:col-span-7">
-            <p className="eyebrow text-accent">{hero.eyebrow}</p>
+            <p className="eyebrow text-balance text-accent">{hero.eyebrow}</p>
             <h1 id="hero-title" className="text-display mt-5 max-w-[15ch] text-balance">
               {hero.title}
             </h1>

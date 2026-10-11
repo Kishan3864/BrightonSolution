@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Container from "@/components/ui/Container";
 import Icon from "@/components/ui/Icon";
+import SectionTitle from "@/components/ui/SectionTitle";
 import EmailLine from "@/components/system/EmailLine";
 
 type ErrorPageProps = {
@@ -25,14 +26,12 @@ export default function ErrorPage({ error, retry }: ErrorPageProps) {
   return (
     <section
       aria-labelledby="error-title"
-      className="pt-[clamp(3rem,2rem+4vw,6rem)] pb-[clamp(3.5rem,2rem+6vw,7.5rem)]"
+      className="pt-[clamp(2.75rem,1.75rem+3.5vw,5rem)] pb-[clamp(3.5rem,2rem+6vw,7.5rem)]"
     >
       <Container>
-        <div className="grid gap-6 md:grid-cols-12 md:gap-8">
-          <div className="md:col-span-4 lg:col-span-3">
-            <p className="eyebrow text-accent">Something went wrong</p>
-          </div>
-          <div className="min-w-0 md:col-span-8 lg:col-span-9">
+        <SectionTitle variant="page">Something went wrong</SectionTitle>
+        <div className="mt-[clamp(1.5rem,1rem+2vw,3rem)] md:grid md:grid-cols-12 md:gap-8">
+          <div className="min-w-0 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
             <h1 id="error-title" className="text-h1 max-w-[18ch] text-balance tracking-tight">
               This page hit an unexpected error
             </h1>
@@ -62,7 +61,7 @@ export default function ErrorPage({ error, retry }: ErrorPageProps) {
             <div className="hairline mt-[clamp(2.5rem,1.5rem+3vw,4rem)]" />
             <EmailLine className="mt-6" lead="If it keeps happening, let us know at" />
             {error.digest ? (
-              <p className="mt-2 font-mono text-[0.75rem] tracking-[0.06em] text-muted">Reference {error.digest}</p>
+              <p className="mt-2 font-mono text-[0.8125rem] tracking-[0.06em] text-muted">Reference {error.digest}</p>
             ) : null}
           </div>
         </div>

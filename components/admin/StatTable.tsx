@@ -30,7 +30,7 @@ export default function StatTable<T>({
         <table className="w-full min-w-[22rem] border-collapse text-left text-[0.8125rem]">
           <caption
             className={
-              captionVisible ? "eyebrow mb-3 text-left text-muted" : "sr-only"
+              captionVisible ? "eyebrow eyebrow-dense mb-3 text-left text-muted" : "sr-only"
             }
           >
             {caption}
@@ -41,7 +41,7 @@ export default function StatTable<T>({
                 <th
                   key={column.header}
                   scope="col"
-                  className={`eyebrow py-2 pr-4 font-medium text-muted last:pr-0 ${column.numeric ? "text-right" : ""} ${column.className ?? ""}`}
+                  className={`eyebrow eyebrow-dense py-2 pr-4 font-medium text-muted last:pr-0 ${column.numeric ? "text-right" : ""} ${column.className ?? ""}`}
                 >
                   {column.header}
                 </th>

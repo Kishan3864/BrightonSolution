@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Container from "@/components/ui/Container";
 import Reveal from "@/components/ui/Reveal";
+import SectionTitle from "@/components/ui/SectionTitle";
 import ContactForm from "@/components/ContactForm";
 import { pageMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
@@ -27,7 +28,7 @@ export default function ContactPage() {
       >
         <Container>
           <div className="grid gap-12 md:grid-cols-12 md:gap-8 lg:gap-x-12">
-            <div className="min-w-0 md:col-span-5 md:self-start">
+            <div className="min-w-0 md:col-span-6 md:self-start lg:col-span-5">
               <Reveal>
                 <h2 className="eyebrow text-accent">Email</h2>
                 <a
@@ -65,15 +66,17 @@ export default function ContactPage() {
                 </Reveal>
               ) : null}
 
-              <Reveal delay={100} className="mt-10 md:mt-14">
-                <h2 className="eyebrow border-t border-line pt-5 text-accent">What happens next</h2>
-                <ol className="mt-4 border-b border-line">
+              <Reveal delay={100} className="mt-12 md:mt-16">
+                <SectionTitle as="h2" variant="sub">
+                  What happens next
+                </SectionTitle>
+                <ol className="sm:mt-2">
                   {nextSteps.map((step) => (
                     <li
                       key={step.number}
-                      className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-3 border-t border-line py-4"
+                      className="grid grid-cols-[2.5rem_minmax(0,1fr)] items-baseline gap-3 border-b border-line py-4"
                     >
-                      <span className="eyebrow pt-[0.35em] tabular-nums text-accent" aria-hidden="true">
+                      <span className="eyebrow tabular-nums text-accent" aria-hidden="true">
                         {step.number}
                       </span>
                       <p className="max-w-[40ch] text-[0.9375rem] leading-relaxed text-ink">{step.text}</p>
@@ -82,16 +85,15 @@ export default function ContactPage() {
                 </ol>
               </Reveal>
 
-              <Reveal delay={140} className="mt-10">
-                <h2 className="eyebrow text-muted">{workingTogether.eyebrow}</h2>
-                <p className="mt-3 max-w-[44ch] text-[0.875rem] leading-relaxed text-muted">{workingTogether.text}</p>
+              <Reveal delay={140} className="mt-12 md:mt-16">
+                <SectionTitle as="h2" variant="sub">
+                  {workingTogether.eyebrow}
+                </SectionTitle>
+                <p className="mt-4 max-w-[44ch] text-[0.875rem] leading-relaxed text-muted">{workingTogether.text}</p>
               </Reveal>
             </div>
 
-            <Reveal
-              delay={80}
-              className="min-w-0 border-t border-line pt-10 md:col-span-7 md:border-t-0 md:pt-0 lg:col-span-6 lg:col-start-7"
-            >
+            <Reveal delay={80} className="min-w-0 md:col-span-6 lg:col-start-7">
               <ContactForm />
             </Reveal>
           </div>

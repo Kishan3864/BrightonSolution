@@ -14,6 +14,7 @@ import {
 import Dashboard from "@/components/admin/Dashboard";
 import LoginPanel from "@/components/admin/LoginPanel";
 import { AdminButton, Notice } from "@/components/admin/ui";
+import SectionTitle from "@/components/ui/SectionTitle";
 
 type Phase =
   | { kind: "booting" }
@@ -70,9 +71,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-w-0">
-      <div className="mb-10 flex flex-col gap-3">
-        <p className="eyebrow text-muted">Private · not indexed</p>
-        <h1 className="text-h1">Site analytics</h1>
+      <div className="mb-10">
+        <SectionTitle variant="page">Private · not indexed</SectionTitle>
+        <h1 className="text-h1 mt-[clamp(1.5rem,1rem+2vw,3rem)]">Site analytics</h1>
       </div>
 
       {!configured ? (

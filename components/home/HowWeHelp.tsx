@@ -2,14 +2,14 @@ import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
 import { howWeHelpSection as copy, howWeHelpItems } from "@/lib/content/home-a";
-import { bodyGap, dividedSection, pad } from "@/lib/content/home-b";
+import { bodyGap, sectionSpace, pad } from "@/lib/content/home-b";
 
 /** Typographic list of the six kinds of work: a verb and one line each. */
 export default function HowWeHelp() {
   return (
     <section id="how-we-help" className="scroll-mt-4" aria-labelledby="how-we-help-title">
       <Container>
-        <div className={dividedSection}>
+        <div className={sectionSpace}>
           <Reveal>
             <SectionHeading
               id="how-we-help-title"

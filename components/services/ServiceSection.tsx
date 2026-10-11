@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import Icon from "@/components/ui/Icon";
 import Reveal from "@/components/ui/Reveal";
+import SectionTitle from "@/components/ui/SectionTitle";
 import TrackCta from "@/components/services/TrackCta";
 import type { Service } from "@/lib/site";
 import { apps, countWord, playDeveloperName, webProjects } from "@/lib/work";
@@ -10,7 +11,6 @@ import { serviceFirstSteps, serviceLabels, serviceRelatedWork } from "@/lib/cont
 
 type ServiceSectionProps = {
   service: Service;
-  total: number;
 };
 
 /** Genuine project names from lib/work.ts that illustrate this service, as one line. */
@@ -31,31 +31,28 @@ function relatedWorkLine(slug: string): string | null {
   return parts.length > 0 ? parts.join(", ") : null;
 }
 
-export default function ServiceSection({ service, total }: ServiceSectionProps) {
+export default function ServiceSection({ service }: ServiceSectionProps) {
   const titleId = `${service.slug}-title`;
   const firstStep = serviceFirstSteps[service.slug];
   const related = relatedWorkLine(service.slug);
 
   return (
-    <section id={service.slug} className="scroll-mt-4" aria-labelledby={titleId}>
+    <section id={service.slug} className="pb-section scroll-mt-4" aria-labelledby={titleId}>
       <Container>
-        <div className="hairline" />
-        <div className="grid gap-8 py-[clamp(3rem,1.75rem+4vw,5.5rem)] md:grid-cols-12 md:gap-8">
-          <Reveal className="min-w-0 md:col-span-5 lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
-            <p className="eyebrow tabular-nums text-accent" aria-hidden="true">
-              {service.number}
-              <span className="text-muted"> / {String(total).padStart(2, "0")}</span>
-            </p>
-            <h2 id={titleId} className="text-h2 mt-4 max-w-[14ch] text-balance">
-              {service.title}
-            </h2>
-            <dl className="mt-6 max-w-[34ch] border-t border-line pt-4">
-              <dt className="eyebrow text-muted">{serviceLabels.goodFor}</dt>
+        <Reveal>
+          <SectionTitle as="h2" id={titleId} number={service.number}>
+            {service.title}
+          </SectionTitle>
+        </Reveal>
+        <div className="mt-[clamp(1.5rem,1rem+2vw,3rem)] grid gap-8 md:grid-cols-12 md:gap-8">
+          <Reveal delay={60} className="min-w-0 md:col-span-4 lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
+            <dl className="max-w-[34ch]">
+              <dt className="eyebrow text-muted md:pt-[0.45em]">{serviceLabels.goodFor}</dt>
               <dd className="mt-2 text-[0.9375rem] leading-relaxed text-ink">{service.goodFor}</dd>
             </dl>
           </Reveal>
 
-          <Reveal delay={100} className="min-w-0 md:col-span-7 md:col-start-6">
+          <Reveal delay={100} className="min-w-0 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
             <p className="text-lead max-w-[60ch] text-ink">{service.description}</p>
 
             <div className="mt-8">

@@ -110,7 +110,7 @@ export const engagementCopy = {
 /** Consistent gap between a section heading and its body across the home page. */
 export const bodyGap = "mt-[clamp(2rem,1.25rem+2.5vw,3.5rem)]";
 
-/** Hairline at container width above a section, followed by the section's vertical rhythm. */
-export const dividedSection = "border-t border-line py-section";
+/** A section opens with its title band, whose rule is the divider: only bottom spacing. */
+export const sectionSpace = "pb-section";
 
 export const pad = (n: number) => String(n).padStart(2, "0");

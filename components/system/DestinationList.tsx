@@ -16,18 +16,21 @@ type DestinationListProps = {
   label?: string;
 };
 
-/** Hairline list of useful destinations, shown on the system pages (404, error, offline). */
+/**
+ * Hairline list of useful destinations, shown on the system pages (404, error, offline).
+ * No top rule of its own: the title band above it draws that line.
+ */
 export default function DestinationList({ items = coreDestinations, label = "Useful pages" }: DestinationListProps) {
   return (
     <nav aria-label={label}>
-      <ol className="border-t border-line">
+      <ol>
         {items.map((item, index) => (
           <li key={item.href} className="border-b border-line">
             <Link
               href={item.href}
               className="group grid min-h-[56px] grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-x-4 py-4 transition-colors duration-200 hover:text-accent sm:grid-cols-[3rem_minmax(0,12rem)_minmax(0,1fr)_auto]"
             >
-              <span className="font-mono text-[0.75rem] tracking-[0.08em] text-muted" aria-hidden="true">
+              <span className="font-mono text-[0.8125rem] tracking-[0.08em] text-muted" aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <span className="min-w-0 font-medium tracking-tight">{item.label}</span>

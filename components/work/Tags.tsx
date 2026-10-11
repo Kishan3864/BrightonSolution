@@ -10,7 +10,7 @@ export default function Tags({ tags, className = "" }: TagsProps) {
       {tags.map((tag) => (
         <li
           key={tag}
-          className="rounded-sharp border border-line px-2 py-[3px] font-mono text-[0.6875rem] uppercase leading-[1.5] tracking-[0.06em] text-muted [.section-dark_&]:border-line-dark [.section-dark_&]:text-muted-dark"
+          className="rounded-sharp border border-line px-2 py-[3px] font-mono text-[0.75rem] uppercase leading-[1.5] tracking-[0.05em] text-muted [.section-dark_&]:border-line-dark [.section-dark_&]:text-muted-dark"
         >
           {tag}
         </li>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import PageHero from "@/components/ui/PageHero";
+import SectionTitle from "@/components/ui/SectionTitle";
 import Button from "@/components/ui/Button";
 import { site } from "@/lib/site";
 import { nextSteps } from "@/lib/content/contact";
@@ -19,24 +20,23 @@ export default function ThankYouPage() {
         eyebrow="Message received"
         title="Thank you — we have your message"
         lead={`Your brief has reached our team. Replies come from ${site.email}, so keep an eye on your inbox and spam folder.`}
+        divider={false}
       />
       <section aria-labelledby="thank-you-next" className="pb-[clamp(3.5rem,2rem+6vw,7.5rem)]">
         <Container>
-          <div className="grid gap-8 md:grid-cols-12 md:gap-8">
-            <div className="md:col-span-4 lg:col-span-3">
-              <h2 id="thank-you-next" className="eyebrow text-muted">
-                What happens next
-              </h2>
-            </div>
-            <div className="min-w-0 md:col-span-8 lg:col-span-9">
-              <ol className="border-t border-line">
+          <SectionTitle as="h2" id="thank-you-next" variant="sub">
+            What happens next
+          </SectionTitle>
+          <div className="sm:mt-3 md:grid md:grid-cols-12 md:gap-8">
+            <div className="min-w-0 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
+              <ol>
                 {nextSteps.map((step) => (
                   <li
                     key={step.number}
                     className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 border-b border-line py-4 sm:grid-cols-[3rem_minmax(0,1fr)]"
                   >
                     <span
-                      className="font-mono text-[0.75rem] leading-[1.6rem] tracking-[0.08em] text-muted"
+                      className="font-mono text-[0.8125rem] leading-[1.6rem] tracking-[0.08em] text-muted"
                       aria-hidden="true"
                     >
                       {step.number}

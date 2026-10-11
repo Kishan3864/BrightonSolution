@@ -2,13 +2,13 @@ import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
 import { technologies } from "@/lib/site";
-import { technologiesCopy, bodyGap, dividedSection } from "@/lib/content/home-b";
+import { technologiesCopy, bodyGap, sectionSpace } from "@/lib/content/home-b";
 
 export default function Technologies() {
   return (
     <section id="technologies" className="scroll-mt-4" aria-labelledby="technologies-title">
       <Container>
-        <div className={dividedSection}>
+        <div className={sectionSpace}>
           <Reveal>
             <SectionHeading
               id="technologies-title"

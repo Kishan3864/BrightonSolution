@@ -424,7 +424,7 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
             <dl className="grid grid-cols-2 border-l border-t border-line lg:grid-cols-4">
               {kpis.map((item) => (
                 <div key={item.label} className="min-w-0 border-b border-r border-line p-4 md:p-5">
-                  <dt className="eyebrow text-muted">{item.label}</dt>
+                  <dt className="eyebrow eyebrow-dense text-muted">{item.label}</dt>
                   <dd className="mt-3 font-mono text-[clamp(1.25rem,1.05rem+0.8vw,1.75rem)] leading-none tracking-[-0.02em] tabular-nums break-words">
                     {item.value}
                   </dd>

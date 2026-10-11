@@ -109,12 +109,12 @@ export default function Footer() {
 
         <div className="hairline" />
 
-        <div className="flex flex-col gap-1 py-5 text-[0.8125rem] text-muted-dark sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1 py-5 text-[0.8125rem] text-muted-dark sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-8">
           <p className="py-2">&copy; {new Date().getFullYear()} {site.name}. All rights reserved.</p>
           {showConsentSettings ? (
             <ConsentSettingsButton className="inline-flex min-h-[44px] items-center self-start text-[0.8125rem] text-muted-dark decoration-1 underline-offset-[6px] transition-colors hover:text-paper hover:underline sm:self-auto" />
           ) : (
-            <p className="eyebrow py-2">Software development &amp; IT services</p>
+            <p className="eyebrow py-2 text-balance">Software development &amp; IT services</p>
           )}
         </div>
       </div>

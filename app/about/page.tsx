@@ -17,7 +17,7 @@ export const metadata: Metadata = pageMetadata({
 export default function AboutPage() {
   return (
     <>
-      <PageHero eyebrow={aboutHero.eyebrow} title={aboutHero.title} lead={aboutHero.lead} />
+      <PageHero eyebrow={aboutHero.eyebrow} title={aboutHero.title} lead={aboutHero.lead} divider={false} />
       <WhoWeAre />
       <Principles />
       <WhoWeWorkWith />

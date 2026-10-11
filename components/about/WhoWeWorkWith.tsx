@@ -5,11 +5,7 @@ import { clientTypes, clientsIntro } from "@/lib/content/about";
 
 export default function WhoWeWorkWith() {
   return (
-    <section
-      id="who-we-work-with"
-      className="border-t border-line py-section scroll-mt-4"
-      aria-labelledby="who-we-work-with-title"
-    >
+    <section id="who-we-work-with" className="pb-section scroll-mt-4" aria-labelledby="who-we-work-with-title">
       <Container>
         <SectionHeading
           number="03"

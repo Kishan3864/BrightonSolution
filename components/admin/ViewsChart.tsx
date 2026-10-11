@@ -105,10 +105,10 @@ export default function ViewsChart({ buckets, unit }: { buckets: Bucket[]; unit:
             <caption className="sr-only">{summary}</caption>
             <thead>
               <tr className="border-b border-ink">
-                <th scope="col" className="eyebrow py-2 font-medium text-muted">
+                <th scope="col" className="eyebrow eyebrow-dense py-2 font-medium text-muted">
                   {unit === "hour" ? "Hour" : "Day"}
                 </th>
-                <th scope="col" className="eyebrow py-2 text-right font-medium text-muted">
+                <th scope="col" className="eyebrow eyebrow-dense py-2 text-right font-medium text-muted">
                   Page views
                 </th>
               </tr>

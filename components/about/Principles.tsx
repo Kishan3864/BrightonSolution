@@ -5,11 +5,7 @@ import { principles, principlesIntro } from "@/lib/content/about";
 
 export default function Principles() {
   return (
-    <section
-      id="principles"
-      className="border-t border-line py-section scroll-mt-4"
-      aria-labelledby="principles-title"
-    >
+    <section id="principles" className="pb-section scroll-mt-4" aria-labelledby="principles-title">
       <Container>
         <SectionHeading
           number="02"
@@ -25,18 +21,18 @@ export default function Principles() {
               as="li"
               key={principle.number}
               delay={i * 50}
-              className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-3 gap-y-2 border-t border-line py-[clamp(1.25rem,1rem+0.8vw,1.875rem)] md:grid-cols-12 md:gap-x-8"
+              className="grid grid-cols-[2.5rem_minmax(0,1fr)] items-baseline gap-x-3 gap-y-2 border-t border-line py-[clamp(1.25rem,1rem+0.8vw,1.875rem)] md:grid-cols-12 md:gap-x-8"
             >
               <span
-                className="eyebrow col-start-1 pt-[0.45em] tabular-nums text-accent md:col-span-3"
+                className="eyebrow col-start-1 tabular-nums text-accent md:col-span-4 lg:col-span-3"
                 aria-hidden="true"
               >
                 {principle.number}
               </span>
-              <h3 className="text-h3 col-start-2 max-w-[22ch] text-balance md:col-span-4 md:col-start-auto">
+              <h3 className="text-h3 col-start-2 max-w-[22ch] text-balance md:col-span-8 md:col-start-5 lg:col-span-4 lg:col-start-auto">
                 {principle.title}
               </h3>
-              <p className="col-start-2 max-w-[54ch] leading-relaxed text-muted md:col-span-5 md:col-start-auto">
+              <p className="col-start-2 max-w-[54ch] leading-relaxed text-muted md:col-span-8 md:col-start-5 lg:col-span-5 lg:col-start-auto">
                 {principle.description}
               </p>
             </Reveal>

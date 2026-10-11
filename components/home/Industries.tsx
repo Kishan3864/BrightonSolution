@@ -1,13 +1,13 @@
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
-import { industriesCopy, homeIndustries, bodyGap, dividedSection, pad } from "@/lib/content/home-b";
+import { industriesCopy, homeIndustries, bodyGap, sectionSpace, pad } from "@/lib/content/home-b";
 
 export default function Industries() {
   return (
     <section id="industries" className="scroll-mt-4" aria-labelledby="industries-title">
       <Container>
-        <div className={dividedSection}>
+        <div className={sectionSpace}>
           <Reveal>
             <SectionHeading
               id="industries-title"

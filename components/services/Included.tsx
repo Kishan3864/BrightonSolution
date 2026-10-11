@@ -22,9 +22,9 @@ export default function Included() {
               key={practice.title}
               as="li"
               delay={(index % 2) * 60}
-              className="grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] gap-x-3 border-b border-line py-6"
+              className="grid min-w-0 grid-cols-[2.5rem_minmax(0,1fr)] items-baseline gap-x-3 border-b border-line py-6"
             >
-              <span className="eyebrow pt-[0.35em] tabular-nums text-accent" aria-hidden="true">
+              <span className="eyebrow tabular-nums text-accent" aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <div className="min-w-0">

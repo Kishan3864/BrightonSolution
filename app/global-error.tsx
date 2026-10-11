@@ -22,10 +22,8 @@ const PAPER = "#FAFAF7";
 const INK = "#0A1220";
 const MUTED = "#5B6170";
 const LINE = "#E3E3DD";
-const ACCENT = "#2447F9";
 const SANS =
   'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace';
 
 const control: React.CSSProperties = {
   display: "inline-flex",
@@ -77,22 +75,27 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
         >
           <p style={{ margin: 0, fontSize: 15, fontWeight: 600, letterSpacing: "-0.01em" }}>BrightonSolution</p>
           <div style={{ borderTop: `1px solid ${LINE}`, margin: "28px 0 40px" }} />
+          {/* Title band, as on every page: the name, then a rule that drops under it when the row is too narrow. */}
           <p
             style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: "12px 20px",
               margin: 0,
-              fontFamily: MONO,
-              fontSize: 11,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: ACCENT,
+              fontSize: "clamp(22px, 0.7vw + 19px, 28px)",
+              lineHeight: 1.2,
+              fontWeight: 500,
+              letterSpacing: "-0.025em",
             }}
           >
-            Something went wrong
+            <span>Something went wrong</span>
+            <span aria-hidden="true" style={{ flex: "1 1 120px", borderTop: `1px solid ${INK}` }} />
           </p>
           <h1
             style={{
-              margin: "16px 0 0",
-              fontSize: "clamp(28px, 4vw + 12px, 48px)",
+              margin: "clamp(24px, 4vw, 36px) 0 0",
+              fontSize: "clamp(32px, 4vw + 16px, 48px)",
               lineHeight: 1.08,
               fontWeight: 600,
               letterSpacing: "-0.03em",

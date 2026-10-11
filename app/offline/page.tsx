@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Container from "@/components/ui/Container";
 import PageHero from "@/components/ui/PageHero";
+import SectionTitle from "@/components/ui/SectionTitle";
 import RetryButton from "@/components/system/RetryButton";
 import EmailLine from "@/components/system/EmailLine";
 
@@ -24,6 +25,7 @@ export default function OfflinePage() {
         eyebrow="Offline"
         title="You appear to be offline"
         lead="We could not reach the network. Once your connection is back, retry and the page will load as normal."
+        divider={false}
       >
         <div className="mt-10">
           <RetryButton />
@@ -31,19 +33,17 @@ export default function OfflinePage() {
       </PageHero>
       <section aria-label="Connection tips" className="pb-[clamp(3.5rem,2rem+6vw,7.5rem)]">
         <Container>
-          <div className="grid gap-8 md:grid-cols-12 md:gap-8">
-            <div className="md:col-span-4 lg:col-span-3">
-              <p className="eyebrow text-muted">Things to check</p>
-            </div>
-            <div className="min-w-0 md:col-span-8 lg:col-span-9">
-              <ol className="border-t border-line">
+          <SectionTitle variant="sub">Things to check</SectionTitle>
+          <div className="sm:mt-3 md:grid md:grid-cols-12 md:gap-8">
+            <div className="min-w-0 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
+              <ol>
                 {tips.map((tip, index) => (
                   <li
                     key={tip}
                     className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 border-b border-line py-4 sm:grid-cols-[3rem_minmax(0,1fr)]"
                   >
                     <span
-                      className="font-mono text-[0.75rem] leading-[1.6rem] tracking-[0.08em] text-muted"
+                      className="font-mono text-[0.8125rem] leading-[1.6rem] tracking-[0.08em] text-muted"
                       aria-hidden="true"
                     >
                       {String(index + 1).padStart(2, "0")}

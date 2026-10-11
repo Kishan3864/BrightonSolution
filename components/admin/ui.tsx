@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import SectionTitle from "@/components/ui/SectionTitle";
 
 /** Small building blocks shared by the admin dashboard (hairlines, sharp corners, mono numbers). */
 
@@ -36,17 +37,12 @@ export function Section({
   id: string;
 }) {
   return (
-    <section aria-labelledby={`${id}-title`} className="border-t border-line pt-6 pb-12 md:pb-16">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <div className="flex min-w-0 items-baseline gap-4">
-          <span className="eyebrow text-muted" aria-hidden="true">
-            {number}
-          </span>
-          <h2 id={`${id}-title`} className="text-h3 min-w-0">
-            {title}
-          </h2>
-        </div>
-        {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+    <section aria-labelledby={`${id}-title`} className="pb-12 md:pb-16">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+        <SectionTitle as="h2" variant="sub" number={number} id={`${id}-title`} className="min-w-0 flex-1">
+          {title}
+        </SectionTitle>
+        {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
       {children}
     </section>

@@ -1,5 +1,6 @@
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
+import SectionTitle from "@/components/ui/SectionTitle";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
 import Icon from "@/components/ui/Icon";
@@ -18,7 +19,7 @@ import {
   playDeveloperUrl,
   workCopy,
 } from "@/lib/work";
-import { dividedSection } from "@/lib/content/home-b";
+import { sectionSpace } from "@/lib/content/home-b";
 
 const copy = workCopy.home;
 const featured = getProject(featuredProjectSlug);
@@ -28,7 +29,7 @@ export default function Work() {
   return (
     <section id="work" className="scroll-mt-4" aria-labelledby="work-title">
       <Container>
-        <div className={dividedSection}>
+        <div className={sectionSpace}>
           <Reveal>
             <SectionHeading
               id="work-title"
@@ -110,38 +111,40 @@ export default function Work() {
           </ul>
 
           {/* Google Play strip */}
-          <Reveal className="mt-[clamp(3rem,2rem+3vw,5rem)] grid gap-x-8 gap-y-6 md:grid-cols-12">
-            <div className="min-w-0 md:col-span-4 lg:col-span-3">
-              <h3 className="eyebrow text-accent">{copy.playStrip}</h3>
-              <p className="mt-3 max-w-[30ch] text-[0.9375rem] leading-relaxed text-muted">
+          <Reveal className="mt-[clamp(3rem,2rem+3vw,5rem)]">
+            <SectionTitle as="h3" variant="sub">
+              {copy.playStrip}
+            </SectionTitle>
+            <div className="mt-[clamp(1.25rem,1rem+1vw,2rem)] grid gap-x-8 gap-y-6 md:grid-cols-12">
+              <p className="max-w-[30ch] text-[0.9375rem] leading-relaxed text-muted md:col-span-4 lg:col-span-3">
                 {capitalise(countWord(apps.length))} Android apps published under the {playDeveloperName} developer
                 account.
               </p>
+              <ul
+                role="list"
+                className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-1 sm:gap-x-6 md:col-span-8 lg:col-span-9 lg:grid-cols-5 lg:gap-y-6"
+              >
+                {apps.map((app) => (
+                  <li key={app.slug} className="min-w-0">
+                    <a
+                      href={app.playUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-track="play"
+                      data-track-label={app.name}
+                      className="group flex min-h-[44px] items-center gap-2.5 py-2 sm:gap-3 lg:flex-col lg:items-start lg:gap-3 lg:py-0"
+                    >
+                      {/* 40px on small screens, 48px in the five-column layout. */}
+                      <AppIcon app={app} size={40} className="lg:size-12!" />
+                      <span className="min-w-0 text-[0.8125rem] font-medium leading-snug tracking-tight break-words decoration-1 underline-offset-4 group-hover:underline sm:text-[0.875rem]">
+                        {app.name}
+                        <span className="sr-only"> on Google Play (opens in a new tab)</span>
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul
-              role="list"
-              className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-1 sm:gap-x-6 md:col-span-8 lg:col-span-9 lg:grid-cols-5 lg:gap-y-6"
-            >
-              {apps.map((app) => (
-                <li key={app.slug} className="min-w-0">
-                  <a
-                    href={app.playUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-track="play"
-                    data-track-label={app.name}
-                    className="group flex min-h-[44px] items-center gap-2.5 py-2 sm:gap-3 lg:flex-col lg:items-start lg:gap-3 lg:py-0"
-                  >
-                    {/* 40px on small screens, 48px in the five-column layout. */}
-                    <AppIcon app={app} size={40} className="lg:size-12!" />
-                    <span className="min-w-0 text-[0.8125rem] font-medium leading-snug tracking-tight break-words decoration-1 underline-offset-4 group-hover:underline sm:text-[0.875rem]">
-                      {app.name}
-                      <span className="sr-only"> on Google Play (opens in a new tab)</span>
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
           </Reveal>
 
           <Reveal className="mt-10 md:grid md:grid-cols-12 md:gap-8">

@@ -18,7 +18,7 @@ export const metadata: Metadata = pageMetadata({
 export default function WorkPage() {
   return (
     <>
-      <PageHero eyebrow={copy.eyebrow} title={copy.title} lead={copy.lead}>
+      <PageHero eyebrow={copy.eyebrow} title={copy.title} lead={copy.lead} divider={false}>
         <WorkIndex />
       </PageHero>
       <WebProjectList />

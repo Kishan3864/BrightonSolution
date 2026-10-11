@@ -8,7 +8,7 @@ export default function ServiceIndex() {
   return (
     <section
       id="services-index"
-      className="pb-[clamp(2rem,1rem+3vw,4rem)] scroll-mt-4"
+      className="pb-section scroll-mt-4"
       aria-labelledby="services-index-title"
     >
       <Container>

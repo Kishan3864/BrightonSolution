@@ -85,16 +85,16 @@
 
 /* ---------- Fluid typography ---------- */
 .text-display {
-  font-size: clamp(2.25rem, 1.45rem + 3.3vw, 4.25rem);
-  line-height: 1.04;
-  letter-spacing: -0.04em;
+  font-size: clamp(2.375rem, 1.6rem + 3.6vw, 4.75rem);
+  line-height: 1.03;
+  letter-spacing: -0.045em;
   font-weight: 500;
 }
 
 .text-h1 {
-  font-size: clamp(2rem, 1.4rem + 2.5vw, 3.5rem);
-  line-height: 1.06;
-  letter-spacing: -0.035em;
+  font-size: clamp(2.125rem, 1.4rem + 3vw, 4rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
   font-weight: 500;
 }
 
@@ -116,17 +116,99 @@
   font-size: clamp(1rem, 0.94rem + 0.3vw, 1.1875rem);
   line-height: 1.55;
   letter-spacing: -0.005em;
+  text-wrap: pretty;
 }
 
-/* Small uppercase labels and section numbers: Geist Mono. */
+/* ---------- Section titles ----------
+   The name of a section, set as a band: optional number, the name, then a rule
+   that runs to the container edge (under the name on phones).
+     .section-title        name of a section ("01 Services", "Who we are")
+     .section-title--page  label above a page h1
+     .section-title--sub   title of a block inside a section ("On Google Play")
+   Colour is inherited, so it follows .section-dark and text-* utilities. */
+.section-title {
+  --title-rule: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: clamp(1.75rem, 1.2rem + 2.7vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+  overflow-wrap: break-word;
+}
+
+.section-title::after {
+  content: "";
+  border-top: 1px solid var(--title-rule);
+}
+
+.section-title-text {
+  min-width: 0;
+  text-wrap: balance;
+}
+
+.section-title-num {
+  margin-right: 0.1em;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+}
+
+.section-title--page {
+  font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.section-title--sub {
+  --title-rule: var(--color-line);
+  font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.section-dark .section-title {
+  --title-rule: rgba(250, 250, 247, 0.45);
+}
+
+.section-dark .section-title--sub {
+  --title-rule: var(--color-line-dark);
+}
+
+.section-dark .section-title-num {
+  color: var(--color-accent-soft);
+}
+
+@media (min-width: 40rem) {
+  /* A name too long to sit beside its rule keeps its line; the rule drops underneath. */
+  .section-title {
+    flex-flow: row wrap;
+    align-items: center;
+    gap: 0.75rem clamp(1rem, 0.4rem + 1.4vw, 1.75rem);
+  }
+
+  .section-title::after {
+    flex: 1 1 4rem;
+    min-width: 2.5rem;
+  }
+}
+
+/* Small uppercase labels and row numbers: Geist Mono. */
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: clamp(0.8125rem, 0.78rem + 0.15vw, 0.875rem);
   line-height: 1.4;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
+}
+
+/* Same label for dense data tables (admin), where the larger size would widen columns. */
+.eyebrow-dense {
+  font-size: 0.75rem;
+  letter-spacing: 0.075em;
 }
 
 /* ---------- Spacing & surfaces ---------- */
@@ -136,6 +218,10 @@
 
 .pt-section {
   padding-top: clamp(3.5rem, 2rem + 6vw, 7.5rem);
+}
+
+.pb-section {
+  padding-bottom: clamp(3.5rem, 2rem + 6vw, 7.5rem);
 }
 
 .section-dark {

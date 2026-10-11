@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import Container from "@/components/ui/Container";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
+import SectionTitle from "@/components/ui/SectionTitle";
 import LegalToc from "@/components/legal/LegalToc";
 import { legalHost, type LegalBlock, type LegalDocument } from "@/lib/content/legal";
 import styles from "@/components/legal/legal.module.css";
@@ -34,7 +35,7 @@ function renderInline(text: string): ReactNode[] {
   return nodes;
 }
 
-function Block({ block }: { block: LegalBlock }) {
+function Block({ block, opensSection }: { block: LegalBlock; opensSection: boolean }) {
   switch (block.type) {
     case "p":
       return <p>{renderInline(block.text)}</p>;
@@ -48,7 +49,8 @@ function Block({ block }: { block: LegalBlock }) {
       );
     case "terms":
       return (
-        <dl>
+        // Straight under a section title, the title's rule is the top line of the list.
+        <dl className={opensSection ? "border-t-0! [&>div:first-child]:pt-0!" : undefined}>
           {block.items.map((item) => (
             <div key={item.term}>
               <dt>{item.term}</dt>
@@ -88,12 +90,14 @@ export default function LegalPage({ doc }: { doc: LegalDocument }) {
         aria-labelledby={`${summaryId}-title`}
       >
         <Container>
-          <div className="grid gap-8 md:grid-cols-12 md:gap-8">
+          <Reveal>
+            <SectionTitle variant="page">In short</SectionTitle>
+          </Reveal>
+          <div className="mt-[clamp(1.5rem,1rem+2vw,3rem)] grid gap-8 md:grid-cols-12 md:gap-8">
             <Reveal className="min-w-0 md:col-span-4 lg:col-span-3">
-              <p className="eyebrow text-accent-soft">In short</p>
               <h2
                 id={`${summaryId}-title`}
-                className="text-h3 mt-4 max-w-[18ch] text-balance"
+                className="text-h3 max-w-[18ch] text-balance"
               >
                 {doc.summaryTitle}
               </h2>
@@ -101,13 +105,13 @@ export default function LegalPage({ doc }: { doc: LegalDocument }) {
                 {doc.summaryNote}
               </p>
             </Reveal>
-            <ul className="grid gap-x-8 sm:grid-cols-2 md:col-span-8 md:col-start-5">
+            <ul className="grid gap-x-8 sm:grid-cols-2 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
               {doc.summary.map((point, i) => (
                 <Reveal
                   as="li"
                   key={point.title}
                   delay={80 + i * 60}
-                  className="min-w-0 border-t border-line-dark py-5"
+                  className="min-w-0 border-b border-line-dark py-5 first:pt-0 sm:[&:nth-child(2)]:pt-0"
                 >
                   <p className="font-medium text-paper">{point.title}</p>
                   <p className="mt-1.5 max-w-[42ch] text-[0.875rem] leading-relaxed text-muted-dark">
@@ -131,38 +135,31 @@ export default function LegalPage({ doc }: { doc: LegalDocument }) {
               <LegalToc sections={doc.sections} label="On this page" />
             </Reveal>
 
-            <div className="min-w-0 md:col-span-8 md:col-start-5">
-              {doc.sections.map((section, i) => {
-                const isFirst = i === 0;
-                const isLast = i === lastIndex;
-                return (
-                  <section
-                    key={section.id}
-                    id={section.id}
-                    aria-labelledby={`${section.id}-title`}
-                    className={`scroll-mt-8 ${isFirst ? "" : "border-t border-line pt-[clamp(2rem,1.25rem+2.5vw,3.5rem)]"} ${isLast ? "" : "pb-[clamp(2rem,1.25rem+2.5vw,3.5rem)]"}`.trim()}
-                  >
-                    <Reveal className="grid gap-x-6 gap-y-3 sm:grid-cols-[3rem_minmax(0,1fr)]">
-                      <p className="eyebrow text-accent tabular-nums sm:pt-[0.3em]" aria-hidden="true">
-                        {String(i + 1).padStart(2, "0")}
-                      </p>
-                      <div className="min-w-0">
-                        <h2
-                          id={`${section.id}-title`}
-                          className="text-h3 max-w-[28ch] text-balance"
-                        >
-                          {section.title}
-                        </h2>
-                        <div className={`${styles.prose} mt-5`}>
-                          {section.blocks.map((block, j) => (
-                            <Block key={j} block={block} />
-                          ))}
-                        </div>
-                      </div>
-                    </Reveal>
-                  </section>
-                );
-              })}
+            <div className="min-w-0 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
+              {doc.sections.map((section, i) => (
+                <section
+                  key={section.id}
+                  id={section.id}
+                  aria-labelledby={`${section.id}-title`}
+                  className={`scroll-mt-8 ${i === lastIndex ? "" : "pb-[clamp(3rem,2rem+3.5vw,5rem)]"}`.trim()}
+                >
+                  <Reveal>
+                    <SectionTitle
+                      as="h2"
+                      variant="sub"
+                      number={String(i + 1).padStart(2, "0")}
+                      id={`${section.id}-title`}
+                    >
+                      {section.title}
+                    </SectionTitle>
+                    <div className={`${styles.prose} mt-[clamp(1.25rem,1rem+1vw,2rem)]`}>
+                      {section.blocks.map((block, j) => (
+                        <Block key={j} block={block} opensSection={j === 0} />
+                      ))}
+                    </div>
+                  </Reveal>
+                </section>
+              ))}
             </div>
           </div>
         </Container>

@@ -11,7 +11,7 @@ import { bodyGap } from "@/lib/content/home-b";
 
 export default function Services() {
   return (
-    <section id="services" className="py-section scroll-mt-4" aria-labelledby="services-title">
+    <section id="services" className="pb-section scroll-mt-4" aria-labelledby="services-title">
       <Container>
         <Reveal>
           <SectionHeading
@@ -31,7 +31,7 @@ export default function Services() {
                 aria-labelledby={`home-service-${service.slug}`}
                 className="group grid min-h-[44px] grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-6 gap-y-2 rounded-sharp py-5 md:grid-cols-12 md:gap-x-8 md:py-6"
               >
-                <div className="col-start-1 row-start-1 flex min-w-0 items-baseline gap-4 md:col-span-4 lg:col-span-3 lg:gap-5">
+                <div className="col-start-1 row-start-1 flex min-w-0 items-baseline gap-4 md:col-span-4 lg:col-span-3">
                   <span className="eyebrow w-7 shrink-0 tabular-nums text-accent">{service.number}</span>
                   <h3
                     id={`home-service-${service.slug}`}

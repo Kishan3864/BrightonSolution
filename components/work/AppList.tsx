@@ -10,7 +10,7 @@ const copy = workCopy.apps;
 /** Every Android app on Google Play, as a two-column hairline list on paper. */
 export default function AppList() {
   return (
-    <section id="apps" className="border-t border-line py-section scroll-mt-4" aria-labelledby="apps-title">
+    <section id="apps" className="pb-section scroll-mt-4" aria-labelledby="apps-title">
       <Container>
         <Reveal>
           <SectionHeading

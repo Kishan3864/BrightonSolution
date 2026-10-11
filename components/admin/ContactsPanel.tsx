@@ -96,7 +96,7 @@ export default function ContactsPanel({
                   <div className="min-w-0 space-y-2">
                     <p className="font-mono text-[0.75rem] tabular-nums text-muted">{formatDateTime(contact.createdAt)}</p>
                     <span
-                      className={`eyebrow inline-flex items-center rounded-sharp border px-2 py-1 ${STATUS_STYLE[status] ?? STATUS_STYLE.new}`}
+                      className={`eyebrow eyebrow-dense inline-flex items-center rounded-sharp border px-2 py-1 ${STATUS_STYLE[status] ?? STATUS_STYLE.new}`}
                     >
                       {status}
                     </span>

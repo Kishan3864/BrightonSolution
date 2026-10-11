@@ -9,12 +9,14 @@ import { webProjects, workCopy } from "@/lib/work";
 const copy = workCopy.web;
 
 /** All web projects as alternating editorial rows.
- *  No top padding: this follows PageHero, whose hairline and bottom padding
- *  already separate the two, so the first screenshot reaches the first viewport.
- *  The bottom padding is the .py-section value. */
+ *  This follows PageHero, which supplies the space above: only bottom padding here. */
 export default function WebProjectList() {
   return (
-    <section id="web" className="scroll-mt-4 pb-[clamp(3.5rem,2rem+6vw,7.5rem)]" aria-labelledby="web-title">
+    <section
+      id="web"
+      className="scroll-mt-4 pb-section"
+      aria-labelledby="web-title"
+    >
       <Container>
         <Reveal>
           <SectionHeading id="web-title" number={copy.number} eyebrow={copy.eyebrow} title={copy.title} />
