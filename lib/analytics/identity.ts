@@ -7,6 +7,7 @@
  *              page counter (pageIndex), the event budget and whether the visitor was new
  *              when the session began.
  * When storage is blocked everything falls back to in-memory values for the current page load.
+ * peekVisitorId() reads the stored visitor id without ever creating one (contact form, /admin).
  */
 
 import { ID_PATTERN } from "@/lib/firebase/schema";
@@ -51,6 +52,19 @@ function readVisitor(): { id: string; isNew: boolean } {
 
 export function getVisitorId(): string {
   return readVisitor().id;
+}
+
+/**
+ * The visitor id already stored in this browser (localStorage "bs_vid"), or "" when there is none
+ * or storage is blocked. Never creates one: safe on /admin and wherever tracking is off.
+ */
+export function peekVisitorId(): string {
+  try {
+    const stored = window.localStorage.getItem(VISITOR_KEY) ?? "";
+    return ID_PATTERN.test(stored) ? stored : "";
+  } catch {
+    return "";
+  }
 }
 
 function parseSession(raw: string | null): SessionState | null {

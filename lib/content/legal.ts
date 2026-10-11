@@ -142,15 +142,20 @@ export const privacyPolicy: LegalDocument = {
           "A random visitor ID, created in your browser and kept in its local storage, so that repeat visits can be counted. On its own it does not identify you, but it is also stored with any contact-form enquiry you send from that browser.",
           "A session ID kept in your browser’s session storage, which changes after 30 minutes of inactivity or when you close the tab.",
           "The pages you view and their titles, the order in which you view them, how long you stay on each page and how far you scroll, and whether this is your first visit.",
-          "The referring page and any campaign tags in the link you followed (UTM parameters).",
+          "How long pages took to load in your browser.",
+          "The referring page and any campaign tags in the link you followed (the UTM source, medium, campaign, term and content parameters).",
           "Your screen and browser-window size, device type (desktop, tablet or phone), browser and operating-system family, language and time zone.",
-          "Clicks on key links, such as contact buttons, email links, project links and Google Play links, and whether a contact-form submission succeeded (never its contents).",
+          "Clicks on key links, such as contact buttons, email links, project links and Google Play links.",
+          "How the contact form is used, never what you type into it: that you started filling it in, the names of any fields that needed correcting when you tried to send it, and whether the submission succeeded.",
         ),
         p(
           "We do not record your name, email address or what you type into the form as part of analytics, and we do not store IP addresses. Google’s infrastructure necessarily processes your IP address in order to deliver your requests to this site and to the database, as any web server does.",
         ),
         p(
-          "Analytics is switched off entirely when your browser sends a Global Privacy Control signal. In that case no visitor ID is created and no page views or clicks are recorded.",
+          "To show roughly where visits come from, our reports estimate the country from the time zone your browser reports; Asia/Kolkata, for example, points to India. It is only an estimate: no IP address is stored or used to work out where you are.",
+        ),
+        p(
+          "Analytics is switched off entirely when your browser sends a Global Privacy Control signal. In that case no visitor ID is created and no page views, clicks or contact-form interactions are recorded.",
         ),
       ],
     },
@@ -250,7 +255,7 @@ export const privacyPolicy: LegalDocument = {
           },
           {
             term: "Analytics records",
-            detail: "Page views and click records are deleted once they are 26 months old.",
+            detail: "Page views, clicks and contact-form interaction records are deleted once they are 26 months old.",
           },
           {
             term: "Google Analytics",

@@ -6,22 +6,27 @@
  * - contacts   one document per contact-form submission (public create, admin read/update/delete)
  * - pageviews  one document per page view, written when the visitor leaves/hides the page
  * - events     CTA / outbound / mailto / Play Store / form interactions
+ * - settings   admin-only dashboard settings: one document, settings/dashboard (DashboardSettings)
  *
- * Every collection gets `createdAt` from the server (REQUEST_TIME transform in createDocument);
- * never send it from the client. Optional fields may be omitted; when sent they must respect
- * the types and limits below or the whole write is rejected. Integers must be whole numbers
- * (Math.round) so they encode as Firestore integers.
+ * contacts, pageviews and events get `createdAt` from the server (REQUEST_TIME transform in
+ * createDocument); never send it from the client. settings/dashboard carries a server `updatedAt`
+ * instead (setDocument with serverTimestamp: "updatedAt"). Optional fields may be omitted; when sent
+ * they must respect the types and limits below or the whole write is rejected. Integers must be
+ * whole numbers (Math.round) so they encode as Firestore integers. New fields are only ever added
+ * as optional, so pages cached by the service worker that send the older payloads stay valid.
  *
  * Exports: COLLECTIONS, ID_PATTERN, CONTACT_FIELDS, CONTACT_REQUIRED, CONTACT_LIMITS,
  * CONTACT_STATUSES, PAGEVIEW_FIELDS, PAGEVIEW_REQUIRED, PAGEVIEW_LIMITS, DEVICE_TYPES,
- * EVENT_FIELDS, EVENT_REQUIRED, EVENT_LIMITS, EVENT_TYPES, RETENTION_DAYS, retentionExpiry(), record types (ContactRecord,
- * PageviewRecord, EventRecord, TrackDetail), clip(), cleanUrl().
+ * EVENT_FIELDS, EVENT_REQUIRED, EVENT_LIMITS, EVENT_TYPES, RETENTION_DAYS, retentionExpiry(),
+ * SETTINGS_DOC_ID, MAX_EXCLUDED_VISITORS, record types (ContactRecord, PageviewRecord, EventRecord,
+ * TrackDetail, DashboardSettings), clip(), cleanUrl().
  */
 
 export const COLLECTIONS = {
   contacts: "contacts",
   pageviews: "pageviews",
   events: "events",
+  settings: "settings",
 } as const;
 
 /** visitorId / sessionId format (rules: '^[A-Za-z0-9_-]{8,64}$'). */
@@ -98,8 +103,11 @@ export const PAGEVIEW_FIELDS = [
   "utmSource",
   "utmMedium",
   "utmCampaign",
+  "utmTerm",
+  "utmContent",
   "durationMs",
   "scrollDepth",
+  "loadMs",
   "viewportW",
   "viewportH",
   "screenW",
@@ -127,12 +135,15 @@ export const PAGEVIEW_LIMITS = {
   utmSource: 100,
   utmMedium: 100,
   utmCampaign: 100,
+  utmTerm: 100,
+  utmContent: 100,
   language: 35,
   timeZone: 64,
   browser: 40,
   os: 40,
   durationMs: [0, 21_600_000],
   scrollDepth: [0, 100],
+  loadMs: [0, 120_000],
   viewportW: [0, 10_000],
   viewportH: [0, 10_000],
   screenW: [0, 10_000],
@@ -149,8 +160,21 @@ export type PageviewRecord = {
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
+  /** utm_term of the session's landing page (landing page only, like the other UTM fields). */
+  utmTerm?: string;
+  /** utm_content of the session's landing page. */
+  utmContent?: string;
+  /** Visible time on the page in ms (time while the tab was hidden is not counted). */
   durationMs: number;
+  /** Maximum share of the page that has been on screen, 0-100. */
   scrollDepth?: number;
+  /**
+   * Page load time in ms: navigation start to the end of the load event, or to DOMContentLoaded when
+   * the visitor left before the load finished. Only on the first page view after a full page load;
+   * absent on client-side route changes, continuation segments, pages that loaded in a background
+   * tab and browsers without Navigation Timing.
+   */
+  loadMs?: number;
   viewportW?: number;
   viewportH?: number;
   screenW?: number;
@@ -184,6 +208,12 @@ export const EVENT_FIELDS = ["visitorId", "sessionId", "type", "label", "href", 
 
 export const EVENT_REQUIRED = ["visitorId", "sessionId", "type", "path", "expireAt"] as const;
 
+/**
+ * Contact-form events (window "bs:track" from components/ContactForm.tsx; never any form contents):
+ * - form_start   first focus or input in a form field, once per page view; label "contact"
+ * - form_error   client validation blocked a submit; label "contact:" + invalid field names joined by ","
+ * - form_submit  a submission was sent; label "contact:ok" or "contact:failed"
+ */
 export const EVENT_TYPES = [
   "cta_click",
   "outbound",
@@ -192,6 +222,8 @@ export const EVENT_TYPES = [
   "tel",
   "form_submit",
   "nav",
+  "form_start",
+  "form_error",
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 
@@ -215,13 +247,32 @@ export type EventRecord = {
 /** Detail of the window CustomEvent "bs:track" that UI components dispatch for the analytics layer. */
 export type TrackDetail = { type: EventType; label?: string; href?: string; ok?: boolean };
 
+/* ---------------------------------------------------------------- settings */
+
+/** The only document in the settings collection: settings/dashboard (admin read and write only). */
+export const SETTINGS_DOC_ID = "dashboard";
+
+/** Maximum length of DashboardSettings.excludedVisitors (firestore.rules enforces the same size). */
+export const MAX_EXCLUDED_VISITORS = 500;
+
+export type DashboardSettings = {
+  /** Visitor ids (bs_vid) of the team's own browsers; reports leave their page views and events out. */
+  excludedVisitors: string[];
+  /** Server time of the last save (REQUEST_TIME transform; the rules accept only request.time). */
+  updatedAt?: Date;
+};
+
 /* ----------------------------------------------------------------- helpers */
 
 /** Trim and cut a string to at most `max` UTF-16 units (always within the rules' character limit). */
 export function clip(value: unknown, max: number): string {
   if (typeof value !== "string") return "";
-  const trimmed = value.trim();
-  return trimmed.length > max ? trimmed.slice(0, max) : trimmed;
+  let text = value.trim();
+  if (text.length > max) text = text.slice(0, max);
+  // Never end on the first half of a surrogate pair (an emoji cut in two is not valid text).
+  const last = text.charCodeAt(text.length - 1);
+  if (last >= 0xd800 && last <= 0xdbff) text = text.slice(0, -1);
+  return text;
 }
 
 /** Drop query string and hash from a URL (referrers can carry tokens or personal data). */

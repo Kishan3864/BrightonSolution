@@ -3,6 +3,8 @@ rules_version = '2';
 // BrightonSolution — Firestore security rules.
 // Field lists and limits mirror lib/firebase/schema.ts; change both together.
 // Public visitors may only CREATE validated documents; nothing is publicly readable.
+// New fields are always optional and the key lists are only ever extended, so payloads from
+// older clients (pages cached by the service worker) stay valid.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -84,9 +86,11 @@ service cloud.firestore {
         && d.expireAt < request.time + duration.value(820, 'd');
     }
 
+    // utmTerm, utmContent and loadMs are optional additions: older cached clients never send them.
     function validPageview(d) {
       return d.keys().hasOnly(['visitorId', 'sessionId', 'path', 'title', 'referrer',
-                               'utmSource', 'utmMedium', 'utmCampaign', 'durationMs', 'scrollDepth',
+                               'utmSource', 'utmMedium', 'utmCampaign', 'utmTerm', 'utmContent',
+                               'durationMs', 'scrollDepth', 'loadMs',
                                'viewportW', 'viewportH', 'screenW', 'screenH', 'language', 'timeZone',
                                'device', 'browser', 'os', 'isNewVisitor', 'pageIndex', 'expireAt', 'createdAt'])
         && d.keys().hasAll(['visitorId', 'sessionId', 'path', 'durationMs', 'expireAt', 'createdAt'])
@@ -98,8 +102,11 @@ service cloud.firestore {
         && optStr(d, 'utmSource', 100)
         && optStr(d, 'utmMedium', 100)
         && optStr(d, 'utmCampaign', 100)
+        && optStr(d, 'utmTerm', 100)
+        && optStr(d, 'utmContent', 100)
         && d.durationMs is int && d.durationMs >= 0 && d.durationMs <= 21600000
         && optInt(d, 'scrollDepth', 0, 100)
+        && optInt(d, 'loadMs', 0, 120000)
         && optInt(d, 'viewportW', 0, 10000)
         && optInt(d, 'viewportH', 0, 10000)
         && optInt(d, 'screenW', 0, 10000)
@@ -128,7 +135,8 @@ service cloud.firestore {
         && d.keys().hasAll(['visitorId', 'sessionId', 'type', 'path', 'expireAt', 'createdAt'])
         && isId(d, 'visitorId')
         && isId(d, 'sessionId')
-        && d.type in ['cta_click', 'outbound', 'play', 'mailto', 'tel', 'form_submit', 'nav']
+        && d.type in ['cta_click', 'outbound', 'play', 'mailto', 'tel', 'form_submit', 'nav',
+                      'form_start', 'form_error']
         && optStr(d, 'label', 200)
         && optStr(d, 'href', 500)
         && reqStr(d, 'path', 1, 300)
@@ -140,6 +148,23 @@ service cloud.firestore {
       allow create: if validEvent(request.resource.data);
       allow read, delete: if isAdmin();
       allow update: if false;
+    }
+
+    // --------------------------------------------------------------- settings
+
+    // Admin-only dashboard settings: one document, settings/dashboard. excludedVisitors lists the
+    // visitor ids of the team's own browsers (at most 500); updatedAt, when sent, is the server time.
+    function validSettings(d) {
+      return d.keys().hasOnly(['excludedVisitors', 'updatedAt'])
+        && d.excludedVisitors is list
+        && d.excludedVisitors.size() <= 500
+        && (!('updatedAt' in d) || d.updatedAt == request.time);
+    }
+
+    match /settings/{docId} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin() && docId == 'dashboard' && validSettings(request.resource.data);
+      allow delete: if isAdmin();
     }
 
     // ---------------------------------------------------------- default deny

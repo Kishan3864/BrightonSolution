@@ -9,16 +9,18 @@ import {
   type ChangeEvent,
   type FormEvent,
   type ReactNode,
+  type SyntheticEvent,
 } from "react";
 import Icon from "@/components/ui/Icon";
+import SectionTitle from "@/components/ui/SectionTitle";
 import { budgets, services, site } from "@/lib/site";
 import { contactFormCopy as copy } from "@/lib/content/contact";
 import { analyticsAllowed } from "@/lib/analytics/env";
+import { peekVisitorId } from "@/lib/analytics/identity";
 import { createDocument } from "@/lib/firebase/firestore";
 import {
   CONTACT_LIMITS,
   COLLECTIONS,
-  ID_PATTERN,
   clip,
   cleanUrl,
   type ContactRecord,
@@ -132,15 +134,6 @@ function buildMailto(raw: Values): string {
   return `mailto:${site.email}?subject=${subject}&body=${body}`;
 }
 
-function readVisitorId(): string {
-  try {
-    const id = window.localStorage.getItem("bs_vid") ?? "";
-    return ID_PATTERN.test(id) ? id : "";
-  } catch {
-    return "";
-  }
-}
-
 function readTimeZone(): string {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
@@ -149,12 +142,29 @@ function readTimeZone(): string {
   }
 }
 
+/**
+ * Hands an interaction to the analytics layer (lib/analytics/tracker.ts), which drops it when tracking
+ * is off. Labels carry field names at most, never anything the visitor typed:
+ * form_start "contact", form_error "contact:<invalid fields>", form_submit "contact" + ok.
+ */
 function track(detail: TrackDetail) {
   try {
     window.dispatchEvent(new CustomEvent<TrackDetail>("bs:track", { detail }));
   } catch {
     /* analytics must never affect the form */
   }
+}
+
+/** A real form field (not the honeypot, a button or a link inside the form). */
+function isFormField(target: EventTarget | null): boolean {
+  if (
+    !(target instanceof HTMLInputElement) &&
+    !(target instanceof HTMLSelectElement) &&
+    !(target instanceof HTMLTextAreaElement)
+  ) {
+    return false;
+  }
+  return (fieldOrder as string[]).includes(target.name);
 }
 
 async function saveToFirestore(values: Values): Promise<boolean> {
@@ -171,9 +181,9 @@ async function saveToFirestore(values: Values): Promise<boolean> {
     userAgent: clip(navigator.userAgent, CONTACT_LIMITS.userAgent),
     language: clip(navigator.language, CONTACT_LIMITS.language),
     timeZone: clip(readTimeZone(), CONTACT_LIMITS.timeZone),
-    // No visitor id once tracking is off (GPC, build switch, bots): an id stored
-    // before GPC was turned on must not link the enquiry to past visits.
-    visitorId: analyticsAllowed() ? readVisitorId() : "",
+    // No visitor id once tracking is off (GPC, build switch, bots, the team's own browsers): an id
+    // stored before GPC was turned on must not link the enquiry to past visits.
+    visitorId: analyticsAllowed() ? peekVisitorId() : "",
     status: "new",
   };
   const result = await createDocument(COLLECTIONS.contacts, record);
@@ -271,6 +281,8 @@ export default function ContactForm() {
   const errorPanel = useRef<HTMLDivElement | null>(null);
   const renderedAt = useRef<number>(0);
   const inFlight = useRef(false);
+  /** form_start goes out once per page view, on the first focus or input in a field. */
+  const started = useRef(false);
 
   useEffect(() => {
     renderedAt.current = Date.now();
@@ -280,6 +292,17 @@ export default function ContactForm() {
     if (status === "sent") successHeading.current?.focus();
     if (status === "error") errorPanel.current?.focus();
   }, [status]);
+
+  const markStarted = () => {
+    if (started.current) return;
+    started.current = true;
+    track({ type: "form_start", label: "contact" });
+  };
+
+  /** Focus and input bubble up to the form; the honeypot, buttons and links do not count. */
+  const handleEngage = (event: SyntheticEvent<HTMLFormElement>) => {
+    if (!started.current && isFormField(event.target)) markStarted();
+  };
 
   const handleChange = (event: ChangeEvent<Control>) => {
     const field = event.target.name as FieldName;
@@ -323,6 +346,9 @@ export default function ContactForm() {
     const nextErrors = validate(values);
     const invalid = fieldOrder.filter((field) => nextErrors[field]);
     if (invalid.length > 0) {
+      // Field names only. Start first, so a submit without touching a field still reads start -> error.
+      markStarted();
+      track({ type: "form_error", label: `contact:${invalid.join(",")}` });
       setErrors(nextErrors);
       setSummary(
         invalid.length === 1
@@ -404,13 +430,17 @@ export default function ContactForm() {
       action={`mailto:${site.email}?subject=${encodeURIComponent("Project enquiry")}`}
       encType="text/plain"
       onSubmit={handleSubmit}
+      onFocus={handleEngage}
+      onInput={handleEngage}
       noValidate
       className="relative min-w-0"
       aria-describedby="cf-required-note"
       aria-busy={sending || undefined}
     >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-        <h2 className="eyebrow text-accent">{copy.heading}</h2>
+      <div className="flex flex-col gap-3">
+        <SectionTitle as="h2" variant="sub">
+          {copy.heading}
+        </SectionTitle>
         <p id="cf-required-note" className="text-sm text-muted">
           {copy.requiredNote}
         </p>
@@ -431,7 +461,7 @@ export default function ContactForm() {
         />
       </div>
 
-      <fieldset className="m-0 mt-8 min-w-0 border-t border-line p-0">
+      <fieldset className="m-0 mt-2 min-w-0 p-0">
         <legend className="eyebrow float-left w-full pt-6 text-muted">{copy.groupDetails}</legend>
         <div className="clear-both grid gap-x-6 gap-y-6 pt-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
           <FieldShell name="name" required error={errors.name}>
