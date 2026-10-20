@@ -9,37 +9,31 @@ type ProjectMediaProps = {
 };
 
 /**
- * A 16:10 hairline frame holding a genuine screenshot of the project.
- * Projects without a screenshot get a typographic tile in ink: the project
- * name, category and a fine-line motif. Never a fake screenshot.
- * Hover zoom is driven by a `group` on an ancestor.
+ * A 16:10 frame (20px radius, surface-2) holding a genuine screenshot of the
+ * project. With `chrome`, a dark browser bar (three dots in line colour and the
+ * site host) sits above the image. Projects without a screenshot get a
+ * plain typographic tile (the host in mono, one orange mark) in the same 16:10
+ * frame, so the layout does not shift. Never a fake screenshot. Hover zoom is driven by a `group` on an ancestor.
  */
 export default function ProjectMedia({ project, chrome = false, eager = false, className = "" }: ProjectMediaProps) {
-  const dark = !project.image;
-
   return (
     <div
-      className={`overflow-hidden rounded-sharp border ${
-        dark ? "border-ink bg-ink text-paper" : "border-line bg-[#fff]"
-      } ${className}`.trim()}
+      className={`overflow-hidden rounded-[var(--radius-card,1.25rem)] border border-line bg-surface-2 ${className}`.trim()}
     >
       {chrome ? (
         <div
           aria-hidden="true"
-          className={`flex h-7 items-center gap-1.5 border-b px-3 ${
-            dark ? "border-line-dark" : "border-line"
-          }`}
+          className="grid h-9 grid-cols-[3rem_minmax(0,1fr)_3rem] items-center gap-2 border-b border-line bg-surface-2 px-3.5"
         >
-          <span className={`size-[7px] border ${dark ? "border-line-dark" : "border-line"}`} />
-          <span className={`size-[7px] border ${dark ? "border-line-dark" : "border-line"}`} />
-          <span className={`size-[7px] border ${dark ? "border-line-dark" : "border-line"}`} />
-          <span
-            className={`ml-3 min-w-0 truncate font-mono text-[0.625rem] tracking-[0.04em] ${
-              dark ? "text-muted-dark" : "text-muted"
-            }`}
-          >
+          <span className="flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-line-strong" />
+            <span className="size-2 rounded-full bg-line-strong" />
+            <span className="size-2 rounded-full bg-line-strong" />
+          </span>
+          <span className="mx-auto min-w-0 max-w-full truncate rounded-sharp bg-canvas/70 px-3 py-[3px] font-mono text-[0.6875rem] leading-[1.4] tracking-[0.02em] text-muted">
             {project.host}
           </span>
+          <span />
         </div>
       ) : null}
 
@@ -52,182 +46,29 @@ export default function ProjectMedia({ project, chrome = false, eager = false, c
             height={SCREENSHOT_HEIGHT}
             loading={eager ? "eager" : "lazy"}
             decoding="async"
-            className="absolute inset-0 block h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.015] motion-reduce:transform-none motion-reduce:transition-none"
+            className="absolute inset-0 block h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none"
           />
         ) : (
-          <TypeTile project={project} showHost={!chrome} />
+          <TypeTile project={project} />
         )}
       </div>
     </div>
   );
 }
 
-/* The name is the typographic mark; category and tagline already sit beside
-   the tile, so they are not repeated here. The host is shown only when there
-   is no browser bar carrying it. */
-function TypeTile({ project, showHost }: { project: WebProject; showHost: boolean }) {
+/* A clean typographic tile for projects without a screenshot: the host in
+   mono over the surface, with one small orange mark. The project name is not
+   repeated here, since the h3 beside the tile already carries it. */
+function TypeTile({ project }: { project: WebProject }) {
   return (
     <div
       aria-hidden="true"
-      className={`absolute inset-0 flex flex-col p-[clamp(1rem,0.6rem+2vw,2rem)] ${
-        showHost ? "justify-between" : "justify-end"
-      }`}
+      className="absolute inset-0 flex flex-col justify-between bg-surface-2 p-[clamp(1.25rem,0.75rem+2vw,2.5rem)]"
     >
-      <Motif slug={project.slug} />
-      {showHost ? (
-        <p className="relative min-w-0 truncate font-mono text-[0.6875rem] tracking-[0.04em] text-muted-dark">
-          {project.host}
-        </p>
-      ) : null}
-      <p className="relative min-w-0 break-words text-[clamp(1.5rem,1rem+2.4vw,2.75rem)] font-medium leading-[1.05] tracking-[-0.035em] text-paper">
-        {project.name}
+      <span className="block h-1 w-8 rounded-full bg-accent" />
+      <p className="min-w-0 break-words font-mono text-[clamp(1.125rem,0.8rem+1.6vw,2rem)] font-normal leading-[1.15] tracking-[-0.01em] text-muted">
+        {project.host}
       </p>
     </div>
-  );
-}
-
-/* Fine-line motifs, drawn in hairline strokes with a single accent detail. */
-function Motif({ slug }: { slug: string }) {
-  const line = "rgba(250,250,247,0.16)";
-  const accent = "#7D93FF";
-
-  if (slug === "leadpin") {
-    // A quiet street grid, a search radius and one pinned location.
-    return (
-      <svg
-        viewBox="0 0 400 250"
-        preserveAspectRatio="xMaxYMid slice"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        fill="none"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <g stroke={line} strokeWidth="1" vectorEffect="non-scaling-stroke">
-          <path d="M150 0v250M215 0v250M300 0v250M360 0v250" />
-          <path d="M120 40h280M120 105h280M120 170h280M120 225h280" />
-          <path d="M260 250L400 120" />
-          <circle cx="300" cy="105" r="38" />
-          <circle cx="300" cy="105" r="72" strokeDasharray="2 5" />
-        </g>
-        <g stroke={accent} strokeWidth="1.25" vectorEffect="non-scaling-stroke">
-          <path d="M300 105c0-10-7-17-15-17s-15 7-15 17c0 11 15 26 15 26s15-15 15-26z" transform="translate(15 -12)" />
-          <circle cx="300" cy="81" r="4.5" />
-        </g>
-        <g fill={line}>
-          <rect x="213" y="38" width="4" height="4" />
-          <rect x="358" y="168" width="4" height="4" />
-          <rect x="148" y="103" width="4" height="4" />
-          <rect x="213" y="223" width="4" height="4" />
-        </g>
-      </svg>
-    );
-  }
-
-  if (slug === "eventerp") {
-    // A month grid beside a quotation ledger.
-    const cols = 7;
-    const rows = 5;
-    const cell = 22;
-    const ox = 208;
-    const oy = 46;
-    return (
-      <svg
-        viewBox="0 0 400 250"
-        preserveAspectRatio="xMaxYMid slice"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        fill="none"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <g stroke={line} strokeWidth="1" vectorEffect="non-scaling-stroke">
-          {Array.from({ length: cols + 1 }, (_, i) => (
-            <path key={`v${i}`} d={`M${ox + i * cell} ${oy}v${rows * cell}`} />
-          ))}
-          {Array.from({ length: rows + 1 }, (_, i) => (
-            <path key={`h${i}`} d={`M${ox} ${oy + i * cell}h${cols * cell}`} />
-          ))}
-          <path d={`M${ox} ${oy - 14}h${cols * cell}`} />
-          <path d="M208 196h154M208 210h120M208 224h154" />
-          <path d="M330 210h32" strokeDasharray="2 3" />
-        </g>
-        <g stroke={accent} strokeWidth="1.25" vectorEffect="non-scaling-stroke">
-          <rect x={ox + 3 * cell + 3} y={oy + 2 * cell + 3} width={cell - 6} height={cell - 6} />
-          <path d={`M${ox + 4 * cell + 4} ${oy + 2 * cell + cell / 2}h${2 * cell - 8}`} />
-        </g>
-      </svg>
-    );
-  }
-
-  if (slug === "recruitment-suite") {
-    // A hiring pipeline: four stage columns narrowing to one placed candidate.
-    const lanes = [214, 256, 298, 340];
-    const cards = [4, 3, 2];
-    return (
-      <svg
-        viewBox="0 0 400 250"
-        preserveAspectRatio="xMaxYMid slice"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        fill="none"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <g stroke={line} strokeWidth="1" vectorEffect="non-scaling-stroke">
-          {lanes.map((x) => (
-            <path key={`h${x}`} d={`M${x} 34h34`} />
-          ))}
-          {cards.map((count, lane) =>
-            Array.from({ length: count }, (_, i) => (
-              <rect key={`c${lane}-${i}`} x={lanes[lane]} y={44 + i * 18} width="34" height="12" />
-            )),
-          )}
-        </g>
-        <g stroke={accent} strokeWidth="1.25" vectorEffect="non-scaling-stroke">
-          <rect x="340" y="44" width="34" height="12" />
-          <path d="M346 50h14" />
-        </g>
-      </svg>
-    );
-  }
-
-  if (slug === "upward") {
-    // Career steps rising to a goal, over a twelve-week timeline.
-    return (
-      <svg
-        viewBox="0 0 400 250"
-        preserveAspectRatio="xMaxYMid slice"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        fill="none"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <g stroke={line} strokeWidth="1" vectorEffect="non-scaling-stroke">
-          <path d="M214 198v-22h26v-22h26v-22h26v-22h26v-22h26v-22" />
-          <path d="M214 216h156" />
-          {Array.from({ length: 13 }, (_, i) => (
-            <path key={`t${i}`} d={`M${214 + i * 13} 216v-5`} />
-          ))}
-        </g>
-        <g stroke={accent} strokeWidth="1.25" vectorEffect="non-scaling-stroke">
-          <path d="M344 66h26V42" />
-          <path d="M370 42h12l-4 5 4 5h-12" />
-        </g>
-      </svg>
-    );
-  }
-
-  return (
-    <svg
-      viewBox="0 0 400 250"
-      preserveAspectRatio="xMaxYMid slice"
-      className="pointer-events-none absolute inset-0 h-full w-full"
-      fill="none"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <g stroke={line} strokeWidth="1" vectorEffect="non-scaling-stroke">
-        <path d="M220 40h150v170H220z" />
-        <path d="M220 80h150M260 80v130" />
-      </g>
-    </svg>
   );
 }

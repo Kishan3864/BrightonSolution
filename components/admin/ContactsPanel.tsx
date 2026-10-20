@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { ContactStatus } from "@/lib/firebase/schema";
 import type { ContactDoc } from "@/lib/analytics/report";
 import { formatDateTime } from "@/lib/analytics/report";
-import { AdminButton } from "@/components/admin/ui";
+import { AdminButton, panelClass } from "@/components/admin/ui";
 
 type Filter = "all" | ContactStatus;
 
@@ -16,9 +16,9 @@ const FILTERS: { key: Filter; label: string }[] = [
 ];
 
 const STATUS_STYLE: Record<ContactStatus, string> = {
-  new: "border-accent text-accent",
-  handled: "border-line text-muted",
-  spam: "border-[#B42318] text-[#B42318]",
+  new: "border-accent/60 bg-accent/10 text-accent",
+  handled: "border-line-strong bg-surface-2 text-muted",
+  spam: "border-[#ff8a7a]/60 bg-[#ff8a7a]/10 text-[#ff8a7a]",
 };
 
 function replyHref(contact: ContactDoc): string {
@@ -63,7 +63,7 @@ export default function ContactsPanel({
             aria-pressed={filter === item.key}
             onClick={() => setFilter(item.key)}
             className={`inline-flex min-h-[44px] items-center gap-2 rounded-sharp border px-3 text-[0.8125rem] transition-colors ${
-              filter === item.key ? "border-ink bg-ink text-paper" : "border-line text-ink hover:border-ink"
+              filter === item.key ? "border-accent bg-accent text-canvas" : "border-line-strong bg-surface text-fg hover:border-fg/60"
             }`}
           >
             {item.label}
@@ -73,9 +73,9 @@ export default function ContactsPanel({
       </div>
 
       {visible.length === 0 ? (
-        <p className="border-y border-line py-4 text-[0.875rem] text-muted">No submissions here.</p>
+        <p className={`px-5 py-6 text-[0.875rem] text-muted ${panelClass}`}>No submissions here.</p>
       ) : (
-        <ol className="border-t border-ink">
+        <ol className="grid gap-3">
           {visible.map((contact) => {
             const status = (contact.status ?? "new") as ContactStatus;
             const reply = replyHref(contact);
@@ -91,7 +91,7 @@ export default function ContactsPanel({
               ["Time zone", contact.timeZone],
             ];
             return (
-              <li key={contact.id} className="border-b border-line py-5">
+              <li key={contact.id} className={`p-4 sm:p-5 md:p-6 ${panelClass}`}>
                 <article aria-label={`Submission from ${contact.name || "unknown"}`} className="grid gap-4 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] md:gap-8">
                   <div className="min-w-0 space-y-2">
                     <p className="font-mono text-[0.75rem] tabular-nums text-muted">{formatDateTime(contact.createdAt)}</p>
@@ -130,10 +130,10 @@ export default function ContactsPanel({
                     </dl>
 
                     <details className="mt-3">
-                      <summary className="inline-flex min-h-[44px] cursor-pointer items-center text-[0.8125rem] text-ink underline-offset-4 hover:underline">
+                      <summary className="inline-flex min-h-[44px] cursor-pointer items-center text-[0.8125rem] text-fg underline-offset-4 hover:text-accent hover:underline">
                         Message ({(contact.message ?? "").length} characters)
                       </summary>
-                      <p className="mt-1 max-w-[70ch] whitespace-pre-wrap break-words border-l border-line pl-4 text-[0.875rem] leading-relaxed">
+                      <p className="mt-1 max-w-[70ch] whitespace-pre-wrap break-words rounded-sharp border border-line bg-canvas p-4 text-[0.875rem] leading-relaxed">
                         {contact.message}
                       </p>
                     </details>

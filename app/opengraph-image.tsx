@@ -9,8 +9,10 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OpenGraphImage() {
-  const svg = await readFile(join(process.cwd(), "public", "logo.svg"));
-  const logo = `data:image/svg+xml;base64,${svg.toString("base64")}`;
+  // The logo's lettering is near-black (#070707); recolour it to the v2 foreground so it
+  // reads on the dark canvas. The orange and amber marks keep their own fills.
+  const svg = (await readFile(join(process.cwd(), "public", "logo.svg"), "utf8")).replace(/#070707/gi, "#f3f0ea");
+  const logo = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 
   return new ImageResponse(
     (
@@ -22,8 +24,8 @@ export default async function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px 80px",
-          background: "#FAFAF7",
-          color: "#0A1220",
+          background: "#0b0c10",
+          color: "#f3f0ea",
           fontFamily: "sans-serif",
         }}
       >
@@ -43,8 +45,8 @@ export default async function OpenGraphImage() {
           >
             Software development &amp; IT services.
           </div>
-          <div style={{ width: 120, height: 2, background: "#2447F9", display: "flex" }} />
-          <div style={{ fontSize: 28, color: "#5B6170", maxWidth: 900, lineHeight: 1.35 }}>
+          <div style={{ width: 120, height: 2, background: "#ed943b", display: "flex" }} />
+          <div style={{ fontSize: 28, color: "#a2a5ae", maxWidth: 900, lineHeight: 1.35 }}>
             Custom software, web and mobile apps, cloud &amp; DevOps, AI integration, UI/UX design and
             maintenance for startups, small businesses and enterprises worldwide.
           </div>
@@ -54,10 +56,10 @@ export default async function OpenGraphImage() {
           style={{
             display: "flex",
             justifyContent: "space-between",
-            borderTop: "1px solid #E3E3DD",
+            borderTop: "1px solid rgba(243,240,234,0.24)",
             paddingTop: 24,
             fontSize: 22,
-            color: "#5B6170",
+            color: "#a2a5ae",
           }}
         >
           <span>{site.url.replace(/^https?:\/\//, "")}</span>

@@ -1,0 +1,134 @@
+/* Stacked project showcase.
+   Base (phones, no scroll-timeline support, reduced motion): a plain list of panels.
+   Enhanced (>= 768px wide and >= 720px tall, animation-timeline supported, motion allowed):
+   sticky panels with staggered tops; the panel underneath recedes (scale 0.94) and dims while
+   the next one arrives, and each screenshot straightens out of a gentle perspective tilt as it
+   enters. Driven only by CSS scroll-driven animations: no scroll listeners. */
+
+.stack {
+  display: grid;
+  gap: clamp(1rem, 0.6rem + 1.5vw, 1.75rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  min-width: 0;
+}
+
+.card {
+  position: relative;
+  padding: clamp(1rem, 0.4rem + 2.2vw, 2.5rem);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card, 1.25rem);
+  background-color: var(--color-surface);
+  transition: border-color 0.2s ease;
+}
+
+.card:hover,
+.card:focus-within {
+  border-color: var(--color-line-strong);
+}
+
+/* Dimming veil for the receding panel; invisible until the stack animation runs. */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background-color: var(--color-canvas);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mediaLink {
+  display: block;
+  border-radius: var(--radius-card, 1.25rem);
+}
+
+.tilt {
+  transform-origin: 50% 100%;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 48rem) and (min-height: 45rem) {
+    .stack {
+      /* The list itself is the timeline subject: it is not sticky, so its progress is exact. */
+      view-timeline-name: --project-stack;
+      gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+    }
+
+    .item {
+      position: sticky;
+      /* Clear of the sticky header (72px), then each panel 1.25rem lower than the last,
+         so the edges of the receding panels read as a deck. */
+      top: calc(6rem + var(--i) * 1.25rem);
+    }
+
+    /* Panel i recedes while panel i + 1 travels from mid-viewport to its sticky top.
+       Each item is roughly 1 / count of the list, so (i + 1) / count of the list's
+       exit-crossing is where panel i + 1 would reach the viewport top; subtract the
+       distance from mid-viewport and from its sticky top respectively. */
+    .card {
+      transform-origin: 50% 0;
+      animation: stack-recede linear both;
+      animation-timeline: --project-stack;
+      animation-range:
+        exit-crossing calc((var(--i) + 1) / var(--count) * 100% - 55vh)
+        exit-crossing calc((var(--i) + 1) / var(--count) * 100% - 6rem - (var(--i) + 1) * 1.25rem);
+    }
+
+    .card::after {
+      animation: stack-dim linear both;
+      animation-timeline: --project-stack;
+      animation-range:
+        exit-crossing calc((var(--i) + 1) / var(--count) * 100% - 55vh)
+        exit-crossing calc((var(--i) + 1) / var(--count) * 100% - 6rem - (var(--i) + 1) * 1.25rem);
+    }
+
+    .item:last-child .card,
+    .item:last-child .card::after {
+      animation: none;
+    }
+
+    /* Focus is never hidden under the next stuck panel (WCAG 2.4.11): a panel holding
+       focus paints above the deck, at full scale and undimmed. */
+    .item:focus-within {
+      z-index: 1;
+    }
+
+    .item:focus-within .card,
+    .item:focus-within .card::after {
+      animation: none;
+    }
+
+    /* The screenshot leans back slightly as its panel enters and is upright before it sticks. */
+    .tilt {
+      animation: stack-straighten linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 42%;
+    }
+  }
+}
+
+@keyframes stack-recede {
+  to {
+    transform: scale(0.94);
+  }
+}
+
+@keyframes stack-dim {
+  to {
+    opacity: 0.62;
+  }
+}
+
+@keyframes stack-straighten {
+  from {
+    transform: perspective(1600px) rotateX(12deg) scale(0.96);
+  }
+  to {
+    transform: none;
+  }
+}

@@ -6,11 +6,19 @@ import TrackCta from "@/components/services/TrackCta";
 import { engagementModels } from "@/lib/site";
 import { waysToWork } from "@/lib/content/services";
 
+/**
+ * The four engagement models as comparison cards on the raised surface.
+ * From 640px each card is a 5-row subgrid (number, title, summary, best for,
+ * billing), so the same rows line up across cards in a row.
+ *   < 640px   one column
+ *   640px+    two columns
+ *   1024px+   four columns
+ */
 export default function WaysToWork() {
   return (
     <section
       id="engagement-models"
-      className="section-dark py-section scroll-mt-4"
+      className="section-alt py-section scroll-mt-4"
       aria-labelledby="engagement-models-title"
     >
       <Container>
@@ -19,41 +27,43 @@ export default function WaysToWork() {
             eyebrow={waysToWork.eyebrow}
             title={waysToWork.title}
             lead={waysToWork.lead}
-            dark
             id="engagement-models-title"
           />
         </Reveal>
 
-        <div className="mt-[clamp(2.25rem,1.5rem+2.5vw,4rem)] grid border-t border-line-dark sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-[clamp(2.25rem,1.5rem+2.5vw,4rem)] grid gap-3 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-0 lg:grid-cols-4 lg:gap-x-4">
           {engagementModels.map((model, index) => (
             <Reveal
               key={model.title}
-              as="article"
+              as="li"
               delay={index * 70}
-              className="min-w-0 border-b border-line-dark py-7 sm:odd:pr-6 sm:even:border-l sm:even:pl-6 lg:border-l lg:px-6 lg:py-8 lg:first:border-l-0 lg:first:pl-0 lg:last:pr-0"
+              className="flex min-w-0 sm:row-span-5 sm:mb-3 sm:grid sm:grid-rows-subgrid lg:mb-0"
             >
-              <p className="eyebrow tabular-nums text-accent-soft" aria-hidden="true">
-                {String(index + 1).padStart(2, "0")}
-              </p>
-              <h3 className="text-h3 mt-3">{model.title}</h3>
-              <p className="mt-2 text-[0.9375rem] leading-relaxed text-muted-dark">{model.summary}</p>
-              <dl className="mt-6 grid gap-4 text-[0.875rem] leading-relaxed">
-                <div>
-                  <dt className="eyebrow text-accent-soft">{waysToWork.bestForLabel}</dt>
-                  <dd className="mt-1.5 text-paper">{model.bestFor}</dd>
-                </div>
-                <div>
-                  <dt className="eyebrow text-accent-soft">{waysToWork.billingLabel}</dt>
-                  <dd className="mt-1.5 text-paper">{model.billing}</dd>
-                </div>
-              </dl>
+              <article className="flex w-full flex-col rounded-[var(--radius-card)] border border-line bg-surface-2 p-6 transition-[border-color,translate] duration-200 hover:border-line-strong motion-safe:hover:-translate-y-0.5 sm:row-span-5 sm:grid sm:grid-rows-subgrid sm:gap-0 lg:p-7">
+                <p className="eyebrow tabular-nums text-accent" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </p>
+                <h3 className="text-h3 mt-4 text-balance">{model.title}</h3>
+                <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">{model.summary}</p>
+                <dl className="mt-7 border-t border-line pt-4 text-[0.875rem] leading-relaxed">
+                  <dt className="eyebrow text-muted">{waysToWork.bestForLabel}</dt>
+                  <dd className="mt-1.5 text-fg">{model.bestFor}</dd>
+                </dl>
+                <dl className="mt-4 border-t border-line pt-4 text-[0.875rem] leading-relaxed">
+                  <dt className="eyebrow text-muted">{waysToWork.billingLabel}</dt>
+                  <dd className="mt-1.5 font-medium text-fg">{model.billing}</dd>
+                </dl>
+              </article>
             </Reveal>
           ))}
-        </div>
+        </ul>
 
-        <Reveal delay={120} className="mt-8 grid gap-5 md:grid-cols-12 md:items-center md:gap-8">
-          <p className="max-w-[52ch] text-[0.9375rem] leading-relaxed text-muted-dark md:col-span-7">{waysToWork.note}</p>
-          <div className="md:col-span-5 md:flex md:justify-end">
+        <Reveal
+          delay={120}
+          className="mt-4 flex flex-col gap-5 rounded-[var(--radius-card)] border border-line p-6 sm:mt-1 md:flex-row md:items-center md:justify-between md:gap-8 lg:mt-4 lg:px-7"
+        >
+          <p className="max-w-[56ch] text-[0.9375rem] leading-relaxed text-muted">{waysToWork.note}</p>
+          <div className="shrink-0">
             <TrackCta label="services_engagement_models">
               <Button href="/contact" variant="light">
                 {waysToWork.cta}

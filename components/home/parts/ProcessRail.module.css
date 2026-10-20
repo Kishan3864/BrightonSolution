@@ -1,0 +1,111 @@
+/* Process: vertical timeline on phones, horizontal snap rail from md.
+   The connecting line runs through the centre of the 44px number tiles. */
+
+.scroller {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+/* Phones: each step but the last draws the segment down to the next tile. */
+.segment {
+  position: absolute;
+  top: 3.25rem;
+  bottom: 0.5rem;
+  left: 1.375rem;
+  width: 1px;
+  background-color: var(--color-line-strong);
+  pointer-events: none;
+}
+
+/* Wrapper that carries the hairline beside the list (never inside the <ol>). */
+.track {
+  position: relative;
+}
+
+/* From md: one hairline across the whole rail. */
+.line {
+  display: none;
+}
+
+/* Orange progress along that line, tied to the rail's horizontal scroll.
+   Only where scroll-driven animations exist and motion is welcome. */
+.fill {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .scroller {
+    /* Distance from the container's content edge to the viewport edge: the container
+       gutter (same clamp as <Container>) plus the margin outside its 1320px max width. */
+    --gutter: clamp(1rem, 0.5rem + 2.5vw, 3rem);
+    --bleed: calc(var(--gutter) + max(0px, (100vw - 1320px) / 2));
+    /* Bleed to the viewport's right edge, then pad back so the last step can scroll
+       (and snap) fully into the container's column. */
+    margin-right: calc(var(--bleed) * -1);
+    padding-right: var(--bleed);
+    scroll-padding-inline-end: var(--bleed);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    padding-bottom: 1.75rem;
+    /* Steps fade out towards the viewport edge instead of being cut mid-word. */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--bleed) - 2rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - var(--bleed) - 2rem), transparent);
+  }
+
+  /* At the end of the rail nothing is left to hint at, so the fade lifts. */
+  .scroller[data-end="true"] {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .step {
+    scroll-snap-align: start;
+  }
+
+  .step:last-child {
+    scroll-snap-align: end;
+  }
+
+  .segment {
+    display: none;
+  }
+
+  .track {
+    width: max-content;
+  }
+
+  .line {
+    display: block;
+    position: absolute;
+    top: 1.375rem;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--color-line-strong);
+    pointer-events: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .fill {
+        display: block;
+        position: absolute;
+        inset: 0;
+        background-color: var(--color-accent);
+        transform-origin: left center;
+        animation: grow linear both;
+        animation-timeline: scroll(nearest inline);
+      }
+    }
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scaleX(0.06);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}

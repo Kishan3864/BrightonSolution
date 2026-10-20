@@ -75,10 +75,14 @@ const MIN_FILL_MS = 3000;
 /** Keep mailto links short enough for every mail client. */
 const MAILTO_MESSAGE_MAX = 1500;
 
+/** Light red for errors on the dark theme: about 7.4:1 on surface-2 and 8:1 on surface. */
+const ERROR_TEXT = "text-[#ff8a7a]";
+
+/* Field edges use fg at 35% (about 3:1 against the form panel, WCAG 1.4.11), not the decorative hairline. */
 const controlBase =
-  "block w-full min-w-0 rounded-sharp border bg-paper px-3.5 text-base text-ink transition-colors duration-200 focus:border-accent focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60";
-const controlBorder = "border-ink/50 hover:border-ink";
-const controlBorderInvalid = "border-[#B42318] hover:border-[#B42318]";
+  "block w-full min-w-0 rounded-sharp border bg-surface-2 px-3.5 text-base text-fg [color-scheme:dark] placeholder:text-muted transition-colors duration-200 focus:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60";
+const controlBorder = "border-fg/35 hover:border-fg/60";
+const controlBorderInvalid = "border-[#ff8a7a] hover:border-[#ff8a7a]";
 
 function charCount(value: string): number {
   return Array.from(value).length;
@@ -245,7 +249,7 @@ function FieldShell({ name, required = false, hint, error, className = "", child
   const id = `cf-${name}`;
   return (
     <div className={`min-w-0 ${className}`.trim()}>
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-ink">
+      <label htmlFor={id} className="mb-2 block text-sm font-medium text-fg">
         {fieldLabels[name]}
         {required ? (
           <span aria-hidden="true" className="ml-1 text-accent">
@@ -260,7 +264,7 @@ function FieldShell({ name, required = false, hint, error, className = "", child
       ) : null}
       {children}
       {error ? (
-        <p id={`${id}-error`} className="mt-2 flex items-start gap-2 text-sm leading-relaxed text-[#B42318]">
+        <p id={`${id}-error`} className={`mt-2 flex items-start gap-2 text-sm leading-relaxed ${ERROR_TEXT}`}>
           <AlertIcon />
           <span>{error}</span>
         </p>
@@ -397,12 +401,12 @@ export default function ContactForm() {
 
   if (status === "sent") {
     return (
-      <div role="status" aria-live="polite" className="border-t border-line pt-6">
+      <div role="status" aria-live="polite">
         <p className="eyebrow text-accent">Message sent</p>
         <h2
           ref={successHeading}
           tabIndex={-1}
-          className="text-h3 mt-4 max-w-[24ch] text-balance tracking-tight outline-offset-4"
+          className="text-h2 mt-4 max-w-[20ch] text-balance outline-offset-4"
         >
           {copy.successTitle}
         </h2>
@@ -411,7 +415,7 @@ export default function ContactForm() {
           <button
             type="button"
             onClick={reset}
-            className="inline-flex min-h-[44px] items-center text-[0.9375rem] font-semibold tracking-tight text-ink decoration-1 underline-offset-8 transition-colors hover:text-accent hover:underline"
+            className="inline-flex min-h-[44px] items-center text-[0.9375rem] font-semibold tracking-tight text-fg decoration-1 underline-offset-8 transition-colors hover:text-accent hover:underline"
           >
             Send another message
           </button>
@@ -462,8 +466,9 @@ export default function ContactForm() {
       </div>
 
       <fieldset className="m-0 mt-2 min-w-0 p-0">
-        <legend className="eyebrow float-left w-full pt-6 text-muted">{copy.groupDetails}</legend>
-        <div className="clear-both grid gap-x-6 gap-y-6 pt-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
+        <legend className="eyebrow float-left w-full pt-8 text-muted">{copy.groupDetails}</legend>
+        {/* One column on phones; two from 640px, where the form panel is at least ~560px wide. */}
+        <div className="clear-both grid gap-x-5 gap-y-5 pt-5 sm:grid-cols-2">
           <FieldShell name="name" required error={errors.name}>
             <input
               {...control("name", { className: "h-12" })}
@@ -504,15 +509,15 @@ export default function ContactForm() {
         </div>
       </fieldset>
 
-      <fieldset className="m-0 mt-10 min-w-0 border-t border-line p-0">
-        <legend className="eyebrow float-left w-full pt-6 text-muted">{copy.groupProject}</legend>
+      <fieldset className="m-0 mt-8 min-w-0 border-t border-line p-0">
+        <legend className="eyebrow float-left w-full pt-8 text-muted">{copy.groupProject}</legend>
         {/* Always one column: two-up selects are too narrow for the longer service names once one is chosen. */}
-        <div className="clear-both grid gap-y-6 pt-6">
+        <div className="clear-both grid gap-y-5 pt-5">
           <FieldShell name="service" error={errors.service}>
             <div className="relative">
               <select
                 {...control("service", {
-                  className: `h-12 appearance-none pr-10 ${values.service ? "text-ink" : "text-muted"}`,
+                  className: `h-12 appearance-none pr-10 ${values.service ? "text-fg" : "text-muted"}`,
                 })}
               >
                 <option value="">Select a service</option>
@@ -529,7 +534,7 @@ export default function ContactForm() {
             <div className="relative">
               <select
                 {...control("budget", {
-                  className: `h-12 appearance-none pr-10 ${values.budget ? "text-ink" : "text-muted"}`,
+                  className: `h-12 appearance-none pr-10 ${values.budget ? "text-fg" : "text-muted"}`,
                 })}
               >
                 <option value="">Select a range</option>
@@ -554,18 +559,18 @@ export default function ContactForm() {
         </div>
       </fieldset>
 
-      <div className="mt-10 border-t border-line pt-6">
+      <div className="mt-8 border-t border-line pt-8">
         <button
           type="submit"
           disabled={sending}
-          className="group inline-flex min-h-[48px] w-full items-center justify-center gap-3 rounded-sharp bg-accent px-6 py-2.5 text-[0.9375rem] font-semibold tracking-tight text-paper transition-colors duration-200 hover:bg-ink disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:bg-accent sm:w-auto sm:min-w-[14rem]"
+          className="group inline-flex min-h-[48px] w-full items-center justify-center gap-3 rounded-sharp bg-accent px-6 py-2.5 text-[0.9375rem] font-semibold tracking-tight text-canvas transition-[background-color,transform] duration-200 hover:bg-accent-2 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:bg-accent sm:w-auto sm:min-w-[14rem]"
         >
           <span>{sending ? copy.sending : copy.submit}</span>
           <Icon name="arrow" size={18} className="transition-transform duration-200 group-hover:translate-x-0.5" />
         </button>
         <p className="mt-4 max-w-[48ch] text-sm leading-relaxed text-muted">
           {copy.privacyPrefix}{" "}
-          <Link href="/privacy" className="text-ink underline decoration-1 underline-offset-4 transition-colors hover:text-accent">
+          <Link href="/privacy" className="text-fg underline decoration-1 underline-offset-4 transition-colors hover:text-accent">
             {copy.privacyLink}
           </Link>
           .
@@ -573,7 +578,7 @@ export default function ContactForm() {
 
         <div role="status" aria-live="polite" aria-atomic="true" className="mt-2">
           {summary ? (
-            <p className="mt-4 flex items-start gap-2 text-sm leading-relaxed text-[#B42318]">
+            <p className={`mt-4 flex items-start gap-2 text-sm leading-relaxed ${ERROR_TEXT}`}>
               <AlertIcon />
               <span>{summary}</span>
             </p>
@@ -585,27 +590,27 @@ export default function ContactForm() {
             ref={errorPanel}
             tabIndex={-1}
             role="alert"
-            className="mt-6 border-l-2 border-[#B42318] pl-4 outline-offset-4"
+            className="mt-6 rounded-sharp border border-[#ff8a7a]/45 bg-[#ff8a7a]/[0.06] p-4 outline-offset-4 sm:p-5"
           >
-            <p className="flex items-start gap-2 text-sm font-medium leading-relaxed text-[#B42318]">
+            <p className={`flex items-start gap-2 text-sm font-medium leading-relaxed ${ERROR_TEXT}`}>
               <AlertIcon />
               <span>Your message could not be sent right now.</span>
             </p>
-            <p className="mt-2 max-w-[52ch] text-sm leading-relaxed text-ink">
+            <p className="mt-2 max-w-[52ch] text-sm leading-relaxed text-fg">
               Your details are still in the form — try again in a moment, or send the same brief by email to{" "}
               <span className="break-all font-medium">{site.email}</span>.
             </p>
             <div className="mt-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-6">
               <a
                 href={buildMailto(values)}
-                className="inline-flex min-h-[44px] items-center gap-2 text-[0.9375rem] font-semibold tracking-tight text-ink decoration-1 underline-offset-8 transition-colors hover:text-accent hover:underline"
+                className="inline-flex min-h-[44px] items-center gap-2 text-[0.9375rem] font-semibold tracking-tight text-fg decoration-1 underline-offset-8 transition-colors hover:text-accent hover:underline"
               >
                 Email the brief instead
                 <Icon name="arrow" size={16} />
               </a>
               <button
                 type="submit"
-                className="inline-flex min-h-[44px] items-center text-[0.9375rem] font-medium tracking-tight text-muted decoration-1 underline-offset-8 transition-colors hover:text-ink hover:underline"
+                className="inline-flex min-h-[44px] items-center text-[0.9375rem] font-medium tracking-tight text-muted decoration-1 underline-offset-8 transition-colors hover:text-fg hover:underline"
               >
                 Try again
               </button>

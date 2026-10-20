@@ -31,8 +31,34 @@ const SUN_RAYS = [
   "M119.183 10.7016L120.734 9.15039L122.742 11.1585L121.191 12.7097L119.183 10.7016Z",
 ];
 
-export default function Logo({ variant = "dark", titled = false, className = "" }: LogoProps) {
-  const color = variant === "light" ? "text-paper" : "text-ink";
+/**
+ * The sun from the logo on its own: the ring and its eight rays, cropped to the mark.
+ * Decorative only (always aria-hidden). The rays share the ring's centre, so a caller can
+ * turn them in place through `raysClassName` with `transform-box: fill-box`.
+ */
+export function LogoMark({ className = "", raysClassName = "" }: { className?: string; raysClassName?: string }) {
+  return (
+    <svg
+      viewBox="116 6 26.93 26.93"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      className={`block overflow-visible ${className}`.trim()}
+    >
+      <path d={SUN_RING} fill="#ED943B" />
+      <g fill="#EDB43B" fillOpacity={0.83} className={raysClassName || undefined}>
+        {SUN_RAYS.map((d, i) => (
+          <path key={i} d={d} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+// `variant` stays in the props for callers written for the v1 light/dark logos. The v2 theme is
+// dark everywhere, so the lettering always uses the light foreground colour.
+export default function Logo({ titled = false, className = "" }: LogoProps) {
+  const color = "text-fg";
   return (
     <svg
       width={167}

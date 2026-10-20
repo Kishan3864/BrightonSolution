@@ -1,0 +1,89 @@
+/* Numbered steps joined by a vertical rail (contact, thank-you, offline).
+   Static by default: markers and a hairline rail. Where CSS scroll-driven animations
+   are supported and motion is welcome, an orange segment draws down each rail as it
+   scrolls into view. No JavaScript, no scroll listeners. */
+
+/* Only list-style here: an unlayered margin or padding would override the
+   Tailwind spacing callers pass in (mt-6 on /contact, mt-2 on /thank-you).
+   Tailwind's preflight already zeroes list margin and padding. */
+.rail {
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  column-gap: 1rem;
+  padding-bottom: 1.75rem;
+}
+
+.step:last-child {
+  padding-bottom: 0;
+}
+
+/* The rail between one marker and the next. */
+.step:not(:last-child)::before,
+.step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(1.375rem - 0.5px);
+  top: 3.125rem;
+  bottom: 0.375rem;
+  width: 1px;
+  background-color: var(--color-line-strong);
+}
+
+/* The drawn segment only exists where it can animate. */
+.step:not(:last-child)::after {
+  display: none;
+  background-color: var(--color-accent);
+  transform-origin: top;
+}
+
+.marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sharp);
+  background-color: var(--color-surface);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.text {
+  min-width: 0;
+  max-width: 46ch;
+  /* Centres a one-line step on the 44px marker; longer steps run on below it. */
+  padding-top: 0.6rem;
+  color: var(--color-fg);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .step:not(:last-child)::after {
+      display: block;
+      animation: rail-draw linear both;
+      animation-timeline: view();
+      animation-range: entry 40% cover 55%;
+    }
+  }
+}
+
+@keyframes rail-draw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}

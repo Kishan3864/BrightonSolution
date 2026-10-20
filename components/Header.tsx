@@ -2,36 +2,42 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import Logo from "@/components/Logo";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import { isAdminPath } from "@/lib/analytics/env";
 import { nav, site } from "@/lib/site";
+import styles from "./Header.module.css";
+
+const gutter = "px-[clamp(1rem,0.5rem+2.5vw,3rem)]";
+
+const iconButton =
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-sharp border border-line text-fg transition-colors duration-200 hover:border-line-strong";
+
+// Contact rows at the foot of the mobile menu: an icon tile and its label.
+const contactRow =
+  "group inline-flex min-h-[44px] min-w-0 items-center gap-3 text-[0.9375rem] text-fg transition-colors duration-200 hover:text-accent";
+const contactTile =
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-sharp border border-line transition-colors duration-200 group-hover:border-accent";
 
 export default function Header() {
   const pathname = usePathname();
-  const [compact, setCompact] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
   const firstLinkRef = useRef<HTMLAnchorElement | null>(null);
   const wasOpen = useRef(false);
 
+  // The bar turns frosted once a 24px sentinel at the top of the document leaves the viewport:
+  // an IntersectionObserver, so nothing runs on every scroll frame.
   useEffect(() => {
-    let ticking = false;
-    const update = () => {
-      setCompact(window.scrollY > 24);
-      ticking = false;
-    };
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        window.requestAnimationFrame(update);
-      }
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const el = sentinelRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const close = useCallback(() => setOpen(false), []);
@@ -114,114 +120,151 @@ export default function Header() {
     !href.includes("#") && (pathname === href || (href !== "/" && pathname.startsWith(`${href}/`)));
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-paper">
-      <div
-        className={`mx-auto flex w-full max-w-[1320px] items-center justify-between px-[clamp(1rem,0.5rem+2.5vw,3rem)] transition-[height] duration-200 ease-out ${
-          compact ? "h-14 md:h-[3.75rem]" : "h-16 md:h-[4.5rem]"
-        }`}
-      >
-        <Link href="/" className="inline-flex min-h-[44px] items-center" aria-label="BrightonSolution home">
-          <Logo variant="dark" titled />
-        </Link>
+    <>
+      {/* Scroll sentinel: absolutely placed at the top of the document, never visible. */}
+      <div ref={sentinelRef} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 h-6 w-px" />
 
-        {admin ? null : (
-          <>
-            <nav className="hidden items-center lg:flex" aria-label="Primary">
-              {nav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={isActive(item.href) ? "page" : undefined}
-                  className={`inline-flex min-h-[44px] items-center whitespace-nowrap px-2.5 text-[0.875rem] font-medium tracking-[-0.005em] decoration-1 underline-offset-[6px] transition-colors hover:underline xl:px-3.5 ${
-                    isActive(item.href) ? "text-ink underline" : "text-ink/75 hover:text-ink"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <Button href="/contact" variant="dark" className="ml-3 xl:ml-5">
-                Let’s Talk
-              </Button>
-            </nav>
-
-            <button
-              ref={toggleRef}
-              type="button"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-sharp text-ink lg:hidden"
-              aria-expanded={open}
-              aria-controls="mobile-menu"
-              aria-label={open ? "Close menu" : "Open menu"}
-              onClick={() => setOpen((v) => !v)}
-            >
-              <Icon name={open ? "close" : "menu"} />
-            </button>
-          </>
-        )}
-      </div>
-
-      {admin ? null : (
+      <header className="sticky top-0 z-50">
+        {/* The frosted layer lives in its own element: a backdrop-filter on <header> itself would
+            become the containing block of the fixed mobile menu below and trap it inside the bar. */}
         <div
-          id="mobile-menu"
-          hidden={!open}
-          className={`section-dark fixed inset-0 z-[60] flex-col bg-ink text-paper lg:hidden ${open ? "flex" : "hidden"}`}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Site menu"
-        >
-          <div className="flex h-16 shrink-0 items-center justify-between border-b border-line-dark md:h-[4.5rem] px-[clamp(1rem,0.5rem+2.5vw,3rem)]">
-            <Link href="/" className="inline-flex min-h-[44px] items-center" aria-label="BrightonSolution home" onClick={close}>
-              <Logo variant="light" />
-            </Link>
-            <button
-              type="button"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-sharp text-paper"
-              aria-label="Close menu"
-              onClick={close}
-            >
-              <Icon name="close" />
-            </button>
-          </div>
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 -z-10 border-b transition-[opacity,border-color] duration-300 ${styles.bar} ${
+            scrolled || admin ? "border-line opacity-100" : "border-transparent opacity-0"
+          }`}
+        />
 
-          <nav className="flex-1 overflow-y-auto px-[clamp(1rem,0.5rem+2.5vw,3rem)] py-8" aria-label="Mobile">
-            <ul className="flex flex-col">
-              {nav.map((item, i) => (
-                <li key={item.href} className="border-b border-line-dark">
+        <div className={`mx-auto flex h-16 w-full max-w-[1320px] items-center justify-between md:h-[4.5rem] ${gutter}`}>
+          <Link href="/" className="inline-flex min-h-[44px] items-center" aria-label="BrightonSolution home">
+            <Logo titled />
+          </Link>
+
+          {admin ? null : (
+            <>
+              <nav className="hidden items-center lg:flex" aria-label="Primary">
+                {nav.map((item) => (
                   <Link
-                    ref={i === 0 ? firstLinkRef : undefined}
+                    key={item.href}
                     href={item.href}
                     aria-current={isActive(item.href) ? "page" : undefined}
-                    onClick={close}
-                    className="flex min-h-[44px] items-center justify-between gap-4 py-4 text-[1.625rem] font-medium tracking-[-0.03em] text-paper aria-[current=page]:text-accent-soft"
+                    className="relative inline-flex min-h-[44px] items-center whitespace-nowrap px-2.5 text-[0.875rem] font-medium tracking-[-0.005em] text-muted transition-colors duration-200 after:pointer-events-none after:absolute after:inset-x-2.5 after:bottom-2 after:h-0.5 after:origin-left after:scale-x-0 after:bg-accent after:transition-transform after:duration-300 after:content-[''] hover:text-fg hover:after:scale-x-100 aria-[current=page]:text-fg aria-[current=page]:after:scale-x-100 xl:px-3.5 xl:after:inset-x-3.5"
                   >
-                    <span className="flex items-baseline gap-4">
-                      <span className="eyebrow text-muted-dark" aria-hidden="true">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span>{item.label}</span>
-                    </span>
-                    <Icon name="arrow" size={20} className="text-accent-soft" />
+                    {item.label}
                   </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+                ))}
+                <a
+                  href={site.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="BrightonSolution on Instagram (opens in a new tab)"
+                  className="ml-2 inline-flex h-11 w-11 items-center justify-center rounded-sharp text-muted transition-colors duration-200 hover:text-accent xl:ml-3"
+                >
+                  <Icon name="instagram" size={20} />
+                </a>
+                <Button href="/contact" variant="dark" className="ml-2 xl:ml-3">
+                  Let’s Talk
+                </Button>
+              </nav>
 
-          <div className="shrink-0 border-t border-line-dark px-[clamp(1rem,0.5rem+2.5vw,3rem)] py-6">
-            <p className="eyebrow text-accent-soft">Email</p>
-            <a
-              href={`mailto:${site.email}`}
-              className="mt-1 inline-flex min-h-[44px] items-center break-all text-[0.9375rem] text-paper underline-offset-[6px] decoration-1 hover:underline"
-            >
-              {site.email}
-            </a>
-            <div className="mt-4">
-              <Button href="/contact" variant="light" className="w-full">
-                Let’s Talk
-              </Button>
+              <button
+                ref={toggleRef}
+                type="button"
+                className={`${iconButton} lg:hidden`}
+                aria-expanded={open}
+                aria-controls="mobile-menu"
+                aria-label={open ? "Close menu" : "Open menu"}
+                onClick={() => setOpen((v) => !v)}
+              >
+                <Icon name={open ? "close" : "menu"} size={22} />
+              </button>
+            </>
+          )}
+        </div>
+
+        {admin ? null : (
+          <div
+            id="mobile-menu"
+            hidden={!open}
+            className={`fixed inset-0 z-[60] flex-col bg-canvas text-fg lg:hidden ${styles.sheet} ${open ? `flex ${styles.panel}` : "hidden"}`}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site menu"
+          >
+            <div className={`flex h-16 shrink-0 items-center justify-between border-b border-line bg-canvas md:h-[4.5rem] ${styles.sheetTop} ${gutter}`}>
+              <Link href="/" className="inline-flex min-h-[44px] items-center" aria-label="BrightonSolution home" onClick={close}>
+                <Logo />
+              </Link>
+              <button type="button" className={iconButton} aria-label="Close menu" onClick={close}>
+                <Icon name="close" size={22} />
+              </button>
+            </div>
+
+            <nav className={`flex-1 overflow-y-auto py-[clamp(0.5rem,0.25rem+2.5vh,2.5rem)] ${styles.sheetNav} ${gutter}`} aria-label="Mobile">
+              <ul className="flex flex-col">
+                {nav.map((item, i) => (
+                  <li
+                    key={item.href}
+                    className={`border-b border-line ${styles.item}`}
+                    style={{ "--i": i } as CSSProperties}
+                  >
+                    <Link
+                      ref={i === 0 ? firstLinkRef : undefined}
+                      href={item.href}
+                      aria-current={isActive(item.href) ? "page" : undefined}
+                      onClick={close}
+                      className="group flex min-h-[44px] items-center justify-between gap-4 py-[clamp(0.25rem,0.1rem+1.4vh,1.125rem)] font-display text-[min(clamp(1.625rem,1.2rem+2.2vw,2.5rem),max(1.375rem,5.5vh))] font-medium leading-[1.1] tracking-[-0.035em] text-fg transition-colors duration-200 hover:text-accent aria-[current=page]:text-accent"
+                    >
+                      <span className="flex min-w-0 items-baseline gap-4">
+                        <span
+                          className="w-7 shrink-0 font-mono text-[0.8125rem] font-normal tracking-[0.06em] text-accent tabular-nums"
+                          aria-hidden="true"
+                        >
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <span className="min-w-0">{item.label}</span>
+                      </span>
+                      <Icon
+                        name="arrow"
+                        size={22}
+                        className="text-muted transition-[color,transform] duration-200 group-hover:translate-x-1 group-hover:text-accent group-aria-[current=page]:text-accent"
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* Pinned to the bottom on tall screens; on short ones (under 42rem tall) the whole
+                panel scrolls instead, so the six links always come first. */}
+            <div className={`shrink-0 border-t border-line bg-surface pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] ${gutter}`}>
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-8">
+                <a
+                  href={`mailto:${site.email}`}
+                  aria-label={`Email ${site.email}`}
+                  className={contactRow}
+                >
+                  <span className={contactTile}>
+                    <Icon name="mail" size={20} />
+                  </span>
+                  <span className="min-w-0 break-all">{site.email}</span>
+                </a>
+                <a href={site.instagramUrl} target="_blank" rel="noopener noreferrer" className={contactRow}>
+                  <span className={contactTile}>
+                    <Icon name="instagram" size={20} />
+                  </span>
+                  <span>Instagram</span>
+                  <span className="sr-only"> (opens in a new tab)</span>
+                </a>
+              </div>
+              <div className="mt-5">
+                <Button href="/contact" className="w-full">
+                  Let’s Talk
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </header>
+        )}
+      </header>
+    </>
   );
 }

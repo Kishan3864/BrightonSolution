@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
@@ -14,6 +14,12 @@ import "./globals.css";
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-geist",
+  display: "swap",
+});
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
   display: "swap",
 });
 
@@ -64,8 +70,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FAFAF7",
-  colorScheme: "light",
+  themeColor: "#0B0C10",
+  colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
 };
@@ -76,15 +82,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`${geist.variable} ${geistMono.variable}`}
+      className={`${geist.variable} ${bricolage.variable} ${geistMono.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
       </head>
-      <body className="bg-paper font-sans text-ink antialiased">
+      <body className="bg-canvas font-sans text-fg antialiased">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-[44px] focus:items-center focus:rounded-sharp focus:bg-ink focus:px-5 focus:text-[0.9375rem] focus:text-paper"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-[44px] focus:items-center focus:rounded-sharp focus:bg-fg focus:px-5 focus:text-[0.9375rem] focus:text-canvas"
         >
           Skip to content
         </a>

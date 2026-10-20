@@ -39,20 +39,20 @@ export default function ErrorPage({ error, retry }: ErrorPageProps) {
               It is usually temporary. Try loading it again, or continue from the home page — the rest of the site is
               unaffected.
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
               <button
                 type="button"
                 onClick={() => retry()}
-                className="group inline-flex min-h-[44px] items-center justify-center gap-3 whitespace-nowrap rounded-sharp bg-ink px-6 py-2.5 text-[0.9375rem] font-semibold tracking-tight text-paper transition-colors duration-200 hover:bg-accent"
+                className="group inline-flex min-h-[44px] items-center justify-center gap-2.5 whitespace-nowrap rounded-sharp bg-accent px-5 py-2.5 text-[0.9375rem] font-medium leading-none tracking-[-0.01em] text-canvas transition-[background-color,transform] duration-200 hover:bg-accent-2 active:translate-y-px"
               >
                 <span>Try again</span>
                 <Icon name="arrow" size={18} className="transition-transform duration-200 group-hover:translate-x-0.5" />
               </button>
-              {/* Plain <a> (same classes as Button's ghost variant), not next/link: a full
+              {/* Plain <a> (same classes as Button's outline variant), not next/link: a full
                   document load still works when the client router is what broke. */}
               <a
                 href="/"
-                className="group inline-flex min-h-[44px] items-center justify-center gap-2.5 whitespace-nowrap rounded-sharp py-2.5 text-[0.9375rem] font-medium leading-none tracking-[-0.01em] transition-colors duration-200 text-ink underline-offset-[6px] decoration-1 hover:underline [.section-dark_&]:text-paper"
+                className="group inline-flex min-h-[44px] items-center justify-center gap-2.5 whitespace-nowrap rounded-sharp border border-line-strong px-5 py-2.5 text-[0.9375rem] font-medium leading-none tracking-[-0.01em] text-fg transition-[color,background-color,border-color,transform] duration-200 hover:border-fg hover:bg-fg/5 active:translate-y-px"
               >
                 <span>Go to home</span>
                 <Icon name="arrow" size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" />

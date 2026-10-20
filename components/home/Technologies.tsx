@@ -3,12 +3,15 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
 import { technologies } from "@/lib/site";
 import { technologiesCopy, bodyGap, sectionSpace } from "@/lib/content/home-b";
+import Marquee from "@/components/home/parts/Marquee";
+
+const allTools = Array.from(new Set(technologies.flatMap((g) => g.items)));
 
 export default function Technologies() {
   return (
     <section id="technologies" className="scroll-mt-4" aria-labelledby="technologies-title">
       <Container>
-        <div className={sectionSpace}>
+        <div>
           <Reveal>
             <SectionHeading
               id="technologies-title"
@@ -18,18 +21,27 @@ export default function Technologies() {
               lead={technologiesCopy.lead}
             />
           </Reveal>
+        </div>
+      </Container>
 
+      {/* Full-bleed strip between the heading and the groups. */}
+      <Reveal delay={60} className={`${bodyGap} border-y border-line bg-surface`}>
+        <Marquee items={allTools} />
+      </Reveal>
+
+      <Container>
+        <div className={sectionSpace}>
           <Reveal delay={80} className={bodyGap}>
-            <dl className="border-b border-line">
+            <dl className="grid gap-x-10 gap-y-9 md:grid-cols-2 lg:grid-cols-3 lg:gap-x-12">
               {technologies.map((group) => (
-                <div key={group.name} className="grid gap-3 border-t border-line py-5 md:grid-cols-12 md:gap-8">
-                  <dt className="eyebrow pt-1.5 text-ink md:col-span-4 lg:col-span-3">{group.name}</dt>
-                  <dd className="min-w-0 md:col-span-8 lg:col-span-9">
-                    <ul className="flex flex-wrap gap-1.5" aria-label={`${group.name} tools`}>
+                <div key={group.name} className="min-w-0 border-t border-line-strong pt-5">
+                  <dt className="text-[1.0625rem] font-medium tracking-[-0.01em]">{group.name}</dt>
+                  <dd className="mt-4 min-w-0">
+                    <ul className="flex flex-wrap gap-2" aria-label={`${group.name} tools`}>
                       {group.items.map((item) => (
                         <li
                           key={item}
-                          className="inline-flex items-center rounded-sharp border border-line px-2 py-0.5 text-[0.8125rem] leading-6 text-ink"
+                          className="inline-flex min-h-9 items-center rounded-sharp border border-line bg-surface px-3 py-1 text-[0.875rem] leading-snug text-fg"
                         >
                           {item}
                         </li>

@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import type { Bucket } from "@/lib/analytics/report";
 import { formatNumber } from "@/lib/analytics/report";
+import { panelClass } from "@/components/admin/ui";
 
 /**
  * Page views over time: single-series bar chart (accent bars with a 2px surface gap, hairline
@@ -24,10 +25,10 @@ export default function ViewsChart({ buckets, unit }: { buckets: Bucket[]; unit:
   const shown = active !== null ? buckets[active] : null;
 
   return (
-    <figure className="min-w-0">
+    <figure className={`min-w-0 p-4 sm:p-6 ${panelClass}`}>
       <div className="mb-3 flex min-h-[1.5rem] flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-[0.8125rem]">
         <span className="text-muted">{summary}</span>
-        <span aria-live="polite" className="font-mono tabular-nums text-ink">
+        <span aria-live="polite" className="font-mono tabular-nums text-fg">
           {shown ? `${shown.longLabel} — ${formatNumber(shown.views)}` : ""}
         </span>
       </div>
@@ -40,7 +41,7 @@ export default function ViewsChart({ buckets, unit }: { buckets: Bucket[]; unit:
         <span className="absolute bottom-0 left-0 translate-y-1/2 font-mono text-[0.6875rem] tabular-nums text-muted" aria-hidden="true">
           0
         </span>
-        <div className="relative h-[180px] border-b border-ink border-t border-t-line md:h-[220px]">
+        <div className="relative h-[180px] border-b border-line-strong border-t border-dashed border-t-line md:h-[220px]">
           <svg
             className="absolute inset-0 h-full w-full"
             viewBox="0 0 100 100"
@@ -60,7 +61,7 @@ export default function ViewsChart({ buckets, unit }: { buckets: Bucket[]; unit:
                       width={slot * 0.76}
                       y={100 - height}
                       height={height}
-                      className={active === index ? "fill-ink" : "fill-accent"}
+                      className={active === index ? "fill-accent-2" : "fill-accent"}
                       shapeRendering="crispEdges"
                     />
                   ) : null}
@@ -97,14 +98,14 @@ export default function ViewsChart({ buckets, unit }: { buckets: Bucket[]; unit:
       </div>
 
       <details className="mt-6 text-[0.8125rem]">
-        <summary className="inline-flex min-h-[44px] cursor-pointer items-center text-ink underline-offset-4 hover:underline">
+        <summary className="inline-flex min-h-[44px] cursor-pointer items-center text-fg underline-offset-4 hover:text-accent hover:underline">
           Show as table
         </summary>
         <div className="mt-2 max-h-[320px] overflow-auto">
           <table className="w-full min-w-[16rem] border-collapse text-left">
             <caption className="sr-only">{summary}</caption>
             <thead>
-              <tr className="border-b border-ink">
+              <tr className="border-b border-line-strong">
                 <th scope="col" className="eyebrow eyebrow-dense py-2 font-medium text-muted">
                   {unit === "hour" ? "Hour" : "Day"}
                 </th>

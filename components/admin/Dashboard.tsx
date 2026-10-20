@@ -29,7 +29,7 @@ import { downloadCsv, toCsv } from "@/lib/analytics/csv";
 import StatTable, { type Column } from "@/components/admin/StatTable";
 import ViewsChart from "@/components/admin/ViewsChart";
 import ContactsPanel from "@/components/admin/ContactsPanel";
-import { AdminButton, Notice, Section } from "@/components/admin/ui";
+import { AdminButton, Notice, Section, panelClass } from "@/components/admin/ui";
 
 const HOUR = 3600 * 1000;
 const RANGES = [
@@ -368,7 +368,7 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
   return (
     <div className="min-w-0">
       {/* Toolbar */}
-      <div className="mb-10 flex flex-col gap-4 border-y border-line py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className={`mb-10 flex flex-col gap-4 p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-between ${panelClass}`}>
         <div role="group" aria-label="Date range" className="flex flex-wrap gap-2">
           {RANGES.map((item) => (
             <button
@@ -377,7 +377,7 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
               aria-pressed={range === item.key}
               onClick={() => setRange(item.key)}
               className={`inline-flex min-h-[44px] items-center rounded-sharp border px-3 text-[0.8125rem] transition-colors ${
-                range === item.key ? "border-ink bg-ink text-paper" : "border-line text-ink hover:border-ink"
+                range === item.key ? "border-accent bg-accent text-canvas" : "border-line-strong bg-surface text-fg hover:border-fg/60"
               }`}
             >
               {item.label}
@@ -386,7 +386,7 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="mr-2 min-w-0 text-[0.8125rem] text-muted break-all">
-            Signed in as <span className="text-ink">{email}</span>
+            Signed in as <span className="text-fg">{email}</span>
           </span>
           <AdminButton onClick={() => void load(range)} disabled={loading}>
             {loading ? "Loading…" : "Refresh"}
@@ -421,11 +421,11 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
       {report ? (
         <div className={loading ? "opacity-60 transition-opacity" : "transition-opacity"} aria-busy={loading}>
           <Section number="01" title="Overview" id="overview">
-            <dl className="grid grid-cols-2 border-l border-t border-line lg:grid-cols-4">
+            <dl className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 lg:grid-cols-4">
               {kpis.map((item) => (
-                <div key={item.label} className="min-w-0 border-b border-r border-line p-4 md:p-5">
+                <div key={item.label} className={`min-w-0 p-4 md:p-5 ${panelClass}`}>
                   <dt className="eyebrow eyebrow-dense text-muted">{item.label}</dt>
-                  <dd className="mt-3 font-mono text-[clamp(1.25rem,1.05rem+0.8vw,1.75rem)] leading-none tracking-[-0.02em] tabular-nums break-words">
+                  <dd className="mt-3 font-mono text-[clamp(1.25rem,1.05rem+0.8vw,1.75rem)] leading-none tracking-[-0.02em] tabular-nums break-words text-fg">
                     {item.value}
                   </dd>
                   {item.note ? <dd className="mt-2 text-[0.75rem] text-muted">{item.note}</dd> : null}

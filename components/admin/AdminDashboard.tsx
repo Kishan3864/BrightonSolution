@@ -107,29 +107,29 @@ function SetupNotice() {
         <p>
           The dashboard needs the Firebase web API key at build time. Add it to <code>.env.local</code> and rebuild:
         </p>
-        <pre className="mt-3 overflow-x-auto border border-line bg-paper p-3 font-mono text-[0.75rem] text-ink">
+        <pre className="mt-3 overflow-x-auto rounded-sharp border border-line bg-canvas p-3 font-mono text-[0.75rem] text-fg">
           NEXT_PUBLIC_FIREBASE_API_KEY=your-web-api-key
         </pre>
       </Notice>
       <ol className="list-decimal space-y-2 pl-5 text-[0.875rem] text-muted">
         <li>
-          Firebase console → project <code className="font-mono text-ink">{firebaseConfig.projectId}</code> → Firestore
-          Database → Create database → keep the database ID <code className="font-mono text-ink">(default)</code> →
-          choose a location → Start in <strong className="font-medium text-ink">production mode</strong>. Never test
+          Firebase console → project <code className="font-mono text-fg">{firebaseConfig.projectId}</code> → Firestore
+          Database → Create database → keep the database ID <code className="font-mono text-fg">(default)</code> →
+          choose a location → Start in <strong className="font-medium text-fg">production mode</strong>. Never test
           mode: it leaves every enquiry publicly readable. Then run{" "}
-          <code className="font-mono text-ink">firebase deploy --only firestore</code> (security rules) before
+          <code className="font-mono text-fg">firebase deploy --only firestore</code> (security rules) before
           any build that writes to it goes live.
         </li>
         <li>
-          Project settings → Your apps → add a Web app and copy its <code className="font-mono text-ink">apiKey</code>.
+          Project settings → Your apps → add a Web app and copy its <code className="font-mono text-fg">apiKey</code>.
         </li>
         <li>Authentication → Sign-in method → enable Email/Password.</li>
         <li>Immediately after: Authentication → Settings → User actions → untick “Enable create (sign-up)”.</li>
         <li>
-          Only then: Authentication → Users → Add user <code className="font-mono text-ink">{ADMIN_EMAILS[0]}</code> (Add
+          Only then: Authentication → Users → Add user <code className="font-mono text-fg">{ADMIN_EMAILS[0]}</code> (Add
           user in the console still works with sign-up disabled). Sign in on this page and send the verification email
           from here.{" "}
-          <strong className="font-medium text-ink">
+          <strong className="font-medium text-fg">
             Never click a verification email you did not request from this page yourself.
           </strong>
         </li>
@@ -139,8 +139,8 @@ function SetupNotice() {
         </li>
         <li>
           Google Cloud console → APIs &amp; Services → Credentials → the browser key: restrict it to HTTP referrers (your
-          domain, <code className="font-mono text-ink">{firebaseConfig.projectId}.web.app</code> and{" "}
-          <code className="font-mono text-ink">{firebaseConfig.projectId}.firebaseapp.com</code>) and to the Identity
+          domain, <code className="font-mono text-fg">{firebaseConfig.projectId}.web.app</code> and{" "}
+          <code className="font-mono text-fg">{firebaseConfig.projectId}.firebaseapp.com</code>) and to the Identity
           Toolkit, Token Service and Cloud Firestore APIs.
         </li>
         <li>Billing → Budgets &amp; alerts: set a low monthly budget alert for the project.</li>
@@ -214,7 +214,7 @@ function VerifyEmail({
     <div className="max-w-[36rem] space-y-5">
       <Notice title="Verify the admin email address">
         The database rules only admit a verified admin email. Send a verification email to{" "}
-        <span className="break-all text-ink">{session.email}</span>, open the link it contains, then check again.
+        <span className="break-all text-fg">{session.email}</span>, open the link it contains, then check again.
       </Notice>
       <div aria-live="polite">
         {message ? (

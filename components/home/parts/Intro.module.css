@@ -1,0 +1,28 @@
+/* "Who we are" statement: each word brightens from muted to full text colour as
+   the statement scrolls up through the viewport. Progressive enhancement only:
+   without scroll-driven animation support, or under reduced motion, the words
+   simply render in the full text colour. Muted is 7:1 on the canvas, so the
+   statement stays readable at every point of the animation. */
+
+.statement {
+  view-timeline-name: --intro-statement;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .word {
+      color: var(--color-muted);
+      animation: lit linear both;
+      animation-timeline: --intro-statement;
+      /* Word p (0..1 through the sentence) lights over a short slice of the
+         statement's travel from the lower third of the viewport to the middle. */
+      animation-range: cover calc(18% + var(--p) * 30%) cover calc(24% + var(--p) * 30%);
+    }
+  }
+}
+
+@keyframes lit {
+  to {
+    color: var(--color-fg);
+  }
+}

@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { sendPasswordReset, signIn, type AuthSession } from "@/lib/firebase/auth";
-import { AdminButton, Notice, inputClass, labelClass } from "@/components/admin/ui";
+import { AdminButton, Notice, inputClass, labelClass, panelClass } from "@/components/admin/ui";
 
 const LOCKOUT_AFTER = 5;
 const LOCKOUT_MS = 30_000;
@@ -79,8 +79,8 @@ export default function LoginPanel({
   }
 
   return (
-    <div className="max-w-[26rem]">
-      <p className="mb-8 text-[0.9375rem] text-muted">Sign in with the administrator account to see visits and enquiries.</p>
+    <div className={`max-w-[28rem] p-[clamp(1.25rem,0.9rem+1.6vw,2rem)] ${panelClass}`}>
+      <p className="mb-6 text-[0.9375rem] leading-relaxed text-muted">Sign in with the administrator account to see visits and enquiries.</p>
 
       {/* One announcement per message: role="status"/"alert" on the notice itself, no extra live wrapper,
           and the error stays tied to the inputs through aria-describedby instead of stealing focus. */}
@@ -146,7 +146,7 @@ export default function LoginPanel({
             </AdminButton>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 pt-1">
+        <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">
           <AdminButton type="submit" variant="primary" disabled={busy || locked} className="min-w-[7.5rem]">
             {busy ? "Please wait…" : "Sign in"}
           </AdminButton>

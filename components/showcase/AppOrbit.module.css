@@ -1,0 +1,156 @@
+/* App orbit: ten icon links on a ring, CSS transforms only (no canvas).
+   The ring element turns one way and each icon turns back the other way at the
+   same rate, so icons stay upright. Pauses on hover and focus; still under
+   reduced motion (the animation only exists under no-preference). */
+
+/* The ring reveals names only on hover or focus, so it is for wide screens with a fine,
+   hovering pointer. Everywhere else (phones, touch tablets) the named tile list shows. */
+.orbit {
+  display: none;
+  container-type: inline-size;
+  position: relative;
+  width: min(100%, 34rem);
+  aspect-ratio: 1;
+  margin-inline: auto;
+}
+
+@media (min-width: 48rem) and (hover: hover) and (pointer: fine) {
+  .orbit {
+    display: block;
+  }
+
+  .list {
+    display: none;
+  }
+}
+
+/* Hairline circle through the icon centres. */
+.path {
+  position: absolute;
+  inset: calc(var(--icon) / 2);
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+}
+
+.orbit > * {
+  --icon: clamp(3.25rem, 12.5cqi, 4rem);
+}
+
+.core {
+  position: absolute;
+  inset: calc(var(--icon) + 0.875rem);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background-color: var(--color-surface);
+}
+
+/* All readouts share one cell; only the shown one is visible. */
+.readout {
+  grid-area: 1 / 1;
+  max-width: 72%;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.readout.isShown {
+  opacity: 1;
+  transform: none;
+}
+
+/* The turning element is the square inscribed in the orbit (inset (1 - 1/sqrt 2) / 2), so its
+   rotated box never reaches past the orbit. Slots are centred on it and placed in cqi of .orbit. */
+.ring {
+  position: absolute;
+  inset: 14.65%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--icon);
+  height: var(--icon);
+  margin: calc(var(--icon) / -2) 0 0 calc(var(--icon) / -2);
+  transform: rotate(calc(var(--i) * 1turn / var(--n))) translateY(calc(var(--icon) / 2 - 50cqi))
+    rotate(calc(var(--i) * -1turn / var(--n)));
+}
+
+.upright {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tile {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sharp, 0.75rem);
+  transition: transform 0.2s ease;
+}
+
+.icon {
+  width: 100% !important;
+  height: 100% !important;
+  transition: border-color 0.2s ease;
+}
+
+.tile:hover,
+.tile:focus-visible {
+  transform: translateY(-2px) scale(1.06);
+}
+
+.tile:hover .icon,
+.tile:focus-visible .icon {
+  border-color: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ring,
+  .upright {
+    animation: orbit-turn 120s linear infinite;
+  }
+
+  .upright {
+    animation-direction: reverse;
+  }
+
+  .orbit:hover .ring,
+  .orbit:hover .upright,
+  .orbit:focus-within .ring,
+  .orbit:focus-within .upright {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring,
+  .upright {
+    animation: none !important;
+  }
+
+  .tile,
+  .readout {
+    transition: none;
+  }
+
+  .tile:hover,
+  .tile:focus-visible {
+    transform: none;
+  }
+}
+
+@keyframes orbit-turn {
+  to {
+    transform: rotate(1turn);
+  }
+}

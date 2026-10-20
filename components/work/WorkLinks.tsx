@@ -3,10 +3,11 @@ import Icon from "@/components/ui/Icon";
 /* External links for project and Play Store destinations.
    Every link opens in a new tab with noopener/noreferrer, announces that to
    screen readers, and carries data-track hooks for the first-party click
-   tracker (closest("[data-track]")). Colours adapt inside .section-dark. */
+   tracker (closest("[data-track]")). Light text with a strong hairline underline;
+   hover turns the label and its underline orange. */
 
 const linkBase =
-  "group/link inline-flex min-h-[44px] items-center gap-2 text-[0.9375rem] font-medium tracking-tight text-ink underline decoration-line decoration-1 underline-offset-[7px] transition-colors duration-200 hover:text-accent hover:decoration-current [.section-dark_&]:text-paper [.section-dark_&]:decoration-line-dark [.section-dark_&]:hover:text-accent-soft";
+  "group/link inline-flex min-h-[44px] items-center gap-2 text-[0.9375rem] font-medium tracking-tight text-fg underline decoration-line-strong decoration-1 underline-offset-[7px] transition-colors duration-200 hover:text-accent hover:decoration-current";
 
 const arrow =
   "transition-transform duration-200 group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5 motion-reduce:transition-none";

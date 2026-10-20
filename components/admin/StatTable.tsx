@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { panelClass } from "@/components/admin/ui";
 
 export type Column<T> = {
   header: string;
@@ -8,7 +9,7 @@ export type Column<T> = {
   className?: string;
 };
 
-/** Hairline data table that scrolls horizontally inside its own box on narrow screens. */
+/** Data table on a raised panel; scrolls horizontally inside its own box on narrow screens. */
 export default function StatTable<T>({
   caption,
   columns,
@@ -25,7 +26,7 @@ export default function StatTable<T>({
   captionVisible?: boolean;
 }) {
   return (
-    <div className="min-w-0">
+    <div className={`min-w-0 px-4 pb-2 pt-4 sm:px-5 ${panelClass}`}>
       <div className="overflow-x-auto" tabIndex={rows.length ? 0 : undefined} role="region" aria-label={caption}>
         <table className="w-full min-w-[22rem] border-collapse text-left text-[0.8125rem]">
           <caption
@@ -36,7 +37,7 @@ export default function StatTable<T>({
             {caption}
           </caption>
           <thead>
-            <tr className="border-b border-ink">
+            <tr className="border-b border-line-strong">
               {columns.map((column) => (
                 <th
                   key={column.header}
@@ -50,14 +51,14 @@ export default function StatTable<T>({
           </thead>
           <tbody>
             {rows.length === 0 ? (
-              <tr className="border-b border-line">
+              <tr>
                 <td colSpan={columns.length} className="py-4 text-muted">
                   {empty}
                 </td>
               </tr>
             ) : (
               rows.map((row, index) => (
-                <tr key={rowKey(row, index)} className="border-b border-line align-top">
+                <tr key={rowKey(row, index)} className="border-b border-line align-top last:border-b-0">
                   {columns.map((column) => (
                     <td
                       key={column.header}

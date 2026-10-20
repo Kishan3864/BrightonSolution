@@ -1,0 +1,80 @@
+/* A small fanned stack of three real project screenshots.
+   Each card sets --x (sideways offset) and --r (rotation); the resting state is
+   the fan itself, so without scroll-driven animation support, or with reduced
+   motion, the stack simply sits fanned. Where supported, the cards open from a
+   closed pile into the fan as the stack enters the viewport (CSS view() timeline). */
+
+.fan {
+  position: relative;
+  aspect-ratio: 16 / 8.6;
+  isolation: isolate;
+}
+
+.card {
+  position: absolute;
+  bottom: 10%;
+  left: 19%;
+  width: 62%;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-card);
+  background-color: var(--color-surface-2);
+  box-shadow: 0 28px 56px -28px rgba(5, 6, 9, 0.85);
+  transform-origin: 50% 100%;
+  transform: translateX(var(--x, 0)) translateY(var(--y, 0)) rotate(var(--r, 0deg));
+}
+
+.card > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top;
+}
+
+.left {
+  --x: -20%;
+  --y: -2%;
+  --r: -8deg;
+  z-index: 1;
+}
+
+.right {
+  --x: 20%;
+  --y: -2%;
+  --r: 8deg;
+  z-index: 2;
+}
+
+.front {
+  --x: 0%;
+  --y: -10%;
+  --r: 0deg;
+  z-index: 3;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .card {
+      animation: fan-open linear both;
+      animation-timeline: --fan;
+      animation-range: entry 10% cover 45%;
+    }
+
+    .fan {
+      view-timeline-name: --fan;
+    }
+  }
+}
+
+@keyframes fan-open {
+  from {
+    transform: translateX(0) translateY(6%) rotate(0deg);
+  }
+
+  to {
+    transform: translateX(var(--x, 0)) translateY(var(--y, 0)) rotate(var(--r, 0deg));
+  }
+}

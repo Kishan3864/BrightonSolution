@@ -4,6 +4,7 @@ import PageHero from "@/components/ui/PageHero";
 import SectionTitle from "@/components/ui/SectionTitle";
 import RetryButton from "@/components/system/RetryButton";
 import EmailLine from "@/components/system/EmailLine";
+import StepRail from "@/components/system/StepRail";
 
 export const metadata: Metadata = {
   title: "You are offline",
@@ -34,25 +35,13 @@ export default function OfflinePage() {
       <section aria-label="Connection tips" className="pb-[clamp(3.5rem,2rem+6vw,7.5rem)]">
         <Container>
           <SectionTitle variant="sub">Things to check</SectionTitle>
-          <div className="sm:mt-3 md:grid md:grid-cols-12 md:gap-8">
+          <div className="mt-6 md:mt-8 md:grid md:grid-cols-12 md:gap-8">
             <div className="min-w-0 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
-              <ol>
-                {tips.map((tip, index) => (
-                  <li
-                    key={tip}
-                    className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 border-b border-line py-4 sm:grid-cols-[3rem_minmax(0,1fr)]"
-                  >
-                    <span
-                      className="font-mono text-[0.8125rem] leading-[1.6rem] tracking-[0.08em] text-muted"
-                      aria-hidden="true"
-                    >
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="min-w-0">{tip}</span>
-                  </li>
-                ))}
-              </ol>
-              <EmailLine className="mt-8" lead="You can also reach us by email at" />
+              <StepRail
+                steps={tips.map((tip, index) => ({ number: String(index + 1).padStart(2, "0"), text: tip }))}
+                className="mt-2"
+              />
+              <EmailLine className="mt-10 border-t border-line pt-6" lead="You can also reach us by email at" />
             </div>
           </div>
         </Container>

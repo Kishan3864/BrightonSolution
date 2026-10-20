@@ -10,7 +10,7 @@ export default function JsonLd() {
     email: site.email,
     description: site.description,
     areaServed: "Worldwide",
-    sameAs: [site.playStoreUrl],
+    sameAs: [site.playStoreUrl, site.instagramUrl],
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",

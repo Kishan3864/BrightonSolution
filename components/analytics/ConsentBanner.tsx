@@ -14,6 +14,7 @@ import {
   storeConsent,
   type ConsentChoice,
 } from "@/lib/analytics/gtag";
+import styles from "./ConsentBanner.module.css";
 
 const measurementId = firebaseConfig.measurementId.trim();
 
@@ -70,30 +71,30 @@ export default function ConsentBanner() {
     <div
       role="region"
       aria-label="Analytics consent"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper text-ink"
+      className={`fixed inset-x-3 bottom-3 z-40 text-fg sm:inset-x-auto sm:bottom-5 sm:left-5 sm:w-[min(30rem,calc(100vw-2.5rem))] ${styles.panel}`}
     >
-      <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-3 px-[clamp(1rem,0.5rem+2.5vw,3rem)] py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-        <p className="min-w-0 text-[0.8125rem] leading-snug text-muted">
+      <div className="rounded-[var(--radius-card)] border border-line-strong bg-surface-2 p-4 shadow-[0_24px_48px_-20px_rgba(5,6,8,0.85)] sm:p-5">
+        <p className="text-[0.875rem] leading-relaxed text-muted">
           May we use Google Analytics to measure visits? Nothing is loaded unless you accept.{" "}
           <Link
             href="/privacy"
-            className="whitespace-nowrap text-ink underline decoration-1 underline-offset-4 hover:text-accent"
+            className="whitespace-nowrap text-fg underline decoration-1 underline-offset-4 transition-colors hover:text-accent"
           >
             Privacy policy
           </Link>
         </p>
-        <div className="flex shrink-0 gap-2">
+        <div className="mt-4 flex gap-2">
           <button
             type="button"
             onClick={() => decide("denied")}
-            className="inline-flex min-h-[44px] min-w-[96px] items-center justify-center rounded-sharp border border-ink px-4 text-[0.8125rem] font-medium text-ink transition-colors hover:bg-ink hover:text-paper"
+            className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-sharp border border-line-strong px-4 text-[0.875rem] font-medium text-fg transition-colors duration-200 hover:border-fg hover:bg-fg/5 sm:flex-none sm:min-w-[7rem]"
           >
             Decline
           </button>
           <button
             type="button"
             onClick={() => decide("granted")}
-            className="inline-flex min-h-[44px] min-w-[96px] items-center justify-center rounded-sharp bg-ink px-4 text-[0.8125rem] font-medium text-paper transition-colors hover:bg-accent"
+            className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-sharp bg-fg px-4 text-[0.875rem] font-medium text-canvas transition-colors duration-200 hover:bg-accent sm:flex-none sm:min-w-[7rem]"
           >
             Accept
           </button>

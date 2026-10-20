@@ -21,10 +21,10 @@ export default function RetryButton({ label = "Retry" }: { label?: string }) {
     <a
       href=""
       onClick={onClick}
-      className="group inline-flex min-h-[44px] items-center justify-center gap-3 whitespace-nowrap rounded-sharp bg-ink px-6 py-2.5 text-[0.9375rem] font-semibold tracking-tight text-paper transition-colors duration-200 hover:bg-accent"
+      className="group inline-flex min-h-[44px] items-center justify-center gap-2.5 whitespace-nowrap rounded-sharp bg-accent px-5 py-2.5 text-[0.9375rem] font-medium leading-none tracking-[-0.01em] text-canvas transition-[color,background-color,transform] duration-200 hover:bg-accent-2 active:translate-y-px"
     >
       <span>{label}</span>
-      <Icon name="arrow" size={18} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+      <Icon name="arrow" size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" />
     </a>
   );
 }

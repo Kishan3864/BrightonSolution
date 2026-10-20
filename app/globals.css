@@ -1,17 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #fafaf7;
-  --color-ink: #0a1220;
-  --color-accent: #2447f9;
-  --color-accent-soft: #7d93ff;
-  --color-muted: #5b6170;
-  --color-muted-dark: rgba(250, 250, 247, 0.68);
-  --color-line: #e3e3dd;
-  --color-line-dark: rgba(250, 250, 247, 0.14);
-  --radius-sharp: 2px;
+  /* Theme v2 "Sunrise": warm night canvas, light text, the logo’s sun orange as the one accent.
+     v1 (paper/ink/blue) is kept as git tag design-v1-editorial. */
+  --color-canvas: #0b0c10;
+  --color-surface: #13151b;
+  --color-surface-2: #1a1d25;
+  --color-fg: #f3f0ea;
+  --color-muted: #a2a5ae;
+  --color-line: rgba(243, 240, 234, 0.11);
+  --color-line-strong: rgba(243, 240, 234, 0.24);
+  --color-accent: #ed943b;
+  --color-accent-2: #edb43b;
+  --radius-sharp: 0.75rem;
+  --radius-card: 1.25rem;
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
     sans-serif;
+  --font-display: var(--font-bricolage), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
     monospace;
 }
@@ -30,8 +35,8 @@
   }
 
   body {
-    background-color: var(--color-paper);
-    color: var(--color-ink);
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
     font-family: var(--font-sans);
     font-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
     line-height: 1.6;
@@ -44,16 +49,12 @@
 
   ::selection {
     background-color: var(--color-accent);
-    color: var(--color-paper);
+    color: var(--color-canvas);
   }
 
   :focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
-  }
-
-  .section-dark :focus-visible {
-    outline-color: var(--color-paper);
   }
 
   svg {
@@ -85,6 +86,7 @@
 
 /* ---------- Fluid typography ---------- */
 .text-display {
+  font-family: var(--font-display);
   font-size: clamp(2.375rem, 1.6rem + 3.6vw, 4.75rem);
   line-height: 1.03;
   letter-spacing: -0.045em;
@@ -92,6 +94,7 @@
 }
 
 .text-h1 {
+  font-family: var(--font-display);
   font-size: clamp(2.125rem, 1.4rem + 3vw, 4rem);
   line-height: 1.05;
   letter-spacing: -0.04em;
@@ -99,6 +102,7 @@
 }
 
 .text-h2 {
+  font-family: var(--font-display);
   font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.5rem);
   line-height: 1.12;
   letter-spacing: -0.03em;
@@ -125,16 +129,17 @@
      .section-title        name of a section ("01 Services", "Who we are")
      .section-title--page  label above a page h1
      .section-title--sub   title of a block inside a section ("On Google Play")
-   Colour is inherited, so it follows .section-dark and text-* utilities. */
+   Colour is inherited, so it follows text-* utilities. */
 .section-title {
-  --title-rule: var(--color-ink);
+  --title-rule: var(--color-line-strong);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   font-size: clamp(1.75rem, 1.2rem + 2.7vw, 3.5rem);
   line-height: 1.05;
   letter-spacing: -0.04em;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: var(--font-display);
   overflow-wrap: break-word;
 }
 
@@ -166,18 +171,6 @@
   font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
   line-height: 1.15;
   letter-spacing: -0.03em;
-}
-
-.section-dark .section-title {
-  --title-rule: rgba(250, 250, 247, 0.45);
-}
-
-.section-dark .section-title--sub {
-  --title-rule: var(--color-line-dark);
-}
-
-.section-dark .section-title-num {
-  color: var(--color-accent-soft);
 }
 
 @media (min-width: 40rem) {
@@ -224,17 +217,13 @@
   padding-bottom: clamp(3.5rem, 2rem + 6vw, 7.5rem);
 }
 
-.section-dark {
-  background-color: var(--color-ink);
-  color: var(--color-paper);
+.section-alt {
+  background-color: var(--color-surface);
+  color: var(--color-fg);
 }
 
 .hairline {
   border-top: 1px solid var(--color-line);
-}
-
-.section-dark .hairline {
-  border-color: var(--color-line-dark);
 }
 
 /* Thin hairline frame for genuine project visuals (screenshots, app icons).
@@ -244,12 +233,7 @@
   overflow: hidden;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sharp);
-  background-color: #ffffff;
-}
-
-.section-dark .media-frame {
-  border-color: var(--color-line-dark);
-  background-color: rgba(250, 250, 247, 0.04);
+  background-color: var(--color-surface-2);
 }
 
 .media-frame > img {
@@ -281,59 +265,6 @@ html.js .reveal.is-visible {
 html.reveal-ready-fallback .reveal {
   opacity: 1;
   transform: none;
-}
-
-/* ---------- Hero art motion ---------- */
-@keyframes ha-dash {
-  from {
-    stroke-dashoffset: 0;
-  }
-  to {
-    stroke-dashoffset: -240;
-  }
-}
-
-@keyframes ha-drift {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(0, 6px, 0);
-  }
-}
-
-@keyframes ha-pulse {
-  from {
-    opacity: 0.35;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.hero-art .ha-dash {
-  stroke-dasharray: 6 10;
-  animation: ha-dash 30s linear infinite;
-}
-
-.hero-art .ha-drift {
-  animation: ha-drift 18s ease-in-out infinite alternate;
-}
-
-.hero-art .ha-pulse {
-  animation: ha-pulse 4s ease-in-out infinite alternate;
-}
-
-.hero-art .ha-delay-1 {
-  animation-delay: -1.5s;
-}
-
-.hero-art .ha-delay-2 {
-  animation-delay: -3s;
-}
-
-.hero-art .ha-delay-3 {
-  animation-delay: -6s;
 }
 
 /* ---------- Reduced motion ---------- */
@@ -370,4 +301,32 @@ html.reveal-ready-fallback .reveal {
   [data-no-print] {
     display: none !important;
   }
+}
+
+/* ---------- Hero sun (3D logo mark, flat SVG poster underneath) ---------- */
+.hero-sun {
+  position: relative;
+  aspect-ratio: 1;
+  touch-action: pan-y;
+}
+
+.hero-sun::before {
+  /* Warm light behind the mark: the one gradient on the site, in the logo's own colours. */
+  content: "";
+  position: absolute;
+  inset: -18%;
+  background: radial-gradient(closest-side, rgba(237, 148, 59, 0.28), rgba(237, 180, 59, 0.08) 55%, transparent 75%);
+  pointer-events: none;
+}
+
+.hero-sun-poster {
+  position: absolute;
+  inset: 12%;
+  width: 76%;
+  height: 76%;
+  transition: opacity 0.8s ease;
+}
+
+.hero-sun.is-3d-live .hero-sun-poster {
+  opacity: 0;
 }

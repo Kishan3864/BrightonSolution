@@ -17,28 +17,28 @@ type DestinationListProps = {
 };
 
 /**
- * Hairline list of useful destinations, shown on the system pages (404, error, offline).
- * No top rule of its own: the title band above it draws that line.
+ * Useful destinations as 12px-radius link rows on the raised surface, shown on the system pages
+ * (404 and similar). Phones show the label alone; from 640px the note sits in its own column.
  */
 export default function DestinationList({ items = coreDestinations, label = "Useful pages" }: DestinationListProps) {
   return (
     <nav aria-label={label}>
-      <ol>
+      <ol className="grid gap-2">
         {items.map((item, index) => (
-          <li key={item.href} className="border-b border-line">
+          <li key={item.href}>
             <Link
               href={item.href}
-              className="group grid min-h-[56px] grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-x-4 py-4 transition-colors duration-200 hover:text-accent sm:grid-cols-[3rem_minmax(0,12rem)_minmax(0,1fr)_auto]"
+              className="group grid min-h-[60px] grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-x-3 rounded-sharp border border-line bg-surface px-4 py-3 transition-[border-color,background-color,transform] duration-200 hover:border-line-strong hover:bg-surface-2 motion-safe:hover:-translate-y-0.5 sm:grid-cols-[2.75rem_minmax(0,11rem)_minmax(0,1fr)_auto] sm:gap-x-4 sm:px-5"
             >
-              <span className="font-mono text-[0.8125rem] tracking-[0.08em] text-muted" aria-hidden="true">
+              <span className="font-mono text-[0.8125rem] tracking-[0.08em] text-accent" aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <span className="min-w-0 font-medium tracking-tight">{item.label}</span>
+              <span className="min-w-0 font-medium tracking-tight text-fg">{item.label}</span>
               <span className="hidden min-w-0 truncate text-[0.9375rem] text-muted sm:block">{item.note}</span>
               <Icon
                 name="arrow"
                 size={18}
-                className="transition-transform duration-200 group-hover:translate-x-0.5"
+                className="text-muted transition-[color,transform] duration-200 group-hover:translate-x-0.5 group-hover:text-accent"
               />
             </Link>
           </li>

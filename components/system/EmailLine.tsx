@@ -12,7 +12,7 @@ export default function EmailLine({ lead = "Need help? Write to", className = ""
       {lead}{" "}
       <a
         href={`mailto:${site.email}`}
-        className="inline-flex min-h-[44px] items-center break-all font-medium text-ink underline decoration-line decoration-1 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+        className="inline-flex min-h-[44px] items-center break-all font-medium text-fg underline decoration-line-strong decoration-1 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
       >
         {site.email}
       </a>

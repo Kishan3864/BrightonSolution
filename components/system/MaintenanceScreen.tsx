@@ -38,13 +38,12 @@ export default function MaintenanceScreen({ standalone = false }: MaintenanceScr
               The website is briefly unavailable while we carry out planned work. Please check back a little later.
               Our team is still reachable by email in the meantime.
             </p>
-            <div className="hairline mt-[clamp(2rem,1.5rem+2vw,3rem)]" />
-            <dl className="mt-4 grid items-center gap-x-8 gap-y-1 sm:grid-cols-[10rem_minmax(0,1fr)]">
-              <dt className="eyebrow text-muted">Email</dt>
+            <dl className="mt-[clamp(2rem,1.5rem+2vw,3rem)] grid w-fit max-w-full items-center gap-x-6 gap-y-1 rounded-sharp border border-line bg-surface px-4 py-3 sm:grid-cols-[6rem_minmax(0,1fr)] sm:px-5">
+              <dt className="eyebrow text-accent">Email</dt>
               <dd className="min-w-0">
                 <a
                   href={`mailto:${site.email}`}
-                  className="inline-flex min-h-[44px] items-center break-all font-medium underline decoration-line decoration-1 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+                  className="inline-flex min-h-[44px] items-center break-all font-medium text-fg underline decoration-line-strong decoration-1 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
                 >
                   {site.email}
                 </a>

@@ -1,0 +1,80 @@
+/* The one marquee on the site: every tool name, drifting slowly.
+   Decorative (the grouped chips below carry the same names for assistive tech).
+   Pauses on hover and with its toggle button; static under reduced motion,
+   where the toggle has nothing to control and is hidden. */
+
+.root {
+  position: relative;
+}
+
+.marquee {
+  overflow: hidden;
+  /* Edge fade so names enter and leave softly, not cut at the container edge. */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+}
+
+.set {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+/* Pause/play, pinned to the strip's right edge inside the container gutter. */
+.toggle {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .track {
+    animation: drift 90s linear infinite;
+  }
+
+  .marquee:hover .track,
+  .paused .track {
+    animation-play-state: paused;
+  }
+
+  .root {
+    /* The toggle sits at the container's right edge; names fade out before reaching it. */
+    --toggle-right: calc(max(0px, (100% - 1320px) / 2) + clamp(1rem, 0.5rem + 2.5vw, 3rem));
+    --toggle-clear: calc(var(--toggle-right) + 2.75rem + 0.75rem);
+  }
+
+  .marquee {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 7%,
+      #000 calc(100% - var(--toggle-clear) - min(8rem, 10vw)),
+      transparent calc(100% - var(--toggle-clear))
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 7%,
+      #000 calc(100% - var(--toggle-clear) - min(8rem, 10vw)),
+      transparent calc(100% - var(--toggle-clear))
+    );
+  }
+
+  .toggle {
+    display: grid;
+    position: absolute;
+    top: 50%;
+    right: var(--toggle-right);
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+}
+
+@keyframes drift {
+  to {
+    transform: translateX(-50%);
+  }
+}

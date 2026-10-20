@@ -3,6 +3,7 @@ import Container from "@/components/ui/Container";
 import PageHero from "@/components/ui/PageHero";
 import SectionTitle from "@/components/ui/SectionTitle";
 import Button from "@/components/ui/Button";
+import StepRail from "@/components/system/StepRail";
 import { site } from "@/lib/site";
 import { nextSteps } from "@/lib/content/contact";
 
@@ -27,32 +28,17 @@ export default function ThankYouPage() {
           <SectionTitle as="h2" id="thank-you-next" variant="sub">
             What happens next
           </SectionTitle>
-          <div className="sm:mt-3 md:grid md:grid-cols-12 md:gap-8">
+          <div className="mt-6 md:mt-8 md:grid md:grid-cols-12 md:gap-8">
             <div className="min-w-0 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
-              <ol>
-                {nextSteps.map((step) => (
-                  <li
-                    key={step.number}
-                    className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 border-b border-line py-4 sm:grid-cols-[3rem_minmax(0,1fr)]"
-                  >
-                    <span
-                      className="font-mono text-[0.8125rem] leading-[1.6rem] tracking-[0.08em] text-muted"
-                      aria-hidden="true"
-                    >
-                      {step.number}
-                    </span>
-                    <span className="min-w-0 max-w-[60ch]">{step.text}</span>
-                  </li>
-                ))}
-              </ol>
-              <p className="mt-8 max-w-[56ch] text-muted">
+              <StepRail steps={nextSteps} className="mt-2" />
+              <p className="mt-10 max-w-[56ch] text-muted">
                 In the meantime, you can look through the products we have built or read how we work.
               </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-                <Button href="/work" variant="dark">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
+                <Button href="/work" variant="primary">
                   See our work
                 </Button>
-                <Button href="/services" variant="ghost">
+                <Button href="/services" variant="outline">
                   Explore services
                 </Button>
               </div>

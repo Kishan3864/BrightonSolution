@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import Container from "@/components/ui/Container";
+import Icon from "@/components/ui/Icon";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
 import SectionTitle from "@/components/ui/SectionTitle";
@@ -35,7 +36,7 @@ function renderInline(text: string): ReactNode[] {
   return nodes;
 }
 
-function Block({ block, opensSection }: { block: LegalBlock; opensSection: boolean }) {
+function Block({ block }: { block: LegalBlock }) {
   switch (block.type) {
     case "p":
       return <p>{renderInline(block.text)}</p>;
@@ -49,8 +50,7 @@ function Block({ block, opensSection }: { block: LegalBlock; opensSection: boole
       );
     case "terms":
       return (
-        // Straight under a section title, the title's rule is the top line of the list.
-        <dl className={opensSection ? "border-t-0! [&>div:first-child]:pt-0!" : undefined}>
+        <dl>
           {block.items.map((item) => (
             <div key={item.term}>
               <dt>{item.term}</dt>
@@ -62,80 +62,75 @@ function Block({ block, opensSection }: { block: LegalBlock; opensSection: boole
   }
 }
 
-
+/**
+ * A legal document: hero with its dates, the "In short" summary panel, then
+ * the full text beside a table of contents.
+ *   < 768px   the contents panel sits above the text
+ *   768px+    the contents panel is a sticky rail (4 of 12 columns, 3 from 1024px)
+ */
 export default function LegalPage({ doc }: { doc: LegalDocument }) {
   const summaryId = `${doc.slug}-summary`;
   const lastIndex = doc.sections.length - 1;
 
   return (
     <>
-      <PageHero eyebrow="Legal" title={doc.title} lead={doc.lead} id={`${doc.slug}-hero`}>
-        <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-3">
-          <div className="flex flex-wrap items-baseline gap-x-2">
+      <PageHero eyebrow="Legal" title={doc.title} lead={doc.lead} id={`${doc.slug}-hero`} divider={false}>
+        <dl className="mt-8 flex flex-wrap gap-2.5">
+          <div className="flex flex-wrap items-baseline gap-x-2 rounded-sharp border border-line bg-surface px-3.5 py-2.5">
             <dt className="eyebrow text-muted">Last updated:</dt>
-            <dd className="eyebrow tabular-nums text-ink">
+            <dd className="eyebrow tabular-nums text-fg">
               <time dateTime={doc.updatedISO}>{doc.updated}</time>
             </dd>
           </div>
-          <div className="flex flex-wrap items-baseline gap-x-2">
+          <div className="flex flex-wrap items-baseline gap-x-2 rounded-sharp border border-line bg-surface px-3.5 py-2.5">
             <dt className="eyebrow text-muted">Applies to:</dt>
-            <dd className="eyebrow text-ink">{legalHost}</dd>
+            <dd className="eyebrow text-fg">{legalHost}</dd>
           </div>
         </dl>
       </PageHero>
 
       <section
         id={summaryId}
-        className="section-dark py-[clamp(2.75rem,1.75rem+3.5vw,5rem)]"
+        className="pb-[clamp(3.5rem,2rem+5vw,6.5rem)]"
         aria-labelledby={`${summaryId}-title`}
       >
         <Container>
           <Reveal>
             <SectionTitle variant="page">In short</SectionTitle>
           </Reveal>
-          <div className="mt-[clamp(1.5rem,1rem+2vw,3rem)] grid gap-8 md:grid-cols-12 md:gap-8">
-            <Reveal className="min-w-0 md:col-span-4 lg:col-span-3">
-              <h2
-                id={`${summaryId}-title`}
-                className="text-h3 max-w-[18ch] text-balance"
-              >
+          <Reveal
+            delay={60}
+            className="mt-[clamp(1.25rem,1rem+1.5vw,2.25rem)] grid gap-8 rounded-[var(--radius-card)] border border-line bg-surface p-6 sm:p-8 lg:grid-cols-12 lg:gap-10 lg:p-10"
+          >
+            <div className="min-w-0 lg:col-span-4">
+              <h2 id={`${summaryId}-title`} className="text-h3 max-w-[20ch] text-balance">
                 {doc.summaryTitle}
               </h2>
-              <p className="mt-4 max-w-[34ch] text-[0.875rem] leading-relaxed text-muted-dark">
-                {doc.summaryNote}
-              </p>
-            </Reveal>
-            <ul className="grid gap-x-8 sm:grid-cols-2 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
-              {doc.summary.map((point, i) => (
-                <Reveal
-                  as="li"
-                  key={point.title}
-                  delay={80 + i * 60}
-                  className="min-w-0 border-b border-line-dark py-5 first:pt-0 sm:[&:nth-child(2)]:pt-0"
-                >
-                  <p className="font-medium text-paper">{point.title}</p>
-                  <p className="mt-1.5 max-w-[42ch] text-[0.875rem] leading-relaxed text-muted-dark">
-                    {point.text}
-                  </p>
-                </Reveal>
+              <p className="mt-3 max-w-[38ch] text-[0.875rem] leading-relaxed text-muted">{doc.summaryNote}</p>
+            </div>
+            <ul className="grid min-w-0 gap-x-8 gap-y-6 sm:grid-cols-2 lg:col-span-8">
+              {doc.summary.map((point) => (
+                <li key={point.title} className="flex min-w-0 items-start gap-3.5 border-t border-line pt-5">
+                  <Icon name="check" size={18} className="mt-[3px] text-accent" />
+                  <div className="min-w-0">
+                    <p className="font-medium leading-snug text-fg">{point.title}</p>
+                    <p className="mt-1.5 max-w-[44ch] text-[0.875rem] leading-relaxed text-muted">{point.text}</p>
+                  </div>
+                </li>
               ))}
             </ul>
-          </div>
+          </Reveal>
         </Container>
       </section>
 
-      <section
-        id={`${doc.slug}-full-text`}
-        className="py-section"
-        aria-label={`${doc.title}: full text`}
-      >
+      <section id={`${doc.slug}-full-text`} className="pb-section" aria-label={`${doc.title}: full text`}>
         <Container>
-          <div className="grid gap-12 md:grid-cols-12 md:gap-8">
-            <Reveal className="min-w-0 self-start md:col-span-4 lg:col-span-3 lg:sticky lg:top-28">
+          <div className="grid gap-12 md:grid-cols-12 md:gap-8 lg:gap-10">
+            <div className="min-w-0 self-start md:sticky md:top-24 md:col-span-4 lg:col-span-3">
               <LegalToc sections={doc.sections} label="On this page" />
-            </Reveal>
+            </div>
 
-            <div className="min-w-0 md:col-span-8 md:col-start-5 lg:col-span-9 lg:col-start-4">
+            <div className="min-w-0 md:col-span-8 lg:col-span-9">
               {doc.sections.map((section, i) => (
                 <section
                   key={section.id}
@@ -154,7 +149,7 @@ export default function LegalPage({ doc }: { doc: LegalDocument }) {
                     </SectionTitle>
                     <div className={`${styles.prose} mt-[clamp(1.25rem,1rem+1vw,2rem)]`}>
                       {section.blocks.map((block, j) => (
-                        <Block key={j} block={block} opensSection={j === 0} />
+                        <Block key={j} block={block} />
                       ))}
                     </div>
                   </Reveal>

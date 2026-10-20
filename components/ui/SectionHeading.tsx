@@ -19,7 +19,7 @@ export default function SectionHeading({
   className = "",
   id,
 }: SectionHeadingProps) {
-  const leadColor = dark ? "text-muted-dark" : "text-muted";
+  const leadColor = dark ? "text-muted" : "text-muted";
 
   return (
     <div className={className}>

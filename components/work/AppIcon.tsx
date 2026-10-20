@@ -6,9 +6,9 @@ type AppIconProps = {
   className?: string;
 };
 
-/** Play Store icon, decorative (the app name is always rendered beside it).
-    Rounded the way Google Play presents icons; a hairline keeps light icons
-    from dissolving into the page. */
+/** Play Store icon, decorative (the app name is always given beside it or as
+    the link's accessible name). A 12px-radius tile, like every small tile on
+    the site; a hairline keeps dark icons from dissolving into the canvas. */
 export default function AppIcon({ app, size, className = "" }: AppIconProps) {
   return (
     <img
@@ -19,7 +19,7 @@ export default function AppIcon({ app, size, className = "" }: AppIconProps) {
       loading="lazy"
       decoding="async"
       style={{ width: size, height: size }}
-      className={`block shrink-0 rounded-[22%] border border-line object-cover [.section-dark_&]:border-line-dark ${className}`.trim()}
+      className={`block shrink-0 rounded-sharp border border-line bg-surface-2 object-cover ${className}`.trim()}
     />
   );
 }

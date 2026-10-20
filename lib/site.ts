@@ -13,7 +13,8 @@ export type IconName =
   | "cloud"
   | "ai"
   | "design"
-  | "support";
+  | "support"
+  | "instagram";
 
 export type NavItem = { label: string; href: string };
 
@@ -58,6 +59,7 @@ export type SiteInfo = {
   locale: string;
   /** Google Play developer page for the company's Android apps. */
   playStoreUrl: string;
+  instagramUrl: string;
 };
 
 export const site: SiteInfo = {
@@ -71,6 +73,7 @@ export const site: SiteInfo = {
   tagline: "Software built properly, for companies that depend on it.",
   locale: "en_GB",
   playStoreUrl: "https://play.google.com/store/apps/developer?id=Brighton+Solution",
+  instagramUrl: "https://www.instagram.com/brighton.solution",
 };
 
 export const nav: NavItem[] = [

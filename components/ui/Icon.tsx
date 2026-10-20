@@ -98,6 +98,13 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M15 12h5" />
     </>
   ),
+  instagram: (
+    <>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <path d="M17.25 6.75h.01" strokeWidth={2.25} strokeLinecap="round" />
+    </>
+  ),
 };
 
 export default function Icon({ name, className = "", size = 24 }: IconProps) {

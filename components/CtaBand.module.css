@@ -1,0 +1,74 @@
+/* Closing panel. One warm radial glow in the logo colours, and the logo's sun, which rises a
+   little and turns its rays as the panel scrolls through the viewport (CSS scroll-driven
+   animation). Without support, or with reduced motion, the sun simply sits in place. */
+
+.card {
+  view-timeline: --cta-card block;
+}
+
+.glow {
+  /* Painted inside the card box (inset: 0) so nothing extends past the card or the viewport. */
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 22rem at 100% 100%,
+    rgba(237, 148, 59, 0.2),
+    rgba(237, 180, 59, 0.06) 48%,
+    transparent 75%
+  );
+}
+
+@media (min-width: 48rem) {
+  /* Centred on the sun in the right-hand column. */
+  .glow {
+    background: radial-gradient(
+      circle 22rem at 82% 58%,
+      rgba(237, 148, 59, 0.2),
+      rgba(237, 180, 59, 0.06) 48%,
+      transparent 75%
+    );
+  }
+}
+
+.rays {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .sun {
+      animation: cta-rise linear both;
+      animation-timeline: --cta-card;
+      animation-range: entry 5% entry 100%;
+    }
+
+    .rays {
+      animation: cta-turn linear both;
+      animation-timeline: --cta-card;
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+
+@keyframes cta-rise {
+  from {
+    opacity: 0.55;
+    transform: translateY(16%) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cta-turn {
+  from {
+    transform: rotate(-40deg);
+  }
+  to {
+    transform: rotate(40deg);
+  }
+}

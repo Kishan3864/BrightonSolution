@@ -18,10 +18,13 @@ type GlobalErrorProps = {
  * fonts or the layout itself could not load. Because it replaces the layout,
  * the layout's viewport export is gone too, so the viewport meta is set here.
  */
-const PAPER = "#FAFAF7";
-const INK = "#0A1220";
-const MUTED = "#5B6170";
-const LINE = "#E3E3DD";
+/* Theme v2 "Sunrise" tokens, copied from app/globals.css (CSS may not have loaded here). */
+const CANVAS = "#0b0c10";
+const FG = "#f3f0ea";
+const MUTED = "#a2a5ae";
+const LINE = "rgba(243, 240, 234, 0.11)";
+const LINE_STRONG = "rgba(243, 240, 234, 0.24)";
+const ACCENT = "#ed943b";
 const SANS =
   'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 
@@ -31,7 +34,7 @@ const control: React.CSSProperties = {
   justifyContent: "center",
   minHeight: 44,
   padding: "0 24px",
-  borderRadius: 2,
+  borderRadius: 12,
   fontFamily: SANS,
   fontSize: 15,
   fontWeight: 600,
@@ -49,7 +52,7 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
   }, [error]);
 
   return (
-    <html lang="en">
+    <html lang="en" style={{ background: CANVAS, colorScheme: "dark" }}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Something went wrong — BrightonSolution</title>
@@ -59,8 +62,9 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
         style={{
           margin: 0,
           minHeight: "100vh",
-          background: PAPER,
-          color: INK,
+          background: CANVAS,
+          color: FG,
+          colorScheme: "dark",
           fontFamily: SANS,
           WebkitFontSmoothing: "antialiased",
         }}
@@ -90,7 +94,7 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
             }}
           >
             <span>Something went wrong</span>
-            <span aria-hidden="true" style={{ flex: "1 1 120px", borderTop: `1px solid ${INK}` }} />
+            <span aria-hidden="true" style={{ flex: "1 1 120px", borderTop: `1px solid ${LINE_STRONG}` }} />
           </p>
           <h1
             style={{
@@ -106,21 +110,21 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
           <p style={{ margin: "20px 0 0", maxWidth: "56ch", fontSize: 17, lineHeight: 1.55, color: MUTED }}>
             This is usually temporary. Please try again, or return to the home page.
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginTop: 36 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 36 }}>
             <button
               type="button"
               onClick={() => retry()}
-              style={{ ...control, border: 0, background: INK, color: PAPER }}
+              style={{ ...control, border: 0, background: ACCENT, color: CANVAS }}
             >
               Try again
             </button>
-            <a href="/" style={{ ...control, border: `1px solid ${INK}`, background: "transparent", color: INK }}>
+            <a href="/" style={{ ...control, border: `1px solid ${LINE_STRONG}`, background: "transparent", color: FG }}>
               Go to home
             </a>
           </div>
           <p style={{ margin: "40px 0 0", fontSize: 15, lineHeight: 1.6, color: MUTED }}>
             If it keeps happening, write to{" "}
-            <a href="mailto:support@brightonsolution.com" style={{ color: INK, fontWeight: 600, wordBreak: "break-all" }}>
+            <a href="mailto:support@brightonsolution.com" style={{ color: FG, fontWeight: 600, wordBreak: "break-all" }}>
               support@brightonsolution.com
             </a>
           </p>
