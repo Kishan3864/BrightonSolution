@@ -77,12 +77,12 @@ const MIN_FILL_MS = 4000;
 const ERROR_TEXT = "text-[#ff8a7a]";
 
 const controlBase =
-  "block h-12 w-full min-w-0 rounded-sharp border bg-surface-2 px-3.5 text-base text-fg [color-scheme:dark] placeholder:text-muted/80 transition-colors duration-200 focus:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60";
+  "block h-11 w-full min-w-0 rounded-sharp sm:h-12 border bg-surface-2 px-3.5 text-base text-fg [color-scheme:dark] placeholder:text-muted/80 transition-colors duration-200 focus:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60";
 const controlBorder = "border-fg/35 hover:border-fg/60";
 const controlBorderInvalid = "border-[#ff8a7a] hover:border-[#ff8a7a]";
 
 const chipBase =
-  "relative inline-flex min-h-[44px] cursor-pointer select-none items-center gap-2 rounded-full border px-4 py-2 text-[0.875rem] leading-snug transition-[color,background-color,border-color] duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent";
+  "relative inline-flex min-h-[40px] max-w-full cursor-pointer select-none items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[0.8125rem] leading-snug sm:min-h-[44px] sm:gap-2 sm:px-4 sm:py-2 sm:text-[0.875rem] transition-[color,background-color,border-color] duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent";
 const chipOn = "border-accent bg-accent/[0.14] text-fg";
 const chipOff = "border-line-strong text-muted hover:border-fg/60 hover:text-fg";
 
@@ -157,7 +157,7 @@ function AlertIcon() {
 function FieldError({ id, error }: { id: string; error?: string }) {
   if (!error) return null;
   return (
-    <p id={id} className={`mt-2 flex items-start gap-2 text-sm leading-relaxed ${ERROR_TEXT}`}>
+    <p id={id} className={`mt-2 flex items-start gap-2 text-[0.8125rem] leading-relaxed sm:text-sm ${ERROR_TEXT}`}>
       <AlertIcon />
       <span>{error}</span>
     </p>
@@ -183,10 +183,10 @@ function ChoiceGroup({
   const describedBy = [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(" ");
   return (
     <fieldset id={id} className="m-0 min-w-0 border-0 p-0" aria-describedby={describedBy || undefined} tabIndex={-1}>
-      <legend className="float-left mr-3 flex min-h-9 items-center p-0 text-[0.9375rem] font-medium text-fg">{legend}</legend>
+      <legend className="float-left mr-3 flex min-h-9 items-center p-0 text-[0.875rem] font-medium text-fg sm:text-[0.9375rem]">{legend}</legend>
       {aside ? <div className="float-right">{aside}</div> : null}
       {hint ? (
-        <p id={`${id}-hint`} className="clear-both mt-1 text-sm text-muted">
+        <p id={`${id}-hint`} className="clear-both mt-0.5 text-[0.8125rem] text-muted sm:mt-1 sm:text-sm">
           {hint}
         </p>
       ) : null}
@@ -384,32 +384,32 @@ export default function LeadForm() {
     const firstName = values.name.trim().split(/\s+/)[0] ?? "";
     return (
       <div ref={rootRef} role="status" aria-live="polite" className="py-2">
-        <span className="inline-flex size-14 items-center justify-center rounded-full bg-accent text-canvas">
-          <Icon name="check" size={28} />
+        <span className="inline-flex size-12 items-center justify-center rounded-full bg-accent text-canvas sm:size-14">
+          <Icon name="check" size={24} />
         </span>
         <h3
           ref={successRef}
           tabIndex={-1}
-          className="mt-6 max-w-[22ch] font-display text-[clamp(1.625rem,1.2rem+1.4vw,2.25rem)] font-medium leading-[1.1] tracking-[-0.03em] outline-offset-4"
+          className="mt-5 max-w-[22ch] font-display text-[1.375rem] sm:mt-6 sm:text-[clamp(1.625rem,1.2rem+1.4vw,2.25rem)] font-medium leading-[1.1] tracking-[-0.03em] outline-offset-4"
         >
           {copy.successTitle(firstName)}
         </h3>
-        <p className="mt-4 max-w-[50ch] text-base leading-relaxed text-muted">
+        <p className="mt-3 max-w-[50ch] text-[0.9375rem] leading-relaxed text-muted sm:mt-4 sm:text-base">
           {copy.successText(labelOf(values.contactPref, contactPrefs))}
         </p>
-        <ol className="mt-8 grid gap-4 border-t border-line pt-6">
+        <ol className="mt-6 grid gap-3.5 border-t border-line pt-5 sm:mt-8 sm:gap-4 sm:pt-6">
           {[
             "We study your answers and note any questions.",
             "You get a written plan: scope, fixed price and timeline.",
             "If it fits, we start with design. If not, you owe nothing.",
           ].map((line, index) => (
-            <li key={line} className="flex items-start gap-4 text-[0.9375rem] leading-relaxed">
+            <li key={line} className="flex items-start gap-3 text-[0.875rem] leading-relaxed sm:gap-4 sm:text-[0.9375rem]">
               <span className="font-mono text-sm tabular-nums text-accent">0{index + 1}</span>
               <span>{line}</span>
             </li>
           ))}
         </ol>
-        <p className="mt-8 text-sm text-muted">
+        <p className="mt-6 text-[0.8125rem] text-muted sm:mt-8 sm:text-sm">
           Something to add? Email{" "}
           <a href={`mailto:${site.email}`} className="text-fg underline decoration-1 underline-offset-4 hover:text-accent">
             {site.email}
@@ -451,7 +451,7 @@ export default function LeadForm() {
                 }`}
               />
               <span
-                className={`mt-2.5 flex items-center gap-1.5 font-mono text-[0.75rem] tracking-[0.06em] uppercase ${
+                className={`mt-2.5 flex items-center gap-1.5 font-mono text-[0.6875rem] tracking-[0.06em] uppercase sm:text-[0.75rem] ${
                   state === "todo" ? "text-muted" : "text-fg"
                 }`}
               >
@@ -471,7 +471,7 @@ export default function LeadForm() {
         onSubmit={handleSubmit}
         onFocus={handleEngage}
         onInput={handleEngage}
-        className="relative mt-8 min-w-0"
+        className="relative mt-6 min-w-0 sm:mt-8"
         aria-busy={sending || undefined}
       >
         {/* Honeypot: hidden from people, filled only by bots. */}
@@ -494,21 +494,23 @@ export default function LeadForm() {
         <h3
           ref={headingRef}
           tabIndex={-1}
-          className="font-display text-[clamp(1.375rem,1.1rem+0.9vw,1.75rem)] font-medium leading-[1.15] tracking-[-0.025em] outline-offset-4"
+          className="font-display text-[1.1875rem] font-medium leading-[1.2] sm:text-[clamp(1.375rem,1.1rem+0.9vw,1.75rem)] sm:leading-[1.15] tracking-[-0.025em] outline-offset-4"
         >
           {STEP_TITLES[step]}
         </h3>
 
         {step === 0 ? (
-          <div className="mt-6 grid gap-8">
+          <div className="mt-5 grid gap-7 sm:mt-6 sm:gap-8">
             <ChoiceGroup id="lf-group-projectTypes" legend="Choose everything that applies" error={errors.projectTypes}>
-              <div className="grid grid-cols-1 gap-2.5 min-[420px]:grid-cols-2">
+              {/* Phones: two compact columns (icon and check on top, the name below). sm and up: icon, name with
+                  its hint, then the check, side by side. Each part has its own grid cell, so nothing overlaps. */}
+              <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                 {projectTypes.map((option) => {
                   const on = values.projectTypes.includes(option.id);
                   return (
                     <label
                       key={option.id}
-                      className={`group relative flex min-h-[72px] cursor-pointer items-start gap-3 rounded-sharp border p-3.5 transition-[color,background-color,border-color] duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent ${
+                      className={`group relative grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-2.5 rounded-sharp border p-3 transition-[color,background-color,border-color] duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent sm:min-h-[72px] sm:p-3.5 ${
                         on ? "border-accent bg-accent/[0.1]" : "border-line-strong bg-surface-2/60 hover:border-fg/60"
                       }`}
                     >
@@ -521,25 +523,27 @@ export default function LeadForm() {
                         className="sr-only"
                       />
                       <span
-                        className={`inline-flex size-10 shrink-0 items-center justify-center rounded-sharp transition-colors duration-200 ${
+                        className={`col-start-1 row-start-1 inline-flex size-9 shrink-0 items-center justify-center rounded-sharp transition-colors duration-200 sm:size-10 ${
                           on ? "bg-accent text-canvas" : "bg-canvas text-accent"
                         }`}
                       >
-                        {option.icon ? <Icon name={option.icon} size={20} /> : null}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-[0.9375rem] font-medium leading-snug text-fg">{option.label}</span>
-                        {option.hint ? (
-                          <span className="mt-0.5 block text-[0.8125rem] leading-snug text-muted">{option.hint}</span>
-                        ) : null}
+                        {option.icon ? <Icon name={option.icon} size={18} /> : null}
                       </span>
                       <span
                         aria-hidden="true"
-                        className={`absolute right-3 top-3 inline-flex size-5 items-center justify-center rounded-full border transition-colors duration-200 ${
+                        className={`col-start-3 row-start-1 inline-flex size-5 items-center justify-center rounded-full border transition-colors duration-200 ${
                           on ? "border-accent bg-accent text-canvas" : "border-line-strong text-transparent"
                         }`}
                       >
                         <Icon name="check" size={12} />
+                      </span>
+                      <span className="col-span-3 row-start-2 min-w-0 sm:col-span-1 sm:col-start-2 sm:row-start-1">
+                        <span className="block text-[0.875rem] font-medium leading-snug break-words text-fg sm:text-[0.9375rem]">
+                          {option.label}
+                        </span>
+                        {option.hint ? (
+                          <span className="mt-0.5 hidden text-[0.8125rem] leading-snug text-muted sm:block">{option.hint}</span>
+                        ) : null}
                       </span>
                     </label>
                   );
@@ -568,7 +572,7 @@ export default function LeadForm() {
         ) : null}
 
         {step === 1 ? (
-          <div className="mt-6 grid gap-8">
+          <div className="mt-5 grid gap-7 sm:mt-6 sm:gap-8">
             <ChoiceGroup id="lf-group-features" legend="Features you need" hint="Optional. Pick any that sound right.">
               <div className="flex flex-wrap gap-2">
                 {features.map((option) => {
@@ -656,23 +660,23 @@ export default function LeadForm() {
         ) : null}
 
         {step === 2 ? (
-          <div className="mt-6 grid gap-5 sm:grid-cols-2">
+          <div className="mt-5 grid gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-5">
             <div className="min-w-0">
-              <label htmlFor="lf-name" className="mb-2 block text-sm font-medium text-fg">
+              <label htmlFor="lf-name" className="mb-1.5 block text-[0.8125rem] font-medium text-fg sm:mb-2 sm:text-sm">
                 Your name<span aria-hidden="true" className="ml-1 text-accent">*</span>
               </label>
               <input {...textControl("name")} type="text" autoComplete="name" aria-required="true" maxLength={LEAD_LIMITS.name} />
               <FieldError id="lf-name-error" error={errors.name} />
             </div>
             <div className="min-w-0">
-              <label htmlFor="lf-company" className="mb-2 block text-sm font-medium text-fg">
+              <label htmlFor="lf-company" className="mb-1.5 block text-[0.8125rem] font-medium text-fg sm:mb-2 sm:text-sm">
                 Business name <span className="font-normal text-muted">(optional)</span>
               </label>
               <input {...textControl("company")} type="text" autoComplete="organization" maxLength={LEAD_LIMITS.company} />
               <FieldError id="lf-company-error" error={errors.company} />
             </div>
             <div className="min-w-0">
-              <label htmlFor="lf-email" className="mb-2 block text-sm font-medium text-fg">
+              <label htmlFor="lf-email" className="mb-1.5 block text-[0.8125rem] font-medium text-fg sm:mb-2 sm:text-sm">
                 Email<span aria-hidden="true" className="ml-1 text-accent">*</span>
               </label>
               <input
@@ -687,7 +691,7 @@ export default function LeadForm() {
               <FieldError id="lf-email-error" error={errors.email} />
             </div>
             <div className="min-w-0">
-              <label htmlFor="lf-phone" className="mb-2 block text-sm font-medium text-fg">
+              <label htmlFor="lf-phone" className="mb-1.5 block text-[0.8125rem] font-medium text-fg sm:mb-2 sm:text-sm">
                 Phone or WhatsApp<span aria-hidden="true" className="ml-1 text-accent">*</span>
               </label>
               <input
@@ -699,7 +703,7 @@ export default function LeadForm() {
                 maxLength={LEAD_LIMITS.phone}
                 placeholder={currency === "INR" ? "+91" : "+"}
               />
-              <p id="lf-phone-hint" className="mt-2 text-[0.8125rem] text-muted">
+              <p id="lf-phone-hint" className="mt-1.5 text-[0.75rem] text-muted sm:mt-2 sm:text-[0.8125rem]">
                 With country code, for example +91 or +1.
               </p>
               <FieldError id="lf-phone-error" error={errors.phone} />
@@ -730,7 +734,7 @@ export default function LeadForm() {
             </div>
 
             <div className="min-w-0 sm:col-span-2">
-              <label htmlFor="lf-message" className="mb-2 block text-sm font-medium text-fg">
+              <label htmlFor="lf-message" className="mb-1.5 block text-[0.8125rem] font-medium text-fg sm:mb-2 sm:text-sm">
                 Anything else we should know? <span className="font-normal text-muted">(optional)</span>
               </label>
               <textarea
@@ -744,26 +748,26 @@ export default function LeadForm() {
           </div>
         ) : null}
 
-        <div className="mt-9 flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-7 flex flex-col-reverse gap-2.5 border-t border-line pt-5 sm:mt-9 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-6">
           {step > 0 ? (
             <button
               type="button"
               onClick={goBack}
               disabled={sending}
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-sharp px-4 text-[0.9375rem] font-medium text-muted transition-colors hover:text-fg disabled:opacity-60"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-sharp px-4 text-[0.875rem] font-medium text-muted sm:min-h-[48px] sm:text-[0.9375rem] transition-colors hover:text-fg disabled:opacity-60"
             >
               <Icon name="arrow" size={16} className="rotate-180" />
               {copy.back}
             </button>
           ) : (
-            <p className="text-sm text-muted">
+            <p className="text-center text-[0.8125rem] text-muted sm:text-left sm:text-sm">
               <span className="font-mono tabular-nums text-fg">3</span> short steps. About 2 minutes.
             </p>
           )}
           <button
             type="submit"
             disabled={sending}
-            className="group inline-flex min-h-[52px] w-full items-center justify-center gap-3 rounded-sharp bg-accent px-7 text-[1rem] font-semibold tracking-tight text-canvas transition-[background-color,transform] duration-200 hover:bg-accent-2 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:min-w-[13rem]"
+            className="group inline-flex min-h-[48px] w-full items-center justify-center gap-2.5 rounded-sharp bg-accent px-6 text-[0.9375rem] sm:min-h-[52px] sm:gap-3 sm:px-7 sm:text-[1rem] font-semibold tracking-tight text-canvas transition-[background-color,transform] duration-200 hover:bg-accent-2 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:min-w-[13rem]"
           >
             <span>{step < STEP_FIELDS.length - 1 ? copy.next : sending ? copy.sending : copy.submit}</span>
             <Icon name="arrow" size={18} className="transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -771,7 +775,7 @@ export default function LeadForm() {
         </div>
 
         {step === STEP_FIELDS.length - 1 ? (
-          <p className="mt-4 text-[0.8125rem] leading-relaxed text-muted">
+          <p className="mt-4 text-center text-[0.75rem] leading-relaxed text-muted sm:text-left sm:text-[0.8125rem]">
             By sending this form you agree to our{" "}
             <Link href="/privacy" target="_blank" className="text-fg underline decoration-1 underline-offset-4 hover:text-accent">
               Privacy Policy

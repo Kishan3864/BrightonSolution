@@ -35,7 +35,7 @@ export default function MobileCtaBar() {
         href="#brief"
         data-track="cta_click"
         data-track-label="launch_mobile_bar"
-        className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-sharp bg-accent px-5 text-[1rem] font-semibold tracking-tight text-canvas"
+        className="flex min-h-[48px] w-full items-center justify-center gap-2.5 rounded-sharp bg-accent px-5 text-[0.9375rem] font-semibold tracking-tight text-canvas"
       >
         {ctaLabel}
         <Icon name="arrow" size={18} />

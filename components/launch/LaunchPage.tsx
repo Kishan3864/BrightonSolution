@@ -25,10 +25,11 @@ import styles from "./launch.module.css";
 
 const showConsentSettings = firebaseConfig.measurementId.trim() !== "";
 
+/* Phones get slightly smaller controls and type (48px buttons, 15px labels); sm and up keep the full size. */
 const primaryButton =
-  "group inline-flex min-h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-sharp bg-accent px-6 text-[1rem] font-semibold tracking-tight text-canvas transition-[background-color,transform] duration-200 hover:bg-accent-2 active:translate-y-px";
+  "group inline-flex min-h-[48px] items-center justify-center gap-2.5 whitespace-nowrap rounded-sharp bg-accent px-5 text-[0.9375rem] font-semibold tracking-tight text-canvas transition-[background-color,transform] duration-200 hover:bg-accent-2 active:translate-y-px sm:min-h-[52px] sm:px-6 sm:text-[1rem]";
 const secondaryButton =
-  "inline-flex min-h-[52px] items-center justify-center gap-2 whitespace-nowrap rounded-sharp border border-line-strong px-6 text-[1rem] font-medium tracking-tight text-fg transition-[border-color,background-color] duration-200 hover:border-fg hover:bg-fg/5";
+  "inline-flex min-h-[48px] items-center justify-center gap-2 whitespace-nowrap rounded-sharp border border-line-strong px-5 text-[0.9375rem] font-medium tracking-tight text-fg transition-[border-color,background-color] duration-200 hover:border-fg hover:bg-fg/5 sm:min-h-[52px] sm:px-6 sm:text-[1rem]";
 
 function CtaLink({ label, track, className = "" }: { label: string; track: string; className?: string }) {
   return (
@@ -42,40 +43,44 @@ function CtaLink({ label, track, className = "" }: { label: string; track: strin
 /**
  * The private landing page (LAUNCH_PATH): one focused path from the promise to the brief form,
  * with the plans at the end. No site navigation or footer, so the only ways forward are the form
- * and the plan requests. Proof is the company's real, live work.
+ * and the plan requests. Proof is the company's real, live work. Built phone first: most visitors
+ * open the shared link on a phone, so phones get a calmer, slightly smaller type scale
+ * (launch.module.css scopes it to this page only).
  */
 export default function LaunchPage() {
   const stack = [getProject("recruitment-suite"), getProject("weekendcart"), getProject("flexypdf")];
 
   return (
     <LaunchProvider>
-      <LaunchHeader />
-      <Hero stack={stack} />
-      <Facts />
-      <Proof />
-      <HowItWorks />
-      <Brief />
-      <section id="plans" aria-labelledby="plans-title" className="scroll-mt-16 py-section">
-        <Container>
-          <Plans />
-          <p className="mt-6 text-[0.9375rem] text-muted">
-            {plansSection.custom}{" "}
-            <a
-              href="#brief"
-              data-track="cta_click"
-              data-track-label="launch_plans_custom"
-              className="font-medium text-fg underline decoration-1 underline-offset-4 transition-colors hover:text-accent"
-            >
-              {plansSection.customLink}
-            </a>
-            .
-          </p>
-        </Container>
-      </section>
-      <Faq />
-      <FinalCta />
-      <LaunchFooter />
-      <MobileCtaBar />
+      <div className={styles.root}>
+        <LaunchHeader />
+        <Hero stack={stack} />
+        <Facts />
+        <Proof />
+        <HowItWorks />
+        <Brief />
+        <section id="plans" aria-labelledby="plans-title" className="scroll-mt-14 py-section sm:scroll-mt-16">
+          <Container>
+            <Plans />
+            <p className="mt-6 text-[0.875rem] leading-relaxed text-muted sm:text-[0.9375rem]">
+              {plansSection.custom}{" "}
+              <a
+                href="#brief"
+                data-track="cta_click"
+                data-track-label="launch_plans_custom"
+                className="font-medium text-fg underline decoration-1 underline-offset-4 transition-colors hover:text-accent"
+              >
+                {plansSection.customLink}
+              </a>
+              .
+            </p>
+          </Container>
+        </section>
+        <Faq />
+        <FinalCta />
+        <LaunchFooter />
+        <MobileCtaBar />
+      </div>
     </LaunchProvider>
   );
 }
@@ -83,11 +88,11 @@ export default function LaunchPage() {
 function LaunchHeader() {
   return (
     <header className={`sticky top-0 z-50 border-b border-line ${styles.headerBar}`}>
-      <div className="mx-auto flex h-16 w-full max-w-[1320px] items-center justify-between gap-4 px-[clamp(1rem,0.5rem+2.5vw,3rem)]">
-        <a href="#top" className="inline-flex min-h-[44px] items-center" aria-label="BrightonSolution, back to top">
-          <Logo />
+      <div className="mx-auto flex h-14 w-full max-w-[1320px] items-center justify-between gap-3 px-[clamp(1rem,0.5rem+2.5vw,3rem)] sm:h-16">
+        <a href="#top" className="inline-flex min-h-[44px] min-w-0 items-center" aria-label="BrightonSolution, back to top">
+          <Logo sizeClassName="h-7 sm:h-9 md:h-10" />
         </a>
-        <nav aria-label="Page" className="flex items-center gap-1 sm:gap-3">
+        <nav aria-label="Page" className="flex shrink-0 items-center gap-1 sm:gap-3">
           <a
             href="#plans"
             className="hidden min-h-[44px] items-center px-3 text-[0.875rem] font-medium text-muted transition-colors hover:text-fg sm:inline-flex"
@@ -104,7 +109,7 @@ function LaunchHeader() {
             href="#brief"
             data-track="cta_click"
             data-track-label="launch_header_quote"
-            className="inline-flex min-h-[44px] items-center rounded-sharp bg-fg px-4 text-[0.875rem] font-semibold text-canvas transition-colors hover:bg-accent"
+            className="inline-flex min-h-[40px] items-center rounded-sharp bg-fg px-3.5 text-[0.8125rem] font-semibold whitespace-nowrap text-canvas transition-colors hover:bg-accent sm:min-h-[44px] sm:px-4 sm:text-[0.875rem]"
           >
             Free quote
           </a>
@@ -120,21 +125,21 @@ function Hero({ stack }: { stack: WebProject[] }) {
     <section
       id="hero"
       aria-labelledby="launch-title"
-      className="relative overflow-hidden pt-[clamp(2.5rem,1.25rem+4vw,5.5rem)] pb-[clamp(3rem,1.5rem+5vw,6rem)]"
+      className="relative overflow-hidden pt-[clamp(1.75rem,0.75rem+4vw,5.5rem)] pb-[clamp(2.5rem,1.25rem+5vw,6rem)]"
     >
       <span id="top" className="absolute top-0" aria-hidden="true" />
       <Container>
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
-          <div className="relative z-10 min-w-0 lg:col-span-6 xl:col-span-6">
+        <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-12 lg:gap-8">
+          <div className="relative z-10 min-w-0 lg:col-span-6">
             <p className="eyebrow text-accent">{launchHero.eyebrow}</p>
             <h1
               id="launch-title"
-              className="mt-5 max-w-[14ch] font-display text-[clamp(2.5rem,1.4rem+4.2vw,4.75rem)] font-medium leading-[1.02] tracking-[-0.045em] text-balance"
+              className="mt-4 max-w-[14ch] font-display text-[clamp(1.875rem,0.9rem+5vw,4.75rem)] font-medium leading-[1.04] tracking-[-0.04em] text-balance sm:mt-5"
             >
               {launchHero.title}
             </h1>
-            <p className="text-lead mt-6 max-w-[42ch] text-muted">{launchHero.lead}</p>
-            <div className="mt-9 flex flex-col gap-3 min-[460px]:flex-row min-[460px]:flex-wrap">
+            <p className="text-lead mt-4 max-w-[42ch] text-muted sm:mt-6">{launchHero.lead}</p>
+            <div className="mt-7 flex flex-col gap-2.5 min-[460px]:flex-row min-[460px]:flex-wrap sm:mt-9 sm:gap-3">
               <CtaLink label={launchHero.primary} track="launch_hero_quote" />
               <a href="#plans" data-track="cta_click" data-track-label="launch_hero_plans" className={secondaryButton}>
                 {launchHero.secondary}
@@ -174,14 +179,16 @@ function Facts() {
             <div
               key={fact.label}
               className={[
-                "flex min-w-0 flex-col-reverse justify-end border-line py-7 md:py-9",
-                index % 2 === 1 ? "border-l pl-5" : "",
+                "flex min-w-0 flex-col-reverse justify-end border-line py-5 sm:py-7 md:py-9",
+                index % 2 === 1 ? "border-l pl-4 sm:pl-5" : "pr-3",
                 index > 1 ? "border-t md:border-t-0" : "",
                 index > 0 ? "md:border-l md:pl-8" : "",
               ].join(" ")}
             >
-              <dt className="mt-2.5 max-w-[20ch] text-[0.9375rem] leading-snug text-muted">{fact.label}</dt>
-              <dd className="font-display text-[clamp(2.25rem,1.6rem+2.2vw,3.5rem)] font-medium leading-none tracking-[-0.04em] tabular-nums text-fg">
+              <dt className="mt-2 max-w-[20ch] text-[0.8125rem] leading-snug text-muted sm:mt-2.5 sm:text-[0.9375rem]">
+                {fact.label}
+              </dt>
+              <dd className="font-display text-[clamp(1.75rem,1.1rem+2.6vw,3.5rem)] font-medium leading-none tracking-[-0.04em] tabular-nums text-fg">
                 {fact.value}
               </dd>
             </div>
@@ -192,6 +199,9 @@ function Facts() {
   );
 }
 
+const arrowBadge =
+  "inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-line-strong text-muted transition-colors duration-300 group-hover:border-accent group-hover:text-accent sm:size-10";
+
 function ProofTile({ project, className = "", large = false }: { project: WebProject; className?: string; large?: boolean }) {
   return (
     <li className={`min-w-0 ${className}`.trim()}>
@@ -201,24 +211,24 @@ function ProofTile({ project, className = "", large = false }: { project: WebPro
         rel="noopener noreferrer"
         data-track="outbound"
         data-track-label={`launch_proof_${project.slug}`}
-        className="group flex h-full flex-col rounded-[var(--radius-card)] border border-line bg-surface p-3 transition-colors duration-300 hover:border-line-strong sm:p-4"
+        className="group flex h-full flex-col rounded-[var(--radius-card)] border border-line bg-surface p-2.5 transition-colors duration-300 hover:border-line-strong sm:p-4"
       >
         <ProjectMedia project={project} />
-        <span className="flex items-start justify-between gap-4 px-1 pt-4 pb-1">
+        <span className="flex items-start justify-between gap-3 px-1 pt-3 pb-0.5 sm:gap-4 sm:pt-4 sm:pb-1">
           <span className="min-w-0">
             <span
               className={`block font-display font-medium leading-tight tracking-[-0.025em] text-fg ${
-                large ? "text-[clamp(1.375rem,1.1rem+0.9vw,1.875rem)]" : "text-[1.25rem]"
+                large ? "text-[1.125rem] sm:text-[clamp(1.375rem,1.1rem+0.9vw,1.875rem)]" : "text-[1.0625rem] sm:text-[1.25rem]"
               }`}
             >
               {project.name}
             </span>
-            <span className="mt-1 block text-[0.875rem] text-muted">
+            <span className="mt-1 block text-[0.8125rem] leading-snug text-muted sm:text-[0.875rem]">
               {project.category}
               {large ? `. ${project.tagline}` : ""}
             </span>
           </span>
-          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-line-strong text-muted transition-colors duration-300 group-hover:border-accent group-hover:text-accent">
+          <span className={arrowBadge}>
             <Icon name="arrowUpRight" size={16} />
           </span>
         </span>
@@ -236,12 +246,12 @@ function Proof() {
           <h2 id="proof-title" className="text-h1 max-w-[20ch] text-balance">
             {proofSection.title}
           </h2>
-          <p className="text-lead mt-5 max-w-[56ch] text-muted">{proofSection.lead}</p>
+          <p className="text-lead mt-4 max-w-[56ch] text-muted sm:mt-5">{proofSection.lead}</p>
         </Reveal>
 
         {/* Phones: one column. md: two columns. lg: big FlexyPdf tile with the apps and WeekendCart beside it,
             then two half-width tiles. Five items, five cells. */}
-        <ul role="list" className="mt-[clamp(2.5rem,1.5rem+3vw,4rem)] grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+        <ul role="list" className="mt-[clamp(1.75rem,1rem+3vw,4rem)] grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-6">
           <ProofTile project={getProject("flexypdf")} large className="md:col-span-2 lg:col-span-4 lg:row-span-2" />
 
           <li className="min-w-0 lg:col-span-2">
@@ -251,9 +261,9 @@ function Proof() {
               rel="noopener noreferrer"
               data-track="play"
               data-track-label="launch_proof_play"
-              className="group flex h-full flex-col justify-between gap-6 rounded-[var(--radius-card)] border border-line bg-[radial-gradient(120%_90%_at_100%_0%,rgba(237,148,59,0.16),transparent_60%)] bg-surface p-5 transition-colors duration-300 hover:border-line-strong sm:p-6"
+              className="group flex h-full flex-col justify-between gap-5 rounded-[var(--radius-card)] border border-line bg-[radial-gradient(120%_90%_at_100%_0%,rgba(237,148,59,0.16),transparent_60%)] bg-surface p-4 transition-colors duration-300 hover:border-line-strong sm:gap-6 sm:p-6"
             >
-              <span className="grid grid-cols-5 gap-2.5">
+              <span className="grid grid-cols-5 gap-2 sm:gap-2.5">
                 {apps.map((app) => (
                   <img
                     key={app.slug}
@@ -267,14 +277,14 @@ function Proof() {
                   />
                 ))}
               </span>
-              <span className="flex items-end justify-between gap-4">
-                <span>
-                  <span className="block font-display text-[1.25rem] font-medium leading-tight tracking-[-0.025em]">
+              <span className="flex items-end justify-between gap-3 sm:gap-4">
+                <span className="min-w-0">
+                  <span className="block font-display text-[1.0625rem] font-medium leading-tight tracking-[-0.025em] sm:text-[1.25rem]">
                     {apps.length} Android apps
                   </span>
-                  <span className="mt-1 block text-[0.875rem] text-muted">Published on Google Play</span>
+                  <span className="mt-1 block text-[0.8125rem] text-muted sm:text-[0.875rem]">Published on Google Play</span>
                 </span>
-                <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-line-strong text-muted transition-colors duration-300 group-hover:border-accent group-hover:text-accent">
+                <span className={arrowBadge}>
                   <Icon name="arrowUpRight" size={16} />
                 </span>
               </span>
@@ -300,20 +310,24 @@ function HowItWorks() {
             {howItWorks.title}
           </h2>
         </Reveal>
-        {/* Phones: a vertical rail. md: two by two. lg: one row joined by a line. */}
-        <ol className="relative mt-[clamp(2.5rem,1.5rem+3vw,4.5rem)] grid gap-10 md:grid-cols-2 md:gap-x-10 lg:grid-cols-4 lg:gap-8">
+        {/* Phones: a compact rail, number beside the text. md: two by two. lg: one row joined by a line. */}
+        <ol className="relative mt-[clamp(1.75rem,1rem+3vw,4.5rem)] grid gap-7 md:grid-cols-2 md:gap-x-10 md:gap-y-10 lg:grid-cols-4 lg:gap-8">
           <span aria-hidden="true" className="absolute top-6 right-[12%] left-6 hidden h-px bg-line-strong lg:block" />
           {howItWorks.steps.map((item, index) => (
-            <Reveal as="li" key={item.title} delay={index * 90} className="relative min-w-0">
-              <span className="relative z-10 inline-flex size-12 items-center justify-center rounded-full border border-accent bg-canvas font-mono text-[0.875rem] tabular-nums text-accent">
+            <Reveal as="li" key={item.title} delay={index * 90} className="relative flex min-w-0 gap-4 md:block">
+              <span className="relative z-10 inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-accent bg-canvas font-mono text-[0.8125rem] tabular-nums text-accent md:size-12 md:text-[0.875rem]">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <h3 className="text-h3 mt-6">{item.title}</h3>
-              <p className="mt-3 max-w-[34ch] text-[0.9375rem] leading-relaxed text-muted">{item.text}</p>
-              <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-line px-3 py-1 text-[0.8125rem] text-fg">
-                <Icon name="clock" size={14} className="text-accent" />
-                {item.meta}
-              </p>
+              <div className="min-w-0 pt-1.5 md:pt-0">
+                <h3 className="text-h3 md:mt-6">{item.title}</h3>
+                <p className="mt-1.5 max-w-[34ch] text-[0.875rem] leading-relaxed text-muted sm:mt-3 sm:text-[0.9375rem]">
+                  {item.text}
+                </p>
+                <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-line px-2.5 py-1 text-[0.75rem] text-fg sm:mt-4 sm:px-3 sm:text-[0.8125rem]">
+                  <Icon name="clock" size={14} className="text-accent" />
+                  {item.meta}
+                </p>
+              </div>
             </Reveal>
           ))}
         </ol>
@@ -322,39 +336,49 @@ function HowItWorks() {
   );
 }
 
+/** What the visitor gets: beside the heading from lg, under the form on phones and tablets. */
+function Promises({ className = "" }: { className?: string }) {
+  return (
+    <div className={className}>
+      <ul role="list" className="grid gap-3.5 sm:gap-5">
+        {briefSection.promises.map((item) => (
+          <li key={item.text} className="flex items-center gap-3 sm:gap-4">
+            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-sharp border border-line-strong bg-surface text-accent sm:size-11">
+              <Icon name={item.icon} size={18} />
+            </span>
+            <span className="min-w-0 text-[0.875rem] leading-snug text-fg sm:text-[1rem]">{item.text}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-6 flex max-w-[44ch] items-start gap-2.5 text-[0.8125rem] leading-relaxed text-muted sm:mt-9 sm:text-sm">
+        <Icon name="shield" size={16} className="mt-0.5 text-accent" />
+        <span className="min-w-0">{briefSection.privacy}</span>
+      </p>
+    </div>
+  );
+}
+
 function Brief() {
   return (
-    <section id="brief" aria-labelledby="brief-title" className="scroll-mt-16 py-section">
+    <section id="brief" aria-labelledby="brief-title" className="scroll-mt-14 py-section sm:scroll-mt-16">
       <Container>
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-x-12 xl:gap-x-16">
+        <div className="grid gap-7 sm:gap-10 lg:grid-cols-12 lg:gap-x-12 xl:gap-x-16">
           <div className="min-w-0 lg:col-span-5">
             <div className="lg:sticky lg:top-28">
               <p className="eyebrow text-accent">{briefSection.eyebrow}</p>
-              <h2 id="brief-title" className="text-h1 mt-5 max-w-[16ch] text-balance">
+              <h2 id="brief-title" className="text-h1 mt-4 max-w-[16ch] text-balance sm:mt-5">
                 {briefSection.title}
               </h2>
-              <p className="text-lead mt-5 max-w-[44ch] text-muted">{briefSection.lead}</p>
-              <ul role="list" className="mt-9 grid gap-5">
-                {briefSection.promises.map((item) => (
-                  <li key={item.text} className="flex items-center gap-4">
-                    <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-sharp border border-line-strong bg-surface text-accent">
-                      <Icon name={item.icon} size={20} />
-                    </span>
-                    <span className="text-[1rem] leading-snug text-fg">{item.text}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-9 flex max-w-[44ch] items-start gap-2.5 text-sm leading-relaxed text-muted">
-                <Icon name="shield" size={18} className="mt-px text-accent" />
-                {briefSection.privacy}
-              </p>
+              <p className="text-lead mt-4 max-w-[44ch] text-muted sm:mt-5">{briefSection.lead}</p>
+              <Promises className="mt-9 hidden lg:block" />
             </div>
           </div>
 
           <div className="min-w-0 lg:col-span-7">
-            <div className="rounded-[var(--radius-card)] border border-line-strong bg-surface p-5 shadow-[0_40px_120px_-48px_rgba(237,148,59,0.35)] sm:p-8 md:p-10">
+            <div className="rounded-[var(--radius-card)] border border-line-strong bg-surface p-4 shadow-[0_40px_120px_-48px_rgba(237,148,59,0.35)] min-[400px]:p-5 sm:p-8 md:p-10">
               <LeadForm />
             </div>
+            <Promises className="mt-8 lg:hidden" />
           </div>
         </div>
       </Container>
@@ -364,28 +388,28 @@ function Brief() {
 
 function Faq() {
   return (
-    <section id="faq" aria-labelledby="faq-title" className="scroll-mt-16 border-t border-line py-section">
+    <section id="faq" aria-labelledby="faq-title" className="scroll-mt-14 border-t border-line py-section sm:scroll-mt-16">
       <Container>
         {/* Phones: heading, then the questions. lg: heading in the left third, questions beside it. */}
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="grid gap-7 sm:gap-10 lg:grid-cols-12 lg:gap-12">
           <div className="min-w-0 lg:col-span-4">
             <h2 id="faq-title" className="text-h1 max-w-[12ch] text-balance">
               Questions before you start
             </h2>
-            <p className="mt-5 max-w-[36ch] text-muted">
+            <p className="mt-4 max-w-[36ch] text-[0.875rem] leading-relaxed text-muted sm:mt-5 sm:text-base">
               Something else on your mind? Write it in the form and we will answer it in your plan.
             </p>
           </div>
           <div className="min-w-0 lg:col-span-8">
             {faq.map((item) => (
               <details key={item.q} className="group border-b border-line first:border-t">
-                <summary className="flex min-h-[64px] cursor-pointer list-none items-center justify-between gap-6 py-5 text-[1.0625rem] font-medium leading-snug text-fg transition-colors hover:text-accent [&::-webkit-details-marker]:hidden">
-                  {item.q}
-                  <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-line-strong text-muted transition-transform duration-300 group-open:rotate-45 group-open:border-accent group-open:text-accent">
-                    <Icon name="plus" size={16} />
+                <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-4 py-4 text-[0.9375rem] font-medium leading-snug text-fg transition-colors hover:text-accent sm:min-h-[64px] sm:gap-6 sm:py-5 sm:text-[1.0625rem] [&::-webkit-details-marker]:hidden">
+                  <span className="min-w-0">{item.q}</span>
+                  <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-line-strong text-muted transition-transform duration-300 group-open:rotate-45 group-open:border-accent group-open:text-accent sm:size-9">
+                    <Icon name="plus" size={14} />
                   </span>
                 </summary>
-                <p className="max-w-[62ch] pb-6 text-[0.9375rem] leading-relaxed text-muted">{item.a}</p>
+                <p className="max-w-[62ch] pb-5 text-[0.875rem] leading-relaxed text-muted sm:pb-6 sm:text-[0.9375rem]">{item.a}</p>
               </details>
             ))}
           </div>
@@ -399,13 +423,13 @@ function FinalCta() {
   return (
     <section aria-labelledby="final-title" className="pb-section">
       <Container>
-        <div className="relative overflow-hidden rounded-[var(--radius-card)] border border-accent/40 bg-[radial-gradient(90%_140%_at_0%_100%,rgba(237,148,59,0.24),transparent_60%)] bg-surface px-6 py-[clamp(3rem,2rem+4vw,5.5rem)] sm:px-10 md:px-14">
+        <div className="relative overflow-hidden rounded-[var(--radius-card)] border border-accent/40 bg-[radial-gradient(90%_140%_at_0%_100%,rgba(237,148,59,0.24),transparent_60%)] bg-surface px-5 py-[clamp(2.25rem,1.5rem+4vw,5.5rem)] sm:px-10 md:px-14">
           <h2 id="final-title" className="text-h1 max-w-[16ch] text-balance">
             {finalCta.title}
           </h2>
-          <p className="text-lead mt-5 max-w-[44ch] text-muted">{finalCta.lead}</p>
-          <div className="mt-9">
-            <CtaLink label={ctaLabel} track="launch_final_quote" />
+          <p className="text-lead mt-4 max-w-[44ch] text-muted sm:mt-5">{finalCta.lead}</p>
+          <div className="mt-7 sm:mt-9">
+            <CtaLink label={ctaLabel} track="launch_final_quote" className="w-full min-[460px]:w-auto" />
           </div>
         </div>
       </Container>
@@ -415,18 +439,21 @@ function FinalCta() {
 
 function LaunchFooter() {
   return (
-    <footer className="border-t border-line pt-10 pb-28 md:pb-10">
+    <footer className="border-t border-line pt-8 pb-28 sm:pt-10 md:pb-10">
       <Container>
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between md:gap-6">
           <div className="flex flex-col gap-3">
-            <Logo />
-            <p className="text-[0.8125rem] text-muted">
+            <Logo sizeClassName="h-7 sm:h-9" />
+            <p className="text-[0.75rem] text-muted sm:text-[0.8125rem]">
               © {new Date().getFullYear()} {site.name}. Software development and IT services.
             </p>
           </div>
-          <ul role="list" className="flex flex-wrap items-center gap-x-6 gap-y-1 text-[0.8125rem]">
-            <li>
-              <a href={`mailto:${site.email}`} className="inline-flex min-h-[44px] items-center text-muted transition-colors hover:text-fg">
+          <ul role="list" className="flex flex-wrap items-center gap-x-5 gap-y-0 text-[0.8125rem] sm:gap-x-6">
+            <li className="min-w-0">
+              <a
+                href={`mailto:${site.email}`}
+                className="inline-flex min-h-[44px] items-center break-all text-muted transition-colors hover:text-fg"
+              >
                 {site.email}
               </a>
             </li>

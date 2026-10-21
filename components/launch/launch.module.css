@@ -1,4 +1,37 @@
-/* Private landing page: hero depth stack and the sticky phone CTA. */
+/* Private landing page: phone type scale, hero depth stack and the sticky phone CTA. */
+
+/* Most visitors open the shared link on a phone. Below 640px the page uses a calmer, slightly
+   smaller scale than the main site; the shared type classes are overridden for this page only. */
+@media (max-width: 39.99rem) {
+  .root :global(.text-h1) {
+    font-size: clamp(1.625rem, 1.05rem + 2.7vw, 2.125rem);
+    line-height: 1.1;
+    letter-spacing: -0.035em;
+  }
+
+  .root :global(.text-lead) {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  .root :global(.text-h3) {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .root :global(.eyebrow) {
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+  }
+
+  .root :global(.py-section) {
+    padding-block: 3rem;
+  }
+
+  .root :global(.pb-section) {
+    padding-bottom: 3rem;
+  }
+}
 
 /* Three real project screenshots stacked in depth. The tilt says "a body of shipped work", and
    settles flatter on hover so the front screenshot can be read. Static under reduced motion. */
@@ -90,7 +123,7 @@
   inset-inline: 0;
   bottom: 0;
   z-index: 40;
-  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+  padding: 0.625rem 1rem calc(0.625rem + env(safe-area-inset-bottom));
   background: rgba(11, 12, 16, 0.86);
   border-top: 1px solid var(--color-line);
   -webkit-backdrop-filter: blur(14px);

@@ -90,7 +90,7 @@ export function CurrencySwitch({ className = "" }: { className?: string }) {
           type="button"
           aria-pressed={currency === option.id}
           onClick={() => setCurrency(option.id)}
-          className={`inline-flex min-h-[36px] items-center rounded-full px-3.5 font-mono text-[0.75rem] tracking-[0.04em] transition-colors duration-200 ${
+          className={`inline-flex min-h-[32px] items-center rounded-full px-3 font-mono text-[0.6875rem] whitespace-nowrap sm:min-h-[36px] sm:px-3.5 sm:text-[0.75rem] tracking-[0.04em] transition-colors duration-200 ${
             currency === option.id ? "bg-fg text-canvas" : "text-muted hover:text-fg"
           }`}
         >

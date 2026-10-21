@@ -2,6 +2,8 @@ type LogoProps = {
   variant?: "dark" | "light";
   titled?: boolean;
   className?: string;
+  /** Height classes; the site default is 36px, 40px from md. */
+  sizeClassName?: string;
 };
 
 // Lettering ("Bright", "n" and the SOLUTION line): painted in currentColor so it follows the variant.
@@ -57,7 +59,7 @@ export function LogoMark({ className = "", raysClassName = "" }: { className?: s
 
 // `variant` stays in the props for callers written for the v1 light/dark logos. The v2 theme is
 // dark everywhere, so the lettering always uses the light foreground colour.
-export default function Logo({ titled = false, className = "" }: LogoProps) {
+export default function Logo({ titled = false, className = "", sizeClassName = "h-9 md:h-10" }: LogoProps) {
   const color = "text-fg";
   return (
     <svg
@@ -68,7 +70,7 @@ export default function Logo({ titled = false, className = "" }: LogoProps) {
       aria-hidden={titled ? undefined : "true"}
       role={titled ? "img" : undefined}
       focusable="false"
-      className={`block h-9 w-auto shrink-0 overflow-visible md:h-10 ${color} ${className}`.trim()}
+      className={`block w-auto shrink-0 overflow-visible ${sizeClassName} ${color} ${className}`.trim()}
     >
       {titled ? <title>BrightonSolution</title> : null}
       <g fill="currentColor">

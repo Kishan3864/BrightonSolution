@@ -23,40 +23,40 @@ export default function Plans() {
           <h2 id="plans-title" className="text-h1 max-w-[16ch] text-balance">
             {plansSection.title}
           </h2>
-          <p className="text-lead mt-5 max-w-[52ch] text-muted">{plansSection.lead}</p>
+          <p className="text-lead mt-4 max-w-[52ch] text-muted sm:mt-5">{plansSection.lead}</p>
         </div>
         <CurrencySwitch className="shrink-0" />
       </div>
 
       {/* Phones: one column, Growth first. From lg: three columns with Growth raised in the middle. */}
-      <ul role="list" className="mt-[clamp(2.5rem,1.5rem+3vw,4rem)] grid gap-4 lg:grid-cols-3 lg:items-stretch lg:gap-5">
+      <ul role="list" className="mt-[clamp(2.25rem,1.5rem+3vw,4rem)] grid gap-6 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 lg:items-stretch">
         {plans.map((plan) => {
           const featured = plan.recommended === true;
           return (
             <li
               key={plan.id}
-              className={`relative flex min-w-0 flex-col rounded-[var(--radius-card)] border p-6 sm:p-7 ${
+              className={`relative flex min-w-0 flex-col rounded-[var(--radius-card)] border p-5 sm:p-7 ${
                 featured
-                  ? "order-first border-accent bg-[linear-gradient(180deg,rgba(237,148,59,0.16),rgba(237,148,59,0.04)_42%,var(--color-surface)_100%)] shadow-[0_24px_80px_-32px_rgba(237,148,59,0.45)] lg:order-none lg:-my-4 lg:py-11"
+                  ? "order-first border-accent md:col-span-2 lg:col-span-1 bg-[linear-gradient(180deg,rgba(237,148,59,0.16),rgba(237,148,59,0.04)_42%,var(--color-surface)_100%)] shadow-[0_24px_80px_-32px_rgba(237,148,59,0.45)] lg:order-none lg:-my-4 lg:py-11"
                   : "border-line bg-surface"
               }`}
             >
               {featured ? (
-                <span className="absolute -top-3.5 left-6 inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 font-mono text-[0.6875rem] font-semibold tracking-[0.08em] text-canvas uppercase sm:left-7">
+                <span className="absolute -top-3 left-5 inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 font-mono text-[0.625rem] sm:-top-3.5 sm:px-3 sm:text-[0.6875rem] font-semibold tracking-[0.08em] text-canvas uppercase sm:left-7">
                   Recommended
                 </span>
               ) : null}
 
-              <h3 className="font-display text-[1.625rem] font-medium leading-none tracking-[-0.03em]">{plan.name}</h3>
-              <p className="mt-3 min-h-[3em] text-[0.9375rem] leading-snug text-muted">{plan.summary}</p>
+              <h3 className="font-display text-[1.375rem] font-medium leading-none tracking-[-0.03em] sm:text-[1.625rem]">{plan.name}</h3>
+              <p className="mt-2.5 text-[0.875rem] leading-snug text-muted sm:mt-3 sm:text-[0.9375rem] lg:min-h-[3em]">{plan.summary}</p>
 
-              <p className="mt-6">
-                <span className="block font-display text-[clamp(2.375rem,2rem+1.4vw,3rem)] font-medium leading-none tracking-[-0.04em] tabular-nums">
+              <p className="mt-5 sm:mt-6">
+                <span className="block font-display text-[clamp(2rem,1.6rem+1.8vw,3rem)] font-medium leading-none tracking-[-0.04em] tabular-nums">
                   {formatPrice(plan.price[currency], currency)}
                 </span>
-                <span className="mt-2 block text-sm text-muted">{plansSection.priceNote}</span>
+                <span className="mt-1.5 block text-[0.8125rem] text-muted sm:mt-2 sm:text-sm">{plansSection.priceNote}</span>
               </p>
-              <p className="mt-3 flex items-center gap-2 text-sm text-fg">
+              <p className="mt-3 flex items-center gap-2 text-[0.8125rem] text-fg sm:text-sm">
                 <Icon name="clock" size={16} className="text-accent" />
                 {plan.delivery}
               </p>
@@ -67,7 +67,7 @@ export default function Plans() {
                   trackLaunch({ type: "cta_click", label: `launch_plan_${plan.id}` });
                   setActive(plan);
                 }}
-                className={`group mt-7 inline-flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-sharp px-5 text-[0.9375rem] font-semibold tracking-tight transition-[background-color,border-color,color,transform] duration-200 active:translate-y-px ${
+                className={`group mt-5 inline-flex min-h-[48px] w-full items-center justify-center gap-2.5 rounded-sharp px-5 text-[0.9375rem] sm:mt-7 sm:min-h-[52px] font-semibold tracking-tight transition-[background-color,border-color,color,transform] duration-200 active:translate-y-px ${
                   featured
                     ? "bg-accent text-canvas hover:bg-accent-2"
                     : "border border-line-strong text-fg hover:border-fg hover:bg-fg/5"
@@ -77,31 +77,31 @@ export default function Plans() {
                 <Icon name="arrow" size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" />
               </button>
 
-              <div className="mt-7 border-t border-line pt-6">
+              <div className="mt-5 border-t border-line pt-5 sm:mt-7 sm:pt-6">
                 {plan.includesPrevious ? (
                   <p className="mb-3 text-[0.8125rem] font-medium text-fg">{plan.includesPrevious}</p>
                 ) : null}
-                <ul role="list" className="grid gap-3">
+                <ul role="list" className="grid gap-2.5 sm:gap-3">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3 text-[0.9375rem] leading-snug">
-                      <Icon name="check" size={18} className="mt-px text-accent" />
+                    <li key={feature} className="flex items-start gap-2.5 text-[0.875rem] leading-snug sm:gap-3 sm:text-[0.9375rem]">
+                      <Icon name="check" size={16} className="mt-0.5 text-accent" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
-                <p className="mt-6 text-[0.8125rem] text-muted">Best for: {plan.bestFor}</p>
+                <p className="mt-5 text-[0.75rem] leading-relaxed text-muted sm:mt-6 sm:text-[0.8125rem]">Best for: {plan.bestFor}</p>
               </div>
             </li>
           );
         })}
       </ul>
 
-      <div className="mt-[clamp(2.5rem,1.5rem+3vw,4rem)] rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6">
+      <div className="mt-[clamp(2rem,1.5rem+3vw,4rem)] rounded-[var(--radius-card)] border border-line bg-surface p-4 sm:p-6">
         <p className="text-sm font-medium text-fg">Every plan includes</p>
-        <ul role="list" className="mt-4 flex flex-wrap gap-x-7 gap-y-3">
+        <ul role="list" className="mt-3.5 grid gap-2.5 min-[420px]:grid-cols-2 sm:mt-4 sm:flex sm:flex-wrap sm:gap-x-7 sm:gap-y-3">
           {plansSection.included.map((item) => (
-            <li key={item} className="flex items-center gap-2 text-[0.9375rem] text-muted">
-              <Icon name="shield" size={18} className="text-accent" />
+            <li key={item} className="flex items-center gap-2 text-[0.8125rem] text-muted sm:text-[0.9375rem]">
+              <Icon name="shield" size={16} className="text-accent" />
               {item}
             </li>
           ))}
@@ -119,7 +119,7 @@ type DialogErrors = Partial<Record<keyof DialogValues, string>>;
 const emptyValues: DialogValues = { name: "", email: "", phone: "", message: "" };
 
 const inputClass =
-  "block h-12 w-full min-w-0 rounded-sharp border border-fg/35 bg-surface-2 px-3.5 text-base text-fg [color-scheme:dark] placeholder:text-muted/80 transition-colors duration-200 hover:border-fg/60 focus:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent aria-[invalid=true]:border-[#ff8a7a]";
+  "block h-11 w-full min-w-0 rounded-sharp border border-fg/35 sm:h-12 bg-surface-2 px-3.5 text-base text-fg [color-scheme:dark] placeholder:text-muted/80 transition-colors duration-200 hover:border-fg/60 focus:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent aria-[invalid=true]:border-[#ff8a7a]";
 
 function PlanDialog({ plan, onClose }: { plan: Plan | null; onClose: () => void }) {
   const { currency, openBrief } = useLaunch();
@@ -201,9 +201,9 @@ function PlanDialog({ plan, onClose }: { plan: Plan | null; onClose: () => void 
         // A click on the backdrop (the dialog element itself, outside the panel) closes it.
         if (event.target === dialogRef.current) close();
       }}
-      className="m-auto w-[min(100%-2rem,32rem)] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[var(--radius-card)] border border-line-strong bg-surface p-0 text-fg shadow-[0_40px_120px_-20px_rgba(0,0,0,0.7)] backdrop:bg-canvas/80 backdrop:backdrop-blur-sm"
+      className="m-auto w-[min(100%-1.5rem,32rem)] max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-[var(--radius-card)] border border-line-strong bg-surface p-0 text-fg shadow-[0_40px_120px_-20px_rgba(0,0,0,0.7)] backdrop:bg-canvas/80 backdrop:backdrop-blur-sm"
     >
-      <div className="relative p-6 sm:p-8">
+      <div className="relative p-4 min-[360px]:p-5 sm:p-8">
         <button
           type="button"
           onClick={close}
@@ -218,10 +218,10 @@ function PlanDialog({ plan, onClose }: { plan: Plan | null; onClose: () => void 
             <span className="inline-flex size-12 items-center justify-center rounded-full bg-accent text-canvas">
               <Icon name="check" size={24} />
             </span>
-            <h2 id="plan-dialog-title" className="mt-5 font-display text-[1.75rem] font-medium leading-[1.1] tracking-[-0.03em]">
+            <h2 id="plan-dialog-title" className="mt-5 pr-10 font-display text-[1.375rem] font-medium leading-[1.15] tracking-[-0.03em] sm:text-[1.75rem] sm:leading-[1.1]">
               {dialogCopy.successTitle}
             </h2>
-            <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted">{dialogCopy.successText}</p>
+            <p className="mt-2.5 text-[0.875rem] leading-relaxed text-muted sm:mt-3 sm:text-[0.9375rem]">{dialogCopy.successText}</p>
             <div className="mt-7 flex flex-col gap-3">
               <button
                 type="button"
@@ -245,13 +245,13 @@ function PlanDialog({ plan, onClose }: { plan: Plan | null; onClose: () => void 
           </div>
         ) : (
           <form noValidate onSubmit={submit} aria-busy={status === "sending" || undefined}>
-            <p className="font-mono text-[0.75rem] tracking-[0.08em] text-accent uppercase">
+            <p className="pr-10 font-mono text-[0.6875rem] tracking-[0.08em] text-accent uppercase sm:text-[0.75rem]">
               {plan.name} plan · {price}
             </p>
-            <h2 id="plan-dialog-title" className="mt-3 pr-10 font-display text-[1.75rem] font-medium leading-[1.1] tracking-[-0.03em]">
+            <h2 id="plan-dialog-title" className="mt-2.5 pr-10 font-display text-[1.375rem] font-medium leading-[1.15] tracking-[-0.03em] sm:mt-3 sm:text-[1.75rem] sm:leading-[1.1]">
               {dialogCopy.title(plan.name)}
             </h2>
-            <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted">{dialogCopy.lead}</p>
+            <p className="mt-2.5 text-[0.875rem] leading-relaxed text-muted sm:mt-3 sm:text-[0.9375rem]">{dialogCopy.lead}</p>
 
             <div aria-hidden="true" className="absolute -left-[9999px] top-0 h-px w-px overflow-hidden">
               <label htmlFor="pd-website">Website</label>
@@ -266,7 +266,7 @@ function PlanDialog({ plan, onClose }: { plan: Plan | null; onClose: () => void 
               />
             </div>
 
-            <div className="mt-6 grid gap-4">
+            <div className="mt-5 grid gap-3.5 sm:mt-6 sm:gap-4">
               {(
                 [
                   { field: "name", label: "Your name", type: "text", autoComplete: "name", inputMode: undefined },
@@ -275,7 +275,7 @@ function PlanDialog({ plan, onClose }: { plan: Plan | null; onClose: () => void 
                 ] as const
               ).map((item) => (
                 <div key={item.field}>
-                  <label htmlFor={`pd-${item.field}`} className="mb-2 block text-sm font-medium">
+                  <label htmlFor={`pd-${item.field}`} className="mb-1.5 block text-[0.8125rem] font-medium sm:mb-2 sm:text-sm">
                     {item.label}
                     <span aria-hidden="true" className="ml-1 text-accent">
                       *
@@ -305,7 +305,7 @@ function PlanDialog({ plan, onClose }: { plan: Plan | null; onClose: () => void 
                 </div>
               ))}
               <div>
-                <label htmlFor="pd-message" className="mb-2 block text-sm font-medium">
+                <label htmlFor="pd-message" className="mb-1.5 block text-[0.8125rem] font-medium sm:mb-2 sm:text-sm">
                   Your project in one line <span className="font-normal text-muted">(optional)</span>
                 </label>
                 <input
@@ -315,7 +315,7 @@ function PlanDialog({ plan, onClose }: { plan: Plan | null; onClose: () => void 
                   value={values.message}
                   onChange={(event) => update("message", event.target.value)}
                   disabled={status === "sending"}
-                  placeholder="For example: a booking app for my salon"
+                  placeholder="A booking app for my salon"
                   className={inputClass}
                 />
               </div>
@@ -324,7 +324,7 @@ function PlanDialog({ plan, onClose }: { plan: Plan | null; onClose: () => void 
             <button
               type="submit"
               disabled={status === "sending"}
-              className="group mt-7 inline-flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-sharp bg-accent px-5 text-[0.9375rem] font-semibold text-canvas transition-[background-color,transform] duration-200 hover:bg-accent-2 active:translate-y-px disabled:opacity-70"
+              className="group mt-6 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-sharp bg-accent px-4 text-[0.875rem] whitespace-nowrap min-[360px]:gap-2.5 min-[360px]:px-5 min-[360px]:text-[0.9375rem] sm:mt-7 sm:min-h-[52px] font-semibold text-canvas transition-[background-color,transform] duration-200 hover:bg-accent-2 active:translate-y-px disabled:opacity-70"
             >
               {status === "sending" ? "Sending…" : dialogCopy.submit(plan.name)}
               <Icon name="arrow" size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" />
