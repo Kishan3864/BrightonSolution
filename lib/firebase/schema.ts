@@ -7,8 +7,10 @@
  * - pageviews  one document per page view, written when the visitor leaves/hides the page
  * - events     CTA / outbound / mailto / Play Store / form interactions
  * - settings   admin-only dashboard settings: one document, settings/dashboard (DashboardSettings)
+ * - leads      one document per enquiry from the private landing page (LAUNCH_PATH in lib/site.ts):
+ *              the full project brief or a plan request (public create, admin read/update/delete)
  *
- * contacts, pageviews and events get `createdAt` from the server (REQUEST_TIME transform in
+ * contacts, leads, pageviews and events get `createdAt` from the server (REQUEST_TIME transform in
  * createDocument); never send it from the client. settings/dashboard carries a server `updatedAt`
  * instead (setDocument with serverTimestamp: "updatedAt"). Optional fields may be omitted; when sent
  * they must respect the types and limits below or the whole write is rejected. Integers must be
@@ -18,8 +20,9 @@
  * Exports: COLLECTIONS, ID_PATTERN, CONTACT_FIELDS, CONTACT_REQUIRED, CONTACT_LIMITS,
  * CONTACT_STATUSES, PAGEVIEW_FIELDS, PAGEVIEW_REQUIRED, PAGEVIEW_LIMITS, DEVICE_TYPES,
  * EVENT_FIELDS, EVENT_REQUIRED, EVENT_LIMITS, EVENT_TYPES, RETENTION_DAYS, retentionExpiry(),
- * SETTINGS_DOC_ID, MAX_EXCLUDED_VISITORS, record types (ContactRecord, PageviewRecord, EventRecord,
- * TrackDetail, DashboardSettings), clip(), cleanUrl().
+ * SETTINGS_DOC_ID, MAX_EXCLUDED_VISITORS, LEAD_FIELDS, LEAD_REQUIRED, LEAD_LIMITS, LEAD_KINDS,
+ * LEAD_STATUSES, LEAD_CURRENCIES, record types (ContactRecord, PageviewRecord, EventRecord,
+ * TrackDetail, DashboardSettings, LeadRecord), clip(), cleanUrl().
  */
 
 export const COLLECTIONS = {
@@ -27,6 +30,7 @@ export const COLLECTIONS = {
   pageviews: "pageviews",
   events: "events",
   settings: "settings",
+  leads: "leads",
 } as const;
 
 /** visitorId / sessionId format (rules: '^[A-Za-z0-9_-]{8,64}$'). */
@@ -260,6 +264,113 @@ export type DashboardSettings = {
   excludedVisitors: string[];
   /** Server time of the last save (REQUEST_TIME transform; the rules accept only request.time). */
   updatedAt?: Date;
+};
+
+/* ------------------------------------------------------------------- leads */
+
+export const LEAD_FIELDS = [
+  "kind",
+  "name",
+  "email",
+  "phone",
+  "company",
+  "projectTypes",
+  "features",
+  "stage",
+  "timeline",
+  "budget",
+  "plan",
+  "currency",
+  "price",
+  "contactPref",
+  "message",
+  "page",
+  "referrer",
+  "utmSource",
+  "utmMedium",
+  "utmCampaign",
+  "utmTerm",
+  "utmContent",
+  "userAgent",
+  "language",
+  "timeZone",
+  "visitorId",
+  "status",
+] as const;
+
+/** createdAt is also required but is set by the server. */
+export const LEAD_REQUIRED = ["kind", "name", "email", "phone", "status"] as const;
+
+/** Maximum string lengths (phone also has a minimum). price is a whole number in [0, LEAD_LIMITS.price]. */
+export const LEAD_LIMITS = {
+  name: 120,
+  email: 254,
+  phoneMin: 6,
+  phone: 40,
+  company: 160,
+  projectTypes: 400,
+  features: 800,
+  stage: 120,
+  timeline: 60,
+  budget: 60,
+  plan: 40,
+  price: 100_000_000,
+  contactPref: 40,
+  message: 3000,
+  page: 300,
+  referrer: 500,
+  utm: 100,
+  userAgent: 400,
+  language: 35,
+  timeZone: 64,
+  note: 2000,
+} as const;
+
+/** brief = the full landing-page form; plan = the short request sent from a plan's button. */
+export const LEAD_KINDS = ["brief", "plan"] as const;
+export type LeadKind = (typeof LEAD_KINDS)[number];
+
+export const LEAD_STATUSES = ["new", "contacted", "won", "lost", "spam"] as const;
+export type LeadStatus = (typeof LEAD_STATUSES)[number];
+
+export const LEAD_CURRENCIES = ["USD", "INR"] as const;
+export type LeadCurrency = (typeof LEAD_CURRENCIES)[number];
+
+export type LeadRecord = {
+  kind: LeadKind;
+  name: string;
+  email: string;
+  phone: string;
+  company?: string;
+  /** Labels of the chosen project types, joined with ", ". */
+  projectTypes?: string;
+  /** Labels of the chosen features, joined with ", ". */
+  features?: string;
+  stage?: string;
+  timeline?: string;
+  budget?: string;
+  /** Plan name ("Starter", "Growth", "Premium") or "Help me choose". */
+  plan?: string;
+  /** Currency the visitor saw the prices and budgets in. */
+  currency?: LeadCurrency;
+  /** Price of the chosen plan as shown to the visitor, in `currency`. */
+  price?: number;
+  contactPref?: string;
+  message?: string;
+  page?: string;
+  referrer?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmTerm?: string;
+  utmContent?: string;
+  userAgent?: string;
+  language?: string;
+  timeZone?: string;
+  visitorId?: string;
+  status: LeadStatus;
+  /** Admin-only follow-up note (never sent by the public page). */
+  note?: string;
 };
 
 /* ----------------------------------------------------------------- helpers */

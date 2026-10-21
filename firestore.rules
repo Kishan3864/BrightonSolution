@@ -76,6 +76,59 @@ service cloud.firestore {
         && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
     }
 
+    // ------------------------------------------------------------------ leads
+
+    // Enquiries from the private landing page (LAUNCH_PATH in lib/site.ts): kind 'brief' is the full
+    // project form, kind 'plan' the short request sent from a plan's button. Limits: LEAD_LIMITS.
+    function validLead(d) {
+      return d.keys().hasOnly(['kind', 'name', 'email', 'phone', 'company', 'projectTypes', 'features',
+                               'stage', 'timeline', 'budget', 'plan', 'currency', 'price', 'contactPref',
+                               'message', 'page', 'referrer', 'utmSource', 'utmMedium', 'utmCampaign',
+                               'utmTerm', 'utmContent', 'userAgent', 'language', 'timeZone', 'visitorId',
+                               'status', 'createdAt'])
+        && d.keys().hasAll(['kind', 'name', 'email', 'phone', 'status', 'createdAt'])
+        && d.kind in ['brief', 'plan']
+        && reqStr(d, 'name', 1, 120)
+        && reqStr(d, 'email', 3, 254)
+        && d.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && reqStr(d, 'phone', 6, 40)
+        && optStr(d, 'company', 160)
+        && optStr(d, 'projectTypes', 400)
+        && optStr(d, 'features', 800)
+        && optStr(d, 'stage', 120)
+        && optStr(d, 'timeline', 60)
+        && optStr(d, 'budget', 60)
+        && optStr(d, 'plan', 40)
+        && (!('currency' in d) || d.currency in ['USD', 'INR'])
+        && optInt(d, 'price', 0, 100000000)
+        && optStr(d, 'contactPref', 40)
+        && optStr(d, 'message', 3000)
+        && optStr(d, 'page', 300)
+        && optStr(d, 'referrer', 500)
+        && optStr(d, 'utmSource', 100)
+        && optStr(d, 'utmMedium', 100)
+        && optStr(d, 'utmCampaign', 100)
+        && optStr(d, 'utmTerm', 100)
+        && optStr(d, 'utmContent', 100)
+        && optStr(d, 'userAgent', 400)
+        && optStr(d, 'language', 35)
+        && optStr(d, 'timeZone', 64)
+        && optId(d, 'visitorId')
+        && d.status == 'new'
+        && d.createdAt == request.time;
+    }
+
+    match /leads/{id} {
+      allow create: if validLead(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'note', 'updatedAt'])
+        && request.resource.data.status in ['new', 'contacted', 'won', 'lost', 'spam']
+        && (!('note' in request.resource.data)
+            || (request.resource.data.note is string && request.resource.data.note.size() <= 2000))
+        && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
+    }
+
     // -------------------------------------------------------------- pageviews
 
     // Expiry field: about 26 months ahead (client sends now + 790 days; window allows clock skew).

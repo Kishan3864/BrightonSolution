@@ -1,0 +1,116 @@
+/* Private landing page: hero depth stack and the sticky phone CTA. */
+
+/* Three real project screenshots stacked in depth. The tilt says "a body of shipped work", and
+   settles flatter on hover so the front screenshot can be read. Static under reduced motion. */
+.visual {
+  position: relative;
+  perspective: 1600px;
+}
+
+.visual::before {
+  /* The site's one warm light, from the logo's own colours. */
+  content: "";
+  position: absolute;
+  inset: -14% -10%;
+  background: radial-gradient(closest-side, rgba(237, 148, 59, 0.24), rgba(237, 180, 59, 0.07) 55%, transparent 76%);
+  pointer-events: none;
+}
+
+.stack {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  transform-style: preserve-3d;
+  transform: rotateX(9deg) rotateY(-15deg) rotateZ(1.5deg);
+  transition: transform 0.9s cubic-bezier(0.2, 0.65, 0.2, 1);
+}
+
+.visual:hover .stack {
+  transform: rotateX(4deg) rotateY(-6deg) rotateZ(0.5deg);
+}
+
+.layer {
+  position: absolute;
+  width: 76%;
+  border-radius: var(--radius-card);
+  box-shadow: 0 40px 90px -36px rgba(0, 0, 0, 0.85);
+  animation: rise 1s cubic-bezier(0.2, 0.65, 0.2, 1) both;
+}
+
+.back {
+  top: 0;
+  right: 0;
+  transform: translateZ(-140px);
+  opacity: 0.5;
+  animation-delay: 0.05s;
+}
+
+.mid {
+  top: 20%;
+  right: 12%;
+  transform: translateZ(-60px);
+  opacity: 0.78;
+  animation-delay: 0.15s;
+}
+
+.front {
+  bottom: 0;
+  left: 0;
+  transform: translateZ(30px);
+  animation-delay: 0.25s;
+}
+
+@keyframes rise {
+  from {
+    translate: 0 28px;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .stack {
+    transform: rotateX(6deg) rotateY(-9deg) rotateZ(1deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack,
+  .visual:hover .stack {
+    transition: none;
+    transform: none;
+  }
+
+  .layer {
+    animation: none;
+  }
+}
+
+/* Phone-only CTA bar: slides up once the hero has scrolled away, hides again over the form. */
+.mobileBar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: rgba(11, 12, 16, 0.86);
+  border-top: 1px solid var(--color-line);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  transform: translateY(110%);
+  transition: transform 0.35s cubic-bezier(0.2, 0.65, 0.2, 1);
+}
+
+.mobileBar[data-shown="true"] {
+  transform: none;
+}
+
+@media (min-width: 48rem) {
+  .mobileBar {
+    display: none;
+  }
+}
+
+.headerBar {
+  background: rgba(11, 12, 16, 0.78);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}

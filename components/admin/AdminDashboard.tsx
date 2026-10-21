@@ -73,7 +73,7 @@ export default function AdminDashboard() {
     <div className="min-w-0">
       <div className="mb-10">
         <SectionTitle variant="page">Private · not indexed</SectionTitle>
-        <h1 className="text-h1 mt-[clamp(1.5rem,1rem+2vw,3rem)]">Site analytics</h1>
+        <h1 className="text-h1 mt-[clamp(1.5rem,1rem+2vw,3rem)]">Leads and analytics</h1>
       </div>
 
       {!configured ? (

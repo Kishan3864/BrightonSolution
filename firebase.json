@@ -47,7 +47,7 @@
         ]
       },
       {
-        "regex": "^/(?:(?:index|_not-found|services|work|about|contact|privacy|terms|maintenance|offline|thank-you|404)?(?:\\.html)?|(?:index|_not-found|services|work|about|contact|privacy|terms|maintenance|offline|thank-you)(?:\\.txt|/.+\\.txt)|__next\\..+\\.txt)$",
+        "regex": "^/(?:(?:index|_not-found|services|work|about|contact|privacy|terms|maintenance|offline|thank-you|start-project|404)?(?:\\.html)?|(?:index|_not-found|services|work|about|contact|privacy|terms|maintenance|offline|thank-you|start-project)(?:\\.txt|/.+\\.txt)|__next\\..+\\.txt)$",
         "headers": [
           {
             "key": "Cache-Control",
@@ -92,6 +92,41 @@
           {
             "key": "Cache-Control",
             "value": "public, max-age=604800"
+          }
+        ]
+      },
+      {
+        "source": "/start-project/opengraph-image",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "image/png"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=604800"
+          }
+        ]
+      },
+      {
+        "source": "/start-project",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
+      },
+      {
+        "source": "/start-project.@(html|txt)",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
           }
         ]
       },

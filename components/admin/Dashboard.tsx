@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { COLLECTIONS, RETENTION_DAYS, type ContactStatus } from "@/lib/firebase/schema";
+import { COLLECTIONS, RETENTION_DAYS, type ContactStatus, type LeadStatus } from "@/lib/firebase/schema";
 import { FirestoreError, purgeOlderThan, runQuery, updateDocument } from "@/lib/firebase/firestore-admin";
 import {
   bySession,
@@ -29,7 +29,10 @@ import { downloadCsv, toCsv } from "@/lib/analytics/csv";
 import StatTable, { type Column } from "@/components/admin/StatTable";
 import ViewsChart from "@/components/admin/ViewsChart";
 import ContactsPanel from "@/components/admin/ContactsPanel";
+import LeadsPanel, { type LeadDoc } from "@/components/admin/LeadsPanel";
 import { AdminButton, Notice, Section, panelClass } from "@/components/admin/ui";
+import Icon from "@/components/ui/Icon";
+import { LAUNCH_PATH } from "@/lib/site";
 
 const HOUR = 3600 * 1000;
 const RANGES = [
@@ -43,6 +46,11 @@ type RangeKey = (typeof RANGES)[number]["key"];
 const PAGE_SIZE = 5000;
 const MAX_ANALYTICS_DOCS = 10_000;
 const MAX_CONTACTS = 1000;
+const MAX_LEADS = 1000;
+/** New landing-page leads are checked this often while the dashboard is open (one read when nothing is new). */
+const LEADS_POLL_MS = 60_000;
+/** localStorage: time (ms) of the previous dashboard visit, to mark leads that arrived since. */
+const LEADS_SEEN_KEY = "bs_leads_seen_at";
 
 type Data = {
   since: Date;
@@ -50,9 +58,38 @@ type Data = {
   pageviews: PageviewDoc[];
   events: EventDoc[];
   contacts: ContactDoc[];
+  leads: LeadDoc[];
   truncated: string[];
   loadedAt: Date;
 };
+
+type LeadAlert = { id: string; name: string; plan: string };
+
+function newestLeadTime(leads: LeadDoc[]): number {
+  let newest = 0;
+  for (const lead of leads) {
+    const at = lead.createdAt instanceof Date ? lead.createdAt.getTime() : 0;
+    if (at > newest) newest = at;
+  }
+  return newest;
+}
+
+function readLastSeen(): number {
+  try {
+    const value = Number(window.localStorage.getItem(LEADS_SEEN_KEY));
+    return Number.isFinite(value) && value > 0 ? value : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function writeLastSeen(at: number) {
+  try {
+    window.localStorage.setItem(LEADS_SEEN_KEY, String(at));
+  } catch {
+    /* storage blocked: every lead stays unmarked */
+  }
+}
 
 export type DashboardProps = {
   email: string;
@@ -139,23 +176,26 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
         const span = RANGES.find((item) => item.key === key)?.ms ?? RANGES[1].ms;
         const until = new Date();
         const since = new Date(until.getTime() - span);
-        const [pageviews, events, contacts] = await Promise.all([
+        const [pageviews, events, contacts, leads] = await Promise.all([
           fetchAll<PageviewDoc>(COLLECTIONS.pageviews, since, MAX_ANALYTICS_DOCS, token),
           fetchAll<EventDoc>(COLLECTIONS.events, since, MAX_ANALYTICS_DOCS, token),
-          // Contacts are listed regardless of range so older unanswered enquiries stay visible.
+          // Contacts and leads are listed regardless of range so older unanswered enquiries stay visible.
           runQuery<ContactDoc>(COLLECTIONS.contacts, { limit: MAX_CONTACTS }, token),
+          runQuery<LeadDoc>(COLLECTIONS.leads, { limit: MAX_LEADS }, token),
         ]);
         if (request !== requestRef.current) return;
         const truncated: string[] = [];
         if (pageviews.truncated) truncated.push(`page views (latest ${formatNumber(MAX_ANALYTICS_DOCS)} records)`);
         if (events.truncated) truncated.push(`events (latest ${formatNumber(MAX_ANALYTICS_DOCS)} records)`);
         if (contacts.length >= MAX_CONTACTS) truncated.push(`contacts (latest ${formatNumber(MAX_CONTACTS)})`);
+        if (leads.length >= MAX_LEADS) truncated.push(`leads (latest ${formatNumber(MAX_LEADS)})`);
         setData({
           since,
           until,
           pageviews: pageviews.docs,
           events: events.docs,
           contacts,
+          leads,
           truncated,
           loadedAt: new Date(),
         });
@@ -200,6 +240,101 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
     })();
   }, [getToken]);
 
+  // --------------------------------------------------------------- lead alerts
+
+  // Time of the previous visit, read once; this visit becomes the new mark.
+  const [lastSeen] = useState(() => (typeof window === "undefined" ? 0 : readLastSeen()));
+  useEffect(() => {
+    writeLastSeen(Date.now());
+  }, []);
+
+  const [alerts, setAlerts] = useState<LeadAlert[]>([]);
+  const [notifyPermission, setNotifyPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  useEffect(() => {
+    if (typeof Notification !== "undefined") setNotifyPermission(Notification.permission);
+  }, []);
+
+  const dataRef = useRef<Data | null>(null);
+  dataRef.current = data;
+
+  // Checks for new leads every minute and announces them (toast, tab title, desktop notification).
+  // Restarts only when the dashboard first has data or the token source changes.
+  const hasData = data !== null;
+  useEffect(() => {
+    if (!hasData) return;
+    let cancelled = false;
+    const timer = window.setInterval(async () => {
+      const current = dataRef.current;
+      if (!current) return;
+      try {
+        const token = await getToken();
+        if (!token || cancelled) return;
+        const newest = newestLeadTime(current.leads);
+        const page = await runQuery<LeadDoc>(
+          COLLECTIONS.leads,
+          { since: newest ? new Date(newest) : undefined, limit: 100 },
+          token,
+        );
+        if (cancelled) return;
+        const known = new Set(current.leads.map((lead) => lead.id));
+        const fresh = page.filter((lead) => !known.has(lead.id));
+        if (fresh.length === 0) return;
+        setData((latest) => (latest ? { ...latest, leads: [...fresh, ...latest.leads] } : latest));
+        setAlerts((list) => [
+          ...fresh.map((lead) => ({ id: lead.id, name: lead.name || "Someone", plan: lead.plan || "no plan picked" })),
+          ...list,
+        ].slice(0, 4));
+        if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+          for (const lead of fresh.slice(0, 3)) {
+            try {
+              new Notification("New lead from the landing page", {
+                body: `${lead.name || "Someone"}: ${lead.plan || "no plan picked"}${lead.projectTypes ? `, ${lead.projectTypes}` : ""}`,
+                icon: "/icon-192.png",
+                tag: `lead-${lead.id}`,
+              });
+            } catch {
+              /* notifications blocked by the browser */
+            }
+          }
+        }
+      } catch {
+        /* a failed check is simply retried on the next tick */
+      }
+    }, LEADS_POLL_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [hasData, getToken]);
+
+  const newLeads = useMemo(() => (data?.leads ?? []).filter((lead) => (lead.status ?? "new") === "new").length, [data]);
+  const sinceLastVisit = useMemo(
+    () => (data?.leads ?? []).filter((lead) => lead.createdAt instanceof Date && lead.createdAt.getTime() > lastSeen).length,
+    [data, lastSeen],
+  );
+
+  // Tab title shows how many leads are waiting for a reply.
+  useEffect(() => {
+    const base = document.title.replace(/^\(\d+\)\s*/, "");
+    document.title = newLeads > 0 ? `(${newLeads}) ${base}` : base;
+    return () => {
+      document.title = document.title.replace(/^\(\d+\)\s*/, "");
+    };
+  }, [newLeads]);
+
+  const enableNotifications = useCallback(async () => {
+    if (typeof Notification === "undefined") return;
+    try {
+      setNotifyPermission(await Notification.requestPermission());
+    } catch {
+      /* the browser refused to ask */
+    }
+  }, []);
+
+  const goToLeads = useCallback(() => {
+    document.getElementById("leads")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   const report = useMemo(() => {
     if (!data) return null;
     const views = mergePageviews(data.pageviews);
@@ -211,12 +346,15 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
       .filter((event) => event.createdAt instanceof Date)
       .sort((a, b) => (b.createdAt as Date).getTime() - (a.createdAt as Date).getTime())
       .slice(0, 50);
+    const pages = topPages(views);
+    const landingRow = pages.find((row) => row.path === LAUNCH_PATH);
     return {
       views,
+      landing: { views: landingRow?.views ?? 0, visitors: landingRow?.visitors ?? 0 },
       kpis: computeKpis(views, data.events, contactsInRange),
       buckets: timeline(views, data.since, data.until),
       unit: (data.until.getTime() - data.since.getTime() <= 48 * HOUR ? "hour" : "day") as "hour" | "day",
-      pages: topPages(views),
+      pages,
       referrers: bySession(landings, (view) => referrerHost(view.referrer)),
       utm: bySession(
         landings.filter((view) => utmLabel(view)),
@@ -263,6 +401,101 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
     },
     [data, getToken, onExpired],
   );
+
+  const patchLead = useCallback((id: string, next: Partial<LeadDoc>) => {
+    setData((current) =>
+      current ? { ...current, leads: current.leads.map((lead) => (lead.id === id ? { ...lead, ...next } : lead)) } : current,
+    );
+  }, []);
+
+  const setLeadStatus = useCallback(
+    async (id: string, status: LeadStatus) => {
+      const before = data?.leads.find((lead) => lead.id === id);
+      if (!before) return;
+      setActionError(null);
+      setBusyId(id);
+      patchLead(id, { status, updatedAt: new Date() });
+      try {
+        const token = await getToken();
+        if (!token) {
+          onExpired();
+          return;
+        }
+        await updateDocument(COLLECTIONS.leads, id, { status }, token, ["status"], { serverTimestamp: "updatedAt" });
+      } catch (caught) {
+        patchLead(id, { status: before.status, updatedAt: before.updatedAt });
+        const described = describeError(caught);
+        if (described.expired) onExpired();
+        else setActionError(described.message);
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [data, getToken, onExpired, patchLead],
+  );
+
+  const saveLeadNote = useCallback(
+    async (id: string, note: string): Promise<boolean> => {
+      const lead = data?.leads.find((item) => item.id === id);
+      if (!lead) return false;
+      try {
+        const token = await getToken();
+        if (!token) {
+          onExpired();
+          return false;
+        }
+        // The rules check the status on every update, so it is sent along unchanged.
+        await updateDocument(
+          COLLECTIONS.leads,
+          id,
+          { note, status: lead.status ?? "new" },
+          token,
+          ["note", "status"],
+          { serverTimestamp: "updatedAt" },
+        );
+        patchLead(id, { note, updatedAt: new Date() });
+        return true;
+      } catch (caught) {
+        const described = describeError(caught);
+        if (described.expired) onExpired();
+        return false;
+      }
+    },
+    [data, getToken, onExpired, patchLead],
+  );
+
+  const exportLeads = useCallback(() => {
+    if (!data) return;
+    const csv = toCsv<LeadDoc>(data.leads, [
+      { header: "time", value: (l) => l.createdAt },
+      { header: "status", value: (l) => l.status },
+      { header: "kind", value: (l) => l.kind },
+      { header: "name", value: (l) => l.name },
+      { header: "email", value: (l) => l.email },
+      { header: "phone", value: (l) => l.phone },
+      { header: "company", value: (l) => l.company },
+      { header: "contactPref", value: (l) => l.contactPref },
+      { header: "plan", value: (l) => l.plan },
+      { header: "currency", value: (l) => l.currency },
+      { header: "price", value: (l) => l.price },
+      { header: "projectTypes", value: (l) => l.projectTypes },
+      { header: "features", value: (l) => l.features },
+      { header: "stage", value: (l) => l.stage },
+      { header: "timeline", value: (l) => l.timeline },
+      { header: "budget", value: (l) => l.budget },
+      { header: "message", value: (l) => l.message },
+      { header: "note", value: (l) => l.note },
+      { header: "utmSource", value: (l) => l.utmSource },
+      { header: "utmMedium", value: (l) => l.utmMedium },
+      { header: "utmCampaign", value: (l) => l.utmCampaign },
+      { header: "referrer", value: (l) => l.referrer },
+      { header: "language", value: (l) => l.language },
+      { header: "timeZone", value: (l) => l.timeZone },
+      { header: "updatedAt", value: (l) => l.updatedAt },
+      { header: "id", value: (l) => l.id },
+    ]);
+    downloadCsv(`leads-${stamp()}.csv`, csv);
+  }, [data]);
 
   const exportPageviews = useCallback(() => {
     if (!report || !data) return;
@@ -388,6 +621,14 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
           <span className="mr-2 min-w-0 text-[0.8125rem] text-muted break-all">
             Signed in as <span className="text-fg">{email}</span>
           </span>
+          <AdminButton
+            onClick={goToLeads}
+            aria-label={`Leads waiting for a reply: ${newLeads}`}
+            className={newLeads > 0 ? "border-accent text-accent" : ""}
+          >
+            <Icon name="bell" size={18} />
+            <span className="font-mono tabular-nums">{newLeads}</span>
+          </AdminButton>
           <AdminButton onClick={() => void load(range)} disabled={loading}>
             {loading ? "Loading…" : "Refresh"}
           </AdminButton>
@@ -397,7 +638,58 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
         </div>
       </div>
 
+      {/* New leads that arrived while the dashboard is open. */}
+      <div aria-live="polite" className="fixed right-4 bottom-4 z-[70] grid w-[min(100%-2rem,22rem)] gap-2">
+        {alerts.map((alert) => (
+          <div
+            key={alert.id}
+            role="status"
+            className="flex items-start gap-3 rounded-[var(--radius-card)] border border-accent/60 bg-surface-2 p-4 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.8)]"
+          >
+            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-canvas">
+              <Icon name="bell" size={18} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.875rem] font-medium text-fg">New lead: {alert.name}</p>
+              <p className="text-[0.8125rem] text-muted">{alert.plan}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  goToLeads();
+                  setAlerts((list) => list.filter((item) => item.id !== alert.id));
+                }}
+                className="mt-1 inline-flex min-h-[32px] items-center text-[0.8125rem] font-medium text-accent underline-offset-4 hover:underline"
+              >
+                View lead
+              </button>
+            </div>
+            <button
+              type="button"
+              aria-label="Dismiss"
+              onClick={() => setAlerts((list) => list.filter((item) => item.id !== alert.id))}
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-sharp text-muted hover:text-fg"
+            >
+              <Icon name="close" size={16} />
+            </button>
+          </div>
+        ))}
+      </div>
+
       <div aria-live="polite" className="mb-8 space-y-3">
+        {data && sinceLastVisit > 0 ? (
+          <div className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-accent/60 bg-accent/[0.08] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="flex items-center gap-3 text-[0.9375rem] text-fg">
+              <Icon name="bell" size={20} className="text-accent" />
+              <span>
+                <strong className="font-semibold">{formatNumber(sinceLastVisit)}</strong>{" "}
+                {sinceLastVisit === 1 ? "new lead" : "new leads"} since your last visit.
+              </span>
+            </p>
+            <AdminButton variant="primary" onClick={goToLeads}>
+              View leads
+            </AdminButton>
+          </div>
+        ) : null}
         {error ? (
           <Notice tone="error" title="Could not load data" role="alert">
             {error}
@@ -420,7 +712,37 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
 
       {report ? (
         <div className={loading ? "opacity-60 transition-opacity" : "transition-opacity"} aria-busy={loading}>
-          <Section number="01" title="Overview" id="overview">
+          <Section
+            number="01"
+            title="Landing page leads"
+            id="leads"
+            actions={
+              <>
+                {notifyPermission === "default" ? (
+                  <AdminButton onClick={() => void enableNotifications()}>
+                    <Icon name="bell" size={16} />
+                    Desktop alerts
+                  </AdminButton>
+                ) : null}
+                <AdminButton onClick={exportLeads} disabled={!data?.leads.length}>
+                  Export leads (CSV)
+                </AdminButton>
+              </>
+            }
+          >
+            <LeadsPanel
+              leads={data?.leads ?? []}
+              landing={report.landing}
+              rangeLabel={RANGES.find((item) => item.key === range)?.label ?? ""}
+              since={data?.since ?? new Date()}
+              lastSeen={lastSeen}
+              busyId={busyId}
+              onStatus={(id, status) => void setLeadStatus(id, status)}
+              onNote={saveLeadNote}
+            />
+          </Section>
+
+          <Section number="02" title="Overview" id="overview">
             <dl className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 lg:grid-cols-4">
               {kpis.map((item) => (
                 <div key={item.label} className={`min-w-0 p-4 md:p-5 ${panelClass}`}>
@@ -434,12 +756,12 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
             </dl>
           </Section>
 
-          <Section number="02" title={report.unit === "hour" ? "Page views by hour" : "Page views by day"} id="traffic">
+          <Section number="03" title={report.unit === "hour" ? "Page views by hour" : "Page views by day"} id="traffic">
             <ViewsChart buckets={report.buckets} unit={report.unit} />
           </Section>
 
           <Section
-            number="03"
+            number="04"
             title="Pages"
             id="pages"
             actions={
@@ -451,7 +773,7 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
             <StatTable caption="Top pages" columns={pageColumns} rows={report.pages} rowKey={(row) => row.path} />
           </Section>
 
-          <Section number="04" title="Acquisition" id="acquisition">
+          <Section number="05" title="Acquisition" id="acquisition">
             <div className="grid gap-10 lg:grid-cols-2">
               <StatTable
                 caption="Referrers (landing page of each session)"
@@ -471,7 +793,7 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
             </div>
           </Section>
 
-          <Section number="05" title="Audience" id="audience">
+          <Section number="06" title="Audience" id="audience">
             <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-3">
               <StatTable caption="Devices" captionVisible columns={countColumns("Device")} rows={report.devices} rowKey={(r) => r.label} />
               <StatTable caption="Browsers" captionVisible columns={countColumns("Browser")} rows={report.browsers} rowKey={(r) => r.label} />
@@ -481,7 +803,7 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
             </div>
           </Section>
 
-          <Section number="06" title="Clicks and events" id="events">
+          <Section number="07" title="Clicks and events" id="events">
             <div className="grid gap-10 xl:grid-cols-2">
               <StatTable
                 caption="Most clicked"
@@ -501,7 +823,7 @@ export default function Dashboard({ email, getToken, onExpired, onSignOut }: Das
           </Section>
 
           <Section
-            number="07"
+            number="08"
             title="Contact submissions"
             id="contacts"
             actions={

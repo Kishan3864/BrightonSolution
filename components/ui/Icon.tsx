@@ -105,6 +105,48 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M17.25 6.75h.01" strokeWidth={2.25} strokeLinecap="round" />
     </>
   ),
+  cart: (
+    <>
+      <path d="M3 4h2.5l2.2 10.5h10.6L20.5 7H6.6" />
+      <circle cx="9" cy="19" r="1.25" />
+      <circle cx="17" cy="19" r="1.25" />
+    </>
+  ),
+  phone: (
+    <path d="M5 4h4l1.5 4.5-2.25 1.5a11 11 0 0 0 5.75 5.75l1.5-2.25L20 15v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z" />
+  ),
+  shield: (
+    <>
+      <path d="M12 3l7.5 3v5.5c0 4.6-3.1 8.2-7.5 9.5-4.4-1.3-7.5-4.9-7.5-9.5V6L12 3z" />
+      <path d="M8.75 12l2.25 2.25 4.25-4.5" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15L6 16.5z" />
+      <path d="M10 20.5h4" />
+    </>
+  ),
+  chat: (
+    <>
+      <path d="M4 5h16v11H9l-5 4V5z" />
+      <path d="M8 9.5h8" />
+      <path d="M8 12.5h5" />
+    </>
+  ),
+  lightbulb: (
+    <>
+      <path d="M9 17.5h6" />
+      <path d="M10 21h4" />
+      <path d="M8.5 14.5A6 6 0 1 1 15.5 14.5c-.6.5-.9 1.2-.9 2v1h-5.2v-1c0-.8-.3-1.5-.9-2z" />
+    </>
+  ),
 };
 
 export default function Icon({ name, className = "", size = 24 }: IconProps) {

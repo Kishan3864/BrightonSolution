@@ -14,7 +14,14 @@ export type IconName =
   | "ai"
   | "design"
   | "support"
-  | "instagram";
+  | "instagram"
+  | "cart"
+  | "phone"
+  | "shield"
+  | "clock"
+  | "bell"
+  | "chat"
+  | "lightbulb";
 
 export type NavItem = { label: string; href: string };
 
@@ -75,6 +82,17 @@ export const site: SiteInfo = {
   playStoreUrl: "https://play.google.com/store/apps/developer?id=Brighton+Solution",
   instagramUrl: "https://www.instagram.com/brighton.solution",
 };
+
+/**
+ * The private landing page: shared by direct link only. Never add it to the navigation, footer,
+ * sitemap or robots.txt (robots.txt is public, so listing it there would reveal it). The page is
+ * noindex, and firebase.json also sends X-Robots-Tag for it.
+ */
+export const LAUNCH_PATH = "/start-project";
+
+export function isLaunchPath(pathname: string): boolean {
+  return pathname === LAUNCH_PATH || pathname.startsWith(`${LAUNCH_PATH}/`);
+}
 
 export const nav: NavItem[] = [
   { label: "Services", href: "/services" },

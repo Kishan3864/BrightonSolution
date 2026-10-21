@@ -7,7 +7,7 @@ import Logo from "@/components/Logo";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import { isAdminPath } from "@/lib/analytics/env";
-import { nav, site } from "@/lib/site";
+import { isLaunchPath, nav, site } from "@/lib/site";
 import styles from "./Header.module.css";
 
 const gutter = "px-[clamp(1rem,0.5rem+2.5vw,3rem)]";
@@ -118,6 +118,9 @@ export default function Header() {
 
   const isActive = (href: string) =>
     !href.includes("#") && (pathname === href || (href !== "/" && pathname.startsWith(`${href}/`)));
+
+  // The private landing page brings its own focused bar (components/launch/LaunchHeader.tsx).
+  if (isLaunchPath(pathname || "/")) return null;
 
   return (
     <>
