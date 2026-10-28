@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "brighton-web-ea63c"
+  },
+  "targets": {
+    "brighton-web-ea63c": {
+      "hosting": {
+        "main": [
+          "brighton-web-ea63c"
+        ],
+        "admin": [
+          "brightonsolution-admin"
+        ]
+      }
+    }
   }
 }

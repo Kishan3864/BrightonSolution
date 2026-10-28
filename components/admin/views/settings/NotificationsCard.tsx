@@ -6,6 +6,7 @@ import { contactNotification, leadNotification, type NotificationPayload } from 
 import { showSystemNotification, type NotifyPermission } from "../../data/systemNotify";
 import { AdminIcon, Button, Card, CardHeader, Notice, Segmented, StatusPill, eyebrow, useToast, type Tone } from "../../kit";
 import { IconList, RowDivider } from "./parts";
+import PushControls from "./PushControls";
 
 /**
  * Settings > Enquiry alerts. Shows the browser's notification permission, lets the owner turn alerts
@@ -117,10 +118,14 @@ export default function NotificationsCard() {
       ) : null}
       {notifications.permission === "unsupported" ? (
         <Notice tone="neutral" title="On iPhone or iPad?" className="mt-4">
-          Safari shows notifications only for web apps added to the Home Screen (iOS 16.4 or later). That arrives with the admin app at{" "}
-          <strong>admin.brightonsolution.com</strong>. Until then, use Chrome on Android or a desktop browser.
+          Safari shows notifications only for web apps added to the Home Screen (iOS 16.4 or later): open{" "}
+          <strong>admin.brightonsolution.com</strong> in Safari, tap Share, then Add to Home Screen.
         </Notice>
       ) : null}
+
+      <div className="mt-4">
+        <PushControls />
+      </div>
 
       <RowDivider />
 
@@ -163,15 +168,15 @@ export default function NotificationsCard() {
         <div className="min-w-0">
           <p className="mb-2.5 flex items-center gap-2 text-[0.8125rem] font-medium text-fg">
             <StatusPill tone="accent" size="sm">
-              Next
+              Push
             </StatusPill>
-            With the admin app
+            Even when the admin is closed
           </p>
           <IconList
             items={[
-              { icon: "smartphone", tone: "accent", text: <>Install <strong>admin.brightonsolution.com</strong> on your phone like an app.</> },
+              { icon: "smartphone", tone: "accent", text: <>Install <strong>admin.brightonsolution.com</strong> on your phone like an app, then turn push on above.</> },
               { icon: "zap", tone: "accent", text: <><strong>Instant push</strong> the second a form is submitted, even when the app is closed or the phone is locked.</> },
-              { icon: "pointer", tone: "accent", text: <>Tapping an alert opens that exact lead or contact.</> },
+              { icon: "pointer", tone: "accent", text: <>Tapping an alert opens that exact lead or contact; on Android, WhatsApp is one tap away.</> },
             ]}
           />
         </div>

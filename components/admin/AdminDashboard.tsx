@@ -16,6 +16,7 @@ import LoginPanel from "@/components/admin/LoginPanel";
 import AdminApp from "@/components/admin/shell/AdminApp";
 import { Button, Notice } from "@/components/admin/kit";
 import { createLiveSource } from "@/components/admin/data/liveSource";
+import { captureInstallPrompt } from "@/components/admin/data/push";
 import type { AdminSource } from "@/components/admin/data/types";
 
 type Phase =
@@ -40,6 +41,9 @@ export default function AdminDashboard() {
   const [demo, setDemo] = useState<AdminSource | null>(null);
   const [demoChecked, setDemoChecked] = useState(process.env.NODE_ENV !== "development");
   const configured = hasApiKey();
+
+  // Chrome offers installing the app once per page load, often before sign-in: keep that offer.
+  useEffect(() => captureInstallPrompt(), []);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;

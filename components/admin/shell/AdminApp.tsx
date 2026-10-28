@@ -12,7 +12,8 @@ import SettingsView from "../views/SettingsView";
 import BottomNav from "./BottomNav";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
-import { useHashRoute, type Route } from "./router";
+import { navigate, useHashRoute, type Route } from "./router";
+import { syncPush } from "../data/push";
 
 /**
  * The signed-in admin app: toasts + data provider + a full-height shell (100dvh, no page scroll).
@@ -73,6 +74,21 @@ function Shell() {
   useEffect(() => {
     main.current?.scrollTo({ top: 0 });
   }, [section]);
+
+  // A tapped push alert (admin-site/sw.js) asks the open app to show that enquiry. On start, this
+  // device's push subscription is re-saved in case the browser replaced it.
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+    void syncPush();
+    const onMessage = (event: MessageEvent) => {
+      const data: unknown = event.data;
+      if (!data || typeof data !== "object") return;
+      const { type, url } = data as { type?: unknown; url?: unknown };
+      if (type === "bs-admin-open" && typeof url === "string") navigate(url);
+    };
+    navigator.serviceWorker.addEventListener("message", onMessage);
+    return () => navigator.serviceWorker.removeEventListener("message", onMessage);
+  }, []);
 
   return (
     <div id="admin-app" className="fixed inset-0 flex h-[100dvh] min-w-[320px] overflow-hidden bg-canvas text-fg">

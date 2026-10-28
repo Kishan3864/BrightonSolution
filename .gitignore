@@ -11,3 +11,6 @@ firebase-debug.*.log
 firestore-debug.log
 tsconfig.tsbuildinfo
 next-env.d.ts
+Instagram
+# Admin hosting site (scripts/build-admin-site.mjs)
+/out-admin/

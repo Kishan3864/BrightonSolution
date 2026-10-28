@@ -11,6 +11,8 @@ import type { ContactRecord, LeadRecord } from "@/lib/firebase/schema";
  * Body lines (only the ones that have data): name · company / phone · email / what they want
  * (project types, budget and timeline, service, or the first line of the message).
  * data.url is a hash route of the admin app ("#/landing/<id>"), resolved against the admin origin.
+ * When the enquiry has a usable phone number, data.whatsapp is a wa.me link and "actions" offers it
+ * as a button (Android; the admin site's service worker opens it).
  */
 
 export type NotificationPayload = {
@@ -22,7 +24,9 @@ export type NotificationPayload = {
   badge: string;
   /** Epoch ms of the enquiry. */
   timestamp?: number;
-  data: { url: string; kind: "lead" | "contact" | "summary"; id: string };
+  data: { url: string; kind: "lead" | "contact" | "summary"; id: string; whatsapp?: string };
+  /** Notification buttons (service-worker notifications only; browsers show at most two). */
+  actions?: { action: "open" | "whatsapp"; title: string }[];
 };
 
 type Meta = { id: string; createdAt?: Date | null };
@@ -30,7 +34,9 @@ export type NotifyLead = Partial<LeadRecord> & Meta;
 export type NotifyContact = Partial<ContactRecord> & Meta;
 
 const ICON = "/icon-192.png";
-const BADGE = "/icon-192.png";
+/** Monochrome status-bar icon (Android). */
+const BADGE = "/badge-96.png";
+const SITE_NAME = "BrightonSolution";
 const BODY_LINE_MAX = 110;
 const PLAN_UNSURE = "Help me choose";
 
@@ -60,6 +66,38 @@ export function formatMoney(amount: number, currency: string): string {
   }
 }
 
+/**
+ * wa.me link for a phone number, "" when it is not usable. Same rules as phoneDigits in records.ts:
+ * "00" prefix dropped, a bare 10-digit (or 0-prefixed 11-digit) number from an Indian time zone gets 91.
+ */
+export function whatsappLink(phone: unknown, timeZone: unknown, message = ""): string {
+  const raw = text(phone);
+  let digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+  const india = timeZone === "Asia/Kolkata" || timeZone === "Asia/Calcutta";
+  if (raw.startsWith("00")) digits = digits.slice(2);
+  else if (!raw.startsWith("+") && india) {
+    if (digits.length === 10) digits = `91${digits}`;
+    else if (digits.length === 11 && digits.startsWith("0")) digits = `91${digits.slice(1)}`;
+  }
+  if (digits.length < 8 || digits.length > 15) return "";
+  return `https://wa.me/${digits}${message ? `?text=${encodeURIComponent(message)}` : ""}`;
+}
+
+function actionsFor(whatsapp: string, open: string): NotificationPayload["actions"] {
+  return whatsapp
+    ? [
+        { action: "whatsapp", title: "WhatsApp" },
+        { action: "open", title: open },
+      ]
+    : [{ action: "open", title: open }];
+}
+
+function greeting(name: unknown, about: string): string {
+  const first = text(name).split(" ")[0] || "there";
+  return `Hi ${first}, this is ${SITE_NAME}. Thank you for your enquiry about ${about}.`;
+}
+
 function stamp(doc: Meta): number | undefined {
   return doc.createdAt instanceof Date && Number.isFinite(doc.createdAt.getTime()) ? doc.createdAt.getTime() : undefined;
 }
@@ -76,6 +114,7 @@ export function leadNotification(lead: NotifyLead): NotificationPayload {
   const terms = join([text(lead.budget) ? `Budget ${text(lead.budget)}` : "", text(lead.timeline)]);
   const note = !want ? firstLine(lead.message) : "";
   const pref = text(lead.contactPref) ? `Prefers ${text(lead.contactPref)}` : "";
+  const whatsapp = whatsappLink(lead.phone, lead.timeZone, greeting(lead.name, plan && plan !== PLAN_UNSURE ? `the ${plan} plan` : "your project"));
 
   return {
     title: cut(title, 90),
@@ -84,7 +123,8 @@ export function leadNotification(lead: NotifyLead): NotificationPayload {
     icon: ICON,
     badge: BADGE,
     timestamp: stamp(lead),
-    data: { url: `#/landing/${encodeURIComponent(lead.id)}`, kind: "lead", id: lead.id },
+    data: { url: `#/landing/${encodeURIComponent(lead.id)}`, kind: "lead", id: lead.id, ...(whatsapp ? { whatsapp } : {}) },
+    actions: actionsFor(whatsapp, "Open lead"),
   };
 }
 
@@ -94,6 +134,7 @@ export function contactNotification(contact: NotifyContact): NotificationPayload
   const reach = join([text(contact.phone), text(contact.email)]);
   const budget = text(contact.budget) ? `Budget ${text(contact.budget)}` : "";
   const message = firstLine(contact.message);
+  const whatsapp = whatsappLink(contact.phone, contact.timeZone, greeting(contact.name, text(contact.service) || "your project"));
 
   return {
     title: cut(title, 90),
@@ -102,7 +143,8 @@ export function contactNotification(contact: NotifyContact): NotificationPayload
     icon: ICON,
     badge: BADGE,
     timestamp: stamp(contact),
-    data: { url: `#/contacts/${encodeURIComponent(contact.id)}`, kind: "contact", id: contact.id },
+    data: { url: `#/contacts/${encodeURIComponent(contact.id)}`, kind: "contact", id: contact.id, ...(whatsapp ? { whatsapp } : {}) },
+    actions: actionsFor(whatsapp, "Open contact"),
   };
 }
 

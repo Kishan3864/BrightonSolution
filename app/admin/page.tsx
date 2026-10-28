@@ -18,6 +18,8 @@ export const metadata: Metadata = {
     googleBot: { index: false, follow: false, noimageindex: true },
   },
   alternates: { canonical: null },
+  // Home Screen app on iPhone/iPad (the admin site serves its own manifest at /manifest.webmanifest).
+  appleWebApp: { capable: true, title: "Brighton Admin", statusBarStyle: "black-translucent" },
 };
 
 /** viewportFit "cover" lets the app paint under the notch and home indicator (it pads with safe-area insets). */

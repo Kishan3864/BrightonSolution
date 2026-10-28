@@ -190,8 +190,8 @@ export function AppCard() {
         }
       />
       <p className="text-[0.8125rem] leading-relaxed text-muted text-pretty">
-        <strong className="font-medium text-fg">Add to Home Screen</strong> arrives with the admin&apos;s own address,{" "}
-        <strong className="font-medium text-fg">admin.brightonsolution.com</strong>. It will open full-screen like an app, with instant alerts.
+        Install <strong className="font-medium text-fg">admin.brightonsolution.com</strong> on your phone: it opens
+        full-screen like an app and receives instant push alerts (turn push on under Enquiry alerts).
       </p>
 
       <div className="mt-4 grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">

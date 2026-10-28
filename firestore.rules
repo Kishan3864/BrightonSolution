@@ -223,6 +223,38 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ------------------------------------------------------- push (admin app)
+
+    // One document per subscribed admin device (id = hex SHA-256 of the endpoint), written by the
+    // admin app (components/admin/data/push.ts) and read by the push Cloud Functions (Admin SDK).
+    // updatedAt, when sent, is the server time.
+    function validPushSubscription(d) {
+      return d.keys().hasOnly(['endpoint', 'p256dh', 'auth', 'label', 'userAgent', 'updatedAt'])
+        && d.keys().hasAll(['endpoint', 'p256dh', 'auth'])
+        && reqStr(d, 'endpoint', 12, 1000)
+        && d.endpoint.matches('^https://.+')
+        && reqStr(d, 'p256dh', 20, 200)
+        && reqStr(d, 'auth', 8, 100)
+        && optStr(d, 'label', 100)
+        && optStr(d, 'userAgent', 400)
+        && (!('updatedAt' in d) || d.updatedAt == request.time);
+    }
+
+    match /pushSubscriptions/{id} {
+      allow read, delete: if isAdmin();
+      allow create, update: if isAdmin()
+        && id.matches('^[0-9a-f]{64}$')
+        && validPushSubscription(request.resource.data);
+    }
+
+    // A request for a test alert: the function sends it to every device, then deletes the document.
+    match /pushTests/{id} {
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['createdAt'])
+        && request.resource.data.createdAt == request.time;
+      allow read, delete: if isAdmin();
+    }
+
     // ---------------------------------------------------------- default deny
 
     match /{document=**} {

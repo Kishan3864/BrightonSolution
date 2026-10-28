@@ -94,6 +94,19 @@ export function isLaunchPath(pathname: string): boolean {
   return pathname === LAUNCH_PATH || pathname.startsWith(`${LAUNCH_PATH}/`);
 }
 
+/**
+ * The private admin app lives on its own Firebase Hosting site (target "admin" in firebase.json,
+ * built by scripts/build-admin-site.mjs from the /admin page). The website's /admin redirects there.
+ */
+export const ADMIN_ORIGIN = "https://admin.brightonsolution.com";
+
+/** Every address the admin site answers on (custom domain and the Firebase defaults). */
+export const ADMIN_HOSTS: readonly string[] = [
+  "admin.brightonsolution.com",
+  "brightonsolution-admin.web.app",
+  "brightonsolution-admin.firebaseapp.com",
+];
+
 export const nav: NavItem[] = [
   { label: "Services", href: "/services" },
   { label: "Work", href: "/work" },

@@ -31,6 +31,8 @@
  * "(direct)" (or "(not set)" for a campaign without utm_source or referrer).
  */
 
+import { ADMIN_HOSTS } from "@/lib/site";
+
 export type Channel =
   | "Direct"
   | "Organic search"
@@ -60,6 +62,7 @@ export const OWN_HOSTS: readonly string[] = [
   "www.brightonsolution.com",
   "brighton-web-ea63c.web.app",
   "brighton-web-ea63c.firebaseapp.com",
+  ...ADMIN_HOSTS,
 ];
 
 const OWN = new Set(OWN_HOSTS.map((host) => host.replace(/^www\./, "")));

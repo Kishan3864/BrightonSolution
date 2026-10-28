@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { applyInternalParam } from "@/lib/analytics/env";
 import { install, route, uninstall } from "@/lib/analytics/tracker";
 
 /**
@@ -17,6 +18,8 @@ export default function Analytics() {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Before the first page view is recorded: ?bs_internal=on marks this browser as the team's own.
+    applyInternalParam();
     install();
     return () => uninstall();
   }, []);

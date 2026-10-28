@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/fix-export-segments.mjs",
+    "build": "next build && node scripts/fix-export-segments.mjs && node scripts/build-admin-site.mjs",
     "typecheck": "tsc --noEmit",
-    "build:maintenance": "node scripts/build-maintenance.mjs && node scripts/fix-export-segments.mjs"
+    "build:maintenance": "node scripts/build-maintenance.mjs && node scripts/fix-export-segments.mjs",
+    "build:admin": "node scripts/build-admin-site.mjs"
   },
   "dependencies": {
-    "next": "16.4.0",
+    "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "three": "0.186.1"

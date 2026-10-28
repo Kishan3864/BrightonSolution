@@ -755,7 +755,7 @@ function AlertsCard() {
           <h2 className="text-[0.9375rem] font-semibold text-fg">{state.title}</h2>
           <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-muted text-pretty">{state.text}</p>
           <p className="mt-2 text-[0.75rem] leading-relaxed text-muted">
-            Alerts while the admin is closed arrive with the installable admin app at admin.brightonsolution.com.
+            For alerts while the admin is closed, install the app and turn on push in Settings.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {p === "granted" ? (
