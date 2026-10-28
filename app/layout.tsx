@@ -88,12 +88,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
       </head>
       <body className="bg-canvas font-sans text-fg antialiased">
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-[44px] focus:items-center focus:rounded-sharp focus:bg-fg focus:px-5 focus:text-[0.9375rem] focus:text-canvas"
-        >
-          Skip to content
-        </a>
+        {/* The admin app has its own skip link (its hash is the router). */}
+        <PublicChrome only="admin">
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-[44px] focus:items-center focus:rounded-sharp focus:bg-fg focus:px-5 focus:text-[0.9375rem] focus:text-canvas"
+          >
+            Skip to content
+          </a>
+        </PublicChrome>
         {/* Maintenance build: one standalone screen (logo, message, email) on every route. */}
         {maintenance ? null : <Header />}
         <main id="main">{maintenance ? <MaintenanceScreen standalone /> : children}</main>

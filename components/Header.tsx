@@ -119,8 +119,9 @@ export default function Header() {
   const isActive = (href: string) =>
     !href.includes("#") && (pathname === href || (href !== "/" && pathname.startsWith(`${href}/`)));
 
-  // The private landing page brings its own focused bar (components/launch/LaunchHeader.tsx).
-  if (isLaunchPath(pathname || "/")) return null;
+  // The private landing page brings its own focused bar (components/launch/LaunchHeader.tsx), and the
+  // admin app its own chrome (sidebar, top bar, tab bar).
+  if (isLaunchPath(pathname || "/") || admin) return null;
 
   return (
     <>

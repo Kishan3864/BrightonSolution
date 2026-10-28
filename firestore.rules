@@ -67,12 +67,15 @@ service cloud.firestore {
         && d.createdAt == request.time;
     }
 
+    // Admins may change the status and a private follow-up note (max 2000 characters, CONTACT_LIMITS.note).
     match /contacts/{id} {
       allow create: if validContact(request.resource.data);
       allow read, delete: if isAdmin();
       allow update: if isAdmin()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'note', 'updatedAt'])
         && request.resource.data.status in ['new', 'handled', 'spam']
+        && (!('note' in request.resource.data)
+            || (request.resource.data.note is string && request.resource.data.note.size() <= 2000))
         && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
     }
 

@@ -2,11 +2,16 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { sendPasswordReset, signIn, type AuthSession } from "@/lib/firebase/auth";
-import { AdminButton, Notice, inputClass, labelClass, panelClass } from "@/components/admin/ui";
+import { Button, Notice, TextInput } from "@/components/admin/kit";
 
 const LOCKOUT_AFTER = 5;
 const LOCKOUT_MS = 30_000;
 
+/**
+ * Email + password sign-in for the admin (inside AdminDashboard's centred gate card).
+ * Five failed attempts pause sign-in for 30 seconds; "Forgot password" never reveals whether an
+ * account exists. Errors stay tied to the inputs through aria-describedby instead of stealing focus.
+ */
 export default function LoginPanel({
   onSignedIn,
   notice,
@@ -79,14 +84,13 @@ export default function LoginPanel({
   }
 
   return (
-    <div className={`max-w-[28rem] p-[clamp(1.25rem,0.9rem+1.6vw,2rem)] ${panelClass}`}>
-      <p className="mb-6 text-[0.9375rem] leading-relaxed text-muted">Sign in with the administrator account to see visits and enquiries.</p>
+    <div>
+      <h2 className="text-[1.0625rem] font-semibold text-fg">Sign in</h2>
+      <p className="mt-1 text-[0.875rem] leading-relaxed text-muted">Use the administrator account to see enquiries and visits.</p>
 
-      {/* One announcement per message: role="status"/"alert" on the notice itself, no extra live wrapper,
-          and the error stays tied to the inputs through aria-describedby instead of stealing focus. */}
-      <div className="space-y-3">
+      <div className="mt-5 space-y-3 empty:hidden">
         {notice ? <Notice>{notice}</Notice> : null}
-        {info ? <Notice role="status">{info}</Notice> : null}
+        {info ? <Notice role="status" tone="success">{info}</Notice> : null}
         {error ? (
           <div id={`${id}-error`}>
             <Notice tone="error" role="alert">
@@ -96,12 +100,12 @@ export default function LoginPanel({
         ) : null}
       </div>
 
-      <form onSubmit={submit} noValidate className="mt-6 space-y-5" aria-busy={busy}>
+      <form onSubmit={submit} noValidate className="mt-5 space-y-4" aria-busy={busy}>
         <div>
-          <label htmlFor={`${id}-email`} className={labelClass}>
+          <label htmlFor={`${id}-email`} className="mb-1.5 block text-[0.8125rem] font-medium text-fg">
             Email
           </label>
-          <input
+          <TextInput
             id={`${id}-email`}
             type="email"
             name="email"
@@ -115,15 +119,15 @@ export default function LoginPanel({
             onChange={(event) => setEmail(event.target.value)}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? `${id}-error` : undefined}
-            className={inputClass}
+            className="min-h-12"
           />
         </div>
         <div>
-          <label htmlFor={`${id}-password`} className={labelClass}>
+          <label htmlFor={`${id}-password`} className="mb-1.5 block text-[0.8125rem] font-medium text-fg">
             Password
           </label>
-          <div className="flex gap-2">
-            <input
+          <div className="relative">
+            <TextInput
               id={`${id}-password`}
               type={showPassword ? "text" : "password"}
               name="password"
@@ -134,25 +138,26 @@ export default function LoginPanel({
               onChange={(event) => setPassword(event.target.value)}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? `${id}-error` : undefined}
-              className={inputClass}
+              className="min-h-12 pr-[4.5rem]"
             />
-            <AdminButton
+            <button
+              type="button"
               onClick={() => setShowPassword((value) => !value)}
               aria-pressed={showPassword}
               aria-controls={`${id}-password`}
-              className="shrink-0"
+              className="absolute right-1.5 top-1/2 inline-flex min-h-9 -translate-y-1/2 items-center rounded-[0.55rem] px-2.5 text-[0.8125rem] font-medium text-muted hover:bg-fg/[0.06] hover:text-fg focus:outline-none focus-visible:outline-2 focus-visible:outline-accent"
             >
               {showPassword ? "Hide" : "Show"}
-            </AdminButton>
+            </button>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">
-          <AdminButton type="submit" variant="primary" disabled={busy || locked} className="min-w-[7.5rem]">
-            {busy ? "Please wait…" : "Sign in"}
-          </AdminButton>
-          <AdminButton variant="ghost" onClick={() => void forgot()} disabled={busy}>
-            Forgot password
-          </AdminButton>
+        <Button type="submit" variant="primary" size="lg" block loading={busy} disabled={locked}>
+          {busy ? "Please wait…" : "Sign in"}
+        </Button>
+        <div className="text-center">
+          <Button variant="ghost" size="sm" onClick={() => void forgot()} disabled={busy}>
+            Forgot password?
+          </Button>
         </div>
       </form>
     </div>

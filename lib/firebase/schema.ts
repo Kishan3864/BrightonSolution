@@ -74,6 +74,8 @@ export const CONTACT_LIMITS = {
   language: 35,
   timeZone: 64,
   visitorId: 64,
+  /** Admin-only follow-up note (never sent by the public form). */
+  note: 2000,
 } as const;
 
 export const CONTACT_STATUSES = ["new", "handled", "spam"] as const;
@@ -94,6 +96,8 @@ export type ContactRecord = {
   timeZone?: string;
   visitorId?: string;
   status: ContactStatus;
+  /** Admin-only follow-up note (never sent by the public form; set from /admin with the status). */
+  note?: string;
 };
 
 /* --------------------------------------------------------------- pageviews */
