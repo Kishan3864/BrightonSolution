@@ -1,5 +1,0 @@
-node_modules/
-# Generated before each deploy by scripts/sync-functions-notify.mjs
-notify.js
-*.log
-.env*

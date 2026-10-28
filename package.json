@@ -7,7 +7,8 @@
     "build": "next build && node scripts/fix-export-segments.mjs && node scripts/build-admin-site.mjs",
     "typecheck": "tsc --noEmit",
     "build:maintenance": "node scripts/build-maintenance.mjs && node scripts/fix-export-segments.mjs",
-    "build:admin": "node scripts/build-admin-site.mjs"
+    "build:admin": "node scripts/build-admin-site.mjs",
+    "push:deploy": "node scripts/deploy-push-server.mjs"
   },
   "dependencies": {
     "next": "16.4.3",

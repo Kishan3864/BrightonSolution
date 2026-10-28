@@ -1,7 +1,7 @@
 "use client";
 
 import { getValidIdToken } from "@/lib/firebase/auth";
-import { deleteDocument, setDocument } from "@/lib/firebase/firestore-admin";
+import { deleteDocument, getDocument, setDocument } from "@/lib/firebase/firestore-admin";
 import { isAdminHost } from "@/lib/analytics/env";
 
 /**
@@ -9,17 +9,18 @@ import { isAdminHost } from "@/lib/analytics/env";
  *
  * This browser subscribes with the admin site's service worker (admin-site/sw.js) and stores the
  * subscription in Firestore pushSubscriptions/{sha-256 of the endpoint} (admin-only, firestore.rules).
- * The Cloud Functions in functions/index.js send every new contact and landing lead to all stored
- * subscriptions, with the wording of data/notify.ts, even while the app is closed.
+ * The push server on the VPS (push-server/index.js, pm2) sends every new contact and landing lead to
+ * all stored subscriptions, with the wording of data/notify.ts, even while the app is closed. It
+ * reports in at pushServer/status every 5 minutes (pushServerStatus below).
  *
  * Only on the admin's own site: the website's service worker (public/sw.js) has no push handler.
  */
 
-/** Public half of the VAPID key pair; the private half is the VAPID_PRIVATE_KEY function secret. */
+/** Public half of the VAPID key pair; the private half is VAPID_PRIVATE_KEY in the push server's .env. */
 export const VAPID_PUBLIC_KEY = "BM4gSoV2wasXy-IwufVRprEhL_8tuhF6rRlroYTu9Nsq5ReJabfukqVmdQ8GUUvJJ14p4tvGy0-_05TiwKpcPks";
 
 export const PUSH_COLLECTION = "pushSubscriptions";
-/** An admin-created document here makes the function send a test push to every subscription. */
+/** An admin-created document here makes the push server send a test push to every subscription. */
 export const PUSH_TEST_COLLECTION = "pushTests";
 
 /**
@@ -158,11 +159,32 @@ export async function disablePush(idToken: string): Promise<PushState> {
   return "off";
 }
 
-/** Asks the Cloud Function to push a sample alert to every subscribed device. */
+/** Asks the push server to push a sample alert to every subscribed device. */
 export async function sendTestPush(idToken: string): Promise<void> {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
   const id = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
   await setDocument(PUSH_TEST_COLLECTION, id, {}, idToken, { serverTimestamp: "createdAt" });
+}
+
+/* ------------------------------------------------------------------ push server status */
+
+/** The push server sets lastSeen here every 5 minutes (admin read only). */
+const PUSH_SERVER_COLLECTION = "pushServer";
+const PUSH_SERVER_DOC = "status";
+/** No report for this long means the push server is not running. */
+export const PUSH_SERVER_STALE_MS = 12 * 60 * 1000;
+
+export type PushServerStatus = { lastSeen: Date | null; version: string; label: string };
+
+/** The push server's last report, or null when it has never run. Throws a FirestoreError. */
+export async function pushServerStatus(idToken: string): Promise<PushServerStatus | null> {
+  const doc = await getDocument<Record<string, unknown>>(PUSH_SERVER_COLLECTION, PUSH_SERVER_DOC, idToken);
+  if (!doc) return null;
+  return {
+    lastSeen: doc.lastSeen instanceof Date ? doc.lastSeen : null,
+    version: typeof doc.version === "string" ? doc.version : "",
+    label: typeof doc.label === "string" ? doc.label : "",
+  };
 }
 
 /* ------------------------------------------------------------------ install prompt */

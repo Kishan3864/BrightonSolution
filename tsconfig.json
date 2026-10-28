@@ -35,5 +35,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "out", "out-admin", "functions"]
+  "exclude": ["node_modules", "out", "out-admin", "push-server"]
 }

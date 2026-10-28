@@ -1,0 +1,9 @@
+node_modules/
+# Generated before each deploy by scripts/sync-push-notify.mjs
+notify.js
+*.log
+# Secrets and runtime state; they live only on the server
+.env*
+!.env.example
+service-account.json
+state.json*

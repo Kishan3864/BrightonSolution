@@ -314,21 +314,5 @@
         }
       ]
     }
-  ],
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "runtime": "nodejs22",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "*.log",
-        ".env*"
-      ],
-      "predeploy": [
-        "node scripts/sync-functions-notify.mjs"
-      ]
-    }
   ]
 }

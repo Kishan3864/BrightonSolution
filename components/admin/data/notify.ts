@@ -2,7 +2,8 @@ import type { ContactRecord, LeadRecord } from "@/lib/firebase/schema";
 
 /**
  * Wording of "new enquiry" notifications. PURE: no DOM, no React, no imports with side effects
- * (type-only imports), so the later Cloud Function that sends web push can reuse it unchanged.
+ * (type-only imports), so the push server (push-server/index.js, notify.js is generated from this file)
+ * sends the same wording.
  *
  *   leadNotification(lead)       -> "New landing lead · Growth plan · ₹79,999"
  *   contactNotification(contact) -> "New contact · Website design"

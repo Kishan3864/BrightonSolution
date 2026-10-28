@@ -11,8 +11,8 @@ import PushControls from "./PushControls";
 /**
  * Settings > Enquiry alerts. Shows the browser's notification permission, lets the owner turn alerts
  * on and send a test, previews the exact wording a new lead / contact alert uses (data/notify.ts, the
- * same text the later push Cloud Function will send) and explains what arrives instantly today versus
- * after the installable admin app with background push.
+ * same text the push server sends) and explains what arrives with the admin open versus as background
+ * push on the installed app.
  */
 
 const PERMISSION: Record<NotifyPermission, { label: string; tone: Tone; text: string }> = {

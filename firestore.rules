@@ -226,7 +226,8 @@ service cloud.firestore {
     // ------------------------------------------------------- push (admin app)
 
     // One document per subscribed admin device (id = hex SHA-256 of the endpoint), written by the
-    // admin app (components/admin/data/push.ts) and read by the push Cloud Functions (Admin SDK).
+    // admin app (components/admin/data/push.ts) and read by the push server on the VPS
+    // (push-server/index.js, Admin SDK, which also writes pushLog/ and pushServer/).
     // updatedAt, when sent, is the server time.
     function validPushSubscription(d) {
       return d.keys().hasOnly(['endpoint', 'p256dh', 'auth', 'label', 'userAgent', 'updatedAt'])
@@ -247,12 +248,17 @@ service cloud.firestore {
         && validPushSubscription(request.resource.data);
     }
 
-    // A request for a test alert: the function sends it to every device, then deletes the document.
+    // A request for a test alert: the push server sends it to every device, then deletes the document.
     match /pushTests/{id} {
       allow create: if isAdmin()
         && request.resource.data.keys().hasOnly(['createdAt'])
         && request.resource.data.createdAt == request.time;
       allow read, delete: if isAdmin();
+    }
+
+    // The push server's report (pushServer/status, lastSeen every 5 minutes), shown in Settings.
+    match /pushServer/{id} {
+      allow read: if isAdmin();
     }
 
     // ---------------------------------------------------------- default deny
