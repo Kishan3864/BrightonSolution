@@ -19,6 +19,7 @@ import {
   type AdminIconName,
 } from "../../kit";
 import { useAdminData } from "../../data/AdminDataProvider";
+import { useMissingCheck } from "../../data/useMissingCheck";
 import {
   CONTACT_STATUSES,
   CONTACT_STATUS_META,
@@ -251,8 +252,9 @@ export default function ContactDetail({
   /** Ids in list order, for previous / next. */
   order?: readonly string[];
 }) {
-  const { contacts, inboxLoaded } = useAdminData();
+  const { contacts } = useAdminData();
   const found = contactId ? (contacts.find((c) => c.id === contactId) ?? null) : null;
+  const missing = useMissingCheck(contactId, Boolean(found));
 
   // Keep the last contact while the drawer animates out.
   const [kept, setKept] = useState<ContactDoc | null>(found);
@@ -284,7 +286,7 @@ export default function ContactDetail({
       open={open}
       onClose={onClose}
       backLabel="Contacts"
-      title={contact ? contact.name || "(no name)" : inboxLoaded ? "Contact not found" : "Loading…"}
+      title={contact ? contact.name || "(no name)" : missing ? "Contact not found" : "Loading…"}
       subtitle={subtitle}
       headerActions={
         order && index >= 0 && order.length > 1 ? (
@@ -308,7 +310,7 @@ export default function ContactDetail({
     >
       {contact ? (
         <DetailBody key={contact.id} contact={contact} />
-      ) : !inboxLoaded ? (
+      ) : !missing ? (
         <div className="space-y-4" aria-busy="true">
           <Skeleton className="h-6 w-1/3" />
           <Skeleton className="h-11 w-full" />

@@ -168,22 +168,33 @@ export async function sendTestPush(idToken: string): Promise<void> {
 
 /* ------------------------------------------------------------------ push server status */
 
-/** The push server sets lastSeen here every 5 minutes (admin read only). */
+/** The push server sets lastSeen here every 5 minutes, and the outcome of each alert (admin read only). */
 const PUSH_SERVER_COLLECTION = "pushServer";
 const PUSH_SERVER_DOC = "status";
 /** No report for this long means the push server is not running. */
 export const PUSH_SERVER_STALE_MS = 12 * 60 * 1000;
 
-export type PushServerStatus = { lastSeen: Date | null; version: string; label: string };
+export type PushServerStatus = {
+  lastSeen: Date | null;
+  version: string;
+  label: string;
+  /** The last alert it sent: when, to how many devices, how many accepted it, and the push service's error code when none did. */
+  lastPush: { at: Date; devices: number; sent: number; error: string } | null;
+};
 
 /** The push server's last report, or null when it has never run. Throws a FirestoreError. */
 export async function pushServerStatus(idToken: string): Promise<PushServerStatus | null> {
   const doc = await getDocument<Record<string, unknown>>(PUSH_SERVER_COLLECTION, PUSH_SERVER_DOC, idToken);
   if (!doc) return null;
+  const count = (value: unknown) => (typeof value === "number" && Number.isFinite(value) ? value : 0);
   return {
     lastSeen: doc.lastSeen instanceof Date ? doc.lastSeen : null,
     version: typeof doc.version === "string" ? doc.version : "",
     label: typeof doc.label === "string" ? doc.label : "",
+    lastPush:
+      doc.lastPushAt instanceof Date
+        ? { at: doc.lastPushAt, devices: count(doc.lastPushDevices), sent: count(doc.lastPushSent), error: typeof doc.lastPushError === "string" ? doc.lastPushError : "" }
+        : null,
   };
 }
 

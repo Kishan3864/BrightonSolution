@@ -8,6 +8,7 @@ import { useToast } from "../kit/Toaster";
 import { exportContactsCsv, exportLeadsCsv, exportPageviewsCsv } from "./exports";
 import { describeError } from "./liveSource";
 import { contactNotification, leadNotification, summaryNotification } from "./notify";
+import { pushState } from "./push";
 import { byNewest, contactStatusOf, contactToInbox, leadStatusOf, leadToInbox, timeOf } from "./records";
 import {
   notificationPermission,
@@ -117,6 +118,8 @@ export type AdminData = {
   setLeadNote: (id: string, note: string) => Promise<boolean>;
   saveExcludedVisitors: (ids: string[]) => Promise<ActionResult>;
   refresh: () => Promise<void>;
+  /** Checks for new enquiries now (the same check that runs every minute); shares one already running. */
+  checkNew: () => Promise<void>;
   /** Exports all loaded rows, or the given ones (e.g. the filtered table). */
   exportContacts: (rows?: readonly ContactDoc[]) => void;
   exportLeads: (rows?: readonly LeadDoc[]) => void;
@@ -381,37 +384,45 @@ export default function AdminDataProvider({
         toast({ id: note.tag, tone: "contact", title: note.title, description: note.body.split("\n").slice(0, 2).join(" — "), action: { label: "Open contact", href: note.data.url } });
       }
       if (notificationPermission() !== "granted") return;
-      if (freshLeads.length + freshContacts.length > MAX_SINGLE_ALERTS) {
-        void showSystemNotification(summaryNotification(freshLeads.length, freshContacts.length));
-        return;
-      }
-      for (const lead of freshLeads) void showSystemNotification(leadNotification(lead));
-      for (const contact of freshContacts) void showSystemNotification(contactNotification(contact));
+      void (async () => {
+        // With background push on, the push server already alerts this device about every enquiry;
+        // a second system notification would come back after that one was tapped or dismissed.
+        if ((await pushState()) === "on") return;
+        if (freshLeads.length + freshContacts.length > MAX_SINGLE_ALERTS) {
+          void showSystemNotification(summaryNotification(freshLeads.length, freshContacts.length));
+          return;
+        }
+        for (const lead of freshLeads) void showSystemNotification(leadNotification(lead));
+        for (const contact of freshContacts) void showSystemNotification(contactNotification(contact));
+      })();
     },
     [toast],
   );
 
-  const polling = useRef(false);
+  const polling = useRef<Promise<void> | null>(null);
   const lastPoll = useRef(0);
-  const poll = useCallback(async () => {
-    if (polling.current) return;
-    polling.current = true;
+  const poll = useCallback((): Promise<void> => {
+    if (polling.current) return polling.current;
     lastPoll.current = Date.now();
-    try {
-      const page = await source.pollNew(newest(contactsRef.current), newest(leadsRef.current));
-      const knownContacts = new Set(contactsRef.current.map((doc) => doc.id));
-      const knownLeads = new Set(leadsRef.current.map((doc) => doc.id));
-      const freshContacts = page.contacts.filter((doc) => !knownContacts.has(doc.id)).sort(byNewest);
-      const freshLeads = page.leads.filter((doc) => !knownLeads.has(doc.id)).sort(byNewest);
-      if (freshContacts.length) setContacts((list) => [...freshContacts, ...list.filter((doc) => !freshContacts.some((f) => f.id === doc.id))]);
-      if (freshLeads.length) setLeads((list) => [...freshLeads, ...list.filter((doc) => !freshLeads.some((f) => f.id === doc.id))]);
-      if (freshContacts.length || freshLeads.length) announce(freshContacts, freshLeads);
-    } catch (error) {
-      // A failed check is retried on the next tick; only an expired session matters here.
-      if (describeError(error).expired) onExpiredRef.current();
-    } finally {
-      polling.current = false;
-    }
+    const run = (async () => {
+      try {
+        const page = await source.pollNew(newest(contactsRef.current), newest(leadsRef.current));
+        const knownContacts = new Set(contactsRef.current.map((doc) => doc.id));
+        const knownLeads = new Set(leadsRef.current.map((doc) => doc.id));
+        const freshContacts = page.contacts.filter((doc) => !knownContacts.has(doc.id)).sort(byNewest);
+        const freshLeads = page.leads.filter((doc) => !knownLeads.has(doc.id)).sort(byNewest);
+        if (freshContacts.length) setContacts((list) => [...freshContacts, ...list.filter((doc) => !freshContacts.some((f) => f.id === doc.id))]);
+        if (freshLeads.length) setLeads((list) => [...freshLeads, ...list.filter((doc) => !freshLeads.some((f) => f.id === doc.id))]);
+        if (freshContacts.length || freshLeads.length) announce(freshContacts, freshLeads);
+      } catch (error) {
+        // A failed check is retried on the next tick; only an expired session matters here.
+        if (describeError(error).expired) onExpiredRef.current();
+      }
+    })().finally(() => {
+      polling.current = null;
+    });
+    polling.current = run;
+    return run;
   }, [source, announce]);
 
   useEffect(() => {
@@ -762,6 +773,7 @@ export default function AdminDataProvider({
       setLeadNote,
       saveExcludedVisitors,
       refresh,
+      checkNew: poll,
       exportContacts,
       exportLeads,
       exportPageviews,
@@ -805,6 +817,7 @@ export default function AdminDataProvider({
       setLeadNote,
       saveExcludedVisitors,
       refresh,
+      poll,
       exportContacts,
       exportLeads,
       exportPageviews,

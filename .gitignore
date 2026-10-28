@@ -14,3 +14,8 @@ next-env.d.ts
 Instagram
 # Admin hosting site (scripts/build-admin-site.mjs)
 /out-admin/
+# Google service-account keys (the push server's lives only on the VPS); this repo is public
+*firebase-adminsdk*.json
+*service-account*.json
+*serviceAccount*.json
+brighton-web-ea63c-*.json

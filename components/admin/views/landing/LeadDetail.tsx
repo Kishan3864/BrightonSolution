@@ -23,6 +23,7 @@ import {
   type AdminIconName,
 } from "../../kit";
 import { useAdminData } from "../../data/AdminDataProvider";
+import { useMissingCheck } from "../../data/useMissingCheck";
 import {
   LEAD_STATUS_META,
   PLAN_UNSURE,
@@ -61,8 +62,9 @@ export default function LeadDetail({
   onClose: () => void;
   order?: readonly string[];
 }) {
-  const { leads, inboxLoaded, lastSeen, now } = useAdminData();
+  const { leads, lastSeen, now } = useAdminData();
   const lead = leadId ? leads.find((l) => l.id === leadId) : undefined;
+  const missing = useMissingCheck(leadId, Boolean(lead));
   const index = lead && order ? order.indexOf(lead.id) : -1;
   const prevId = index > 0 ? order?.[index - 1] : undefined;
   const nextId = index >= 0 && order && index < order.length - 1 ? order[index + 1] : undefined;
@@ -98,14 +100,14 @@ export default function LeadDetail({
       onClose={onClose}
       size="lg"
       backLabel="Leads"
-      title={lead ? lead.name || "(no name)" : inboxLoaded ? "Lead not found" : "Loading lead…"}
+      title={lead ? lead.name || "(no name)" : missing ? "Lead not found" : "Loading lead…"}
       subtitle={lead ? `${leadKindLabel(lead)} · ${timeAgo(lead.createdAt, now)}` : undefined}
       headerActions={headerActions}
       footer={lead ? <QuickActions lead={lead} /> : undefined}
     >
       {lead ? (
         <LeadBody key={lead.id} lead={lead} fresh={fresh} />
-      ) : inboxLoaded ? (
+      ) : missing ? (
         <EmptyState
           icon="rocket"
           title="This lead is not loaded"

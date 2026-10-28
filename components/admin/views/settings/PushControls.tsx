@@ -36,10 +36,20 @@ function serverLine(report: ServerReport, now: number): { tone: Tone; text: stri
   if (report === "error") return { tone: "muted", text: "Push server status could not be loaded." };
   if (!report || !report.lastSeen) return { tone: "yellow", text: "Push server not connected yet. Alerts start as soon as it runs." };
   const where = report.label ? ` (${report.label})` : "";
-  if (now - report.lastSeen.getTime() <= PUSH_SERVER_STALE_MS) {
-    return { tone: "green", text: `Push server online${where}, last report ${timeAgo(report.lastSeen, now)}.` };
+  if (now - report.lastSeen.getTime() > PUSH_SERVER_STALE_MS) {
+    return { tone: "red", text: `Push server offline${where} since ${timeAgo(report.lastSeen, now)}. Alerts resume when it runs again.` };
   }
-  return { tone: "red", text: `Push server offline${where} since ${timeAgo(report.lastSeen, now)}. Alerts resume when it runs again.` };
+  const online = `Push server online${where}, last report ${timeAgo(report.lastSeen, now)}.`;
+  const last = report.lastPush;
+  if (!last) return { tone: "green", text: online };
+  const when = timeAgo(last.at, now);
+  if (last.devices === 0) return { tone: "yellow", text: `${online} The last alert (${when}) found no device with push on.` };
+  if (last.sent === 0) {
+    const code = last.error ? ` (push service error ${last.error})` : "";
+    return { tone: "red", text: `${online} The last alert (${when}) reached no device${code}. Turn push off and on again on your phone.` };
+  }
+  const devices = `${last.sent} of ${last.devices} ${last.devices === 1 ? "device" : "devices"}`;
+  return { tone: "green", text: `${online} Last alert ${when}, delivered to ${devices}.` };
 }
 
 const STATE: Record<PushState, { label: string; tone: Tone; text: string }> = {
@@ -64,6 +74,8 @@ export default function PushControls() {
   const installable = useSyncExternalStore(subscribeInstall, canInstall, () => false);
   const [server, setServer] = useState<ServerReport>(undefined);
   const [now, setNow] = useState(() => Date.now());
+  /** Bumped to read the push server's report again now (after a test push). */
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,7 +108,7 @@ export default function PushControls() {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [mode]);
+  }, [mode, reload]);
 
   const withToken = useCallback(
     async (run: (token: string) => Promise<void>) => {
@@ -145,7 +157,9 @@ export default function PushControls() {
     try {
       await withToken(async (token) => {
         await sendTestPush(token);
-        toast({ tone: "success", title: "Test push requested", description: "It reaches every device with push on within a few seconds." });
+        toast({ tone: "info", title: "Test push requested", description: "It reaches every device with push on within a few seconds. The result shows below." });
+        // The push server records the outcome; read it once the test has gone out.
+        window.setTimeout(() => setReload((value) => value + 1), 6000);
       });
     } catch (error) {
       toast({ tone: "error", title: "Could not send the test", description: errorText(error) });
@@ -179,7 +193,7 @@ export default function PushControls() {
       </div>
       <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-muted text-pretty">{info ? info.text : "Checking…"}</p>
       {serverInfo ? (
-        <p className="mt-2 flex min-w-0 items-start gap-2 text-[0.8125rem] leading-relaxed text-fg text-pretty" role="status">
+        <p className="mt-2 flex min-w-0 items-start gap-2 text-[0.8125rem] leading-relaxed text-fg text-pretty">
           <span aria-hidden="true" className="mt-[0.4rem] size-2 shrink-0 rounded-full" style={{ backgroundColor: TONE_DOT[serverInfo.tone] }} />
           <span className="min-w-0">{serverInfo.text}</span>
         </p>

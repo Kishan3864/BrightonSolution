@@ -5,5 +5,7 @@ notify.js
 # Secrets and runtime state; they live only on the server
 .env*
 !.env.example
-service-account.json
+*.json
+!package.json
+!package-lock.json
 state.json*
