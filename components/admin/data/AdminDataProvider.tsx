@@ -8,7 +8,7 @@ import { useToast } from "../kit/Toaster";
 import { exportContactsCsv, exportLeadsCsv, exportPageviewsCsv } from "./exports";
 import { describeError } from "./liveSource";
 import { contactNotification, leadNotification, summaryNotification } from "./notify";
-import { pushState } from "./push";
+import { shownByPush } from "./push";
 import { byNewest, contactStatusOf, contactToInbox, leadStatusOf, leadToInbox, timeOf } from "./records";
 import {
   notificationPermission,
@@ -118,8 +118,8 @@ export type AdminData = {
   setLeadNote: (id: string, note: string) => Promise<boolean>;
   saveExcludedVisitors: (ids: string[]) => Promise<ActionResult>;
   refresh: () => Promise<void>;
-  /** Checks for new enquiries now (the same check that runs every minute); shares one already running. */
-  checkNew: () => Promise<void>;
+  /** Checks for new enquiries now (the same check that runs every minute; shares one already running). False when it failed. */
+  checkNew: () => Promise<boolean>;
   /** Exports all loaded rows, or the given ones (e.g. the filtered table). */
   exportContacts: (rows?: readonly ContactDoc[]) => void;
   exportLeads: (rows?: readonly LeadDoc[]) => void;
@@ -384,24 +384,28 @@ export default function AdminDataProvider({
         toast({ id: note.tag, tone: "contact", title: note.title, description: note.body.split("\n").slice(0, 2).join(" — "), action: { label: "Open contact", href: note.data.url } });
       }
       if (notificationPermission() !== "granted") return;
+      const leadNotes = freshLeads.map((lead) => leadNotification(lead));
+      const contactNotes = freshContacts.map((contact) => contactNotification(contact));
       void (async () => {
-        // With background push on, the push server already alerts this device about every enquiry;
-        // a second system notification would come back after that one was tapped or dismissed.
-        if ((await pushState()) === "on") return;
-        if (freshLeads.length + freshContacts.length > MAX_SINGLE_ALERTS) {
-          void showSystemNotification(summaryNotification(freshLeads.length, freshContacts.length));
+        // Background push may already have shown some of these on this device (admin-site/sw.js
+        // records their tags): show only the rest, so a second notification never comes back after
+        // the first was tapped, while the open app still alerts when the push server is down.
+        const shown = await shownByPush([...leadNotes, ...contactNotes].map((note) => note.tag));
+        const leadsLeft = leadNotes.filter((note) => !shown.has(note.tag));
+        const contactsLeft = contactNotes.filter((note) => !shown.has(note.tag));
+        if (leadsLeft.length + contactsLeft.length > MAX_SINGLE_ALERTS) {
+          void showSystemNotification(summaryNotification(leadsLeft.length, contactsLeft.length));
           return;
         }
-        for (const lead of freshLeads) void showSystemNotification(leadNotification(lead));
-        for (const contact of freshContacts) void showSystemNotification(contactNotification(contact));
+        for (const note of [...leadsLeft, ...contactsLeft]) void showSystemNotification(note);
       })();
     },
     [toast],
   );
 
-  const polling = useRef<Promise<void> | null>(null);
+  const polling = useRef<Promise<boolean> | null>(null);
   const lastPoll = useRef(0);
-  const poll = useCallback((): Promise<void> => {
+  const poll = useCallback((): Promise<boolean> => {
     if (polling.current) return polling.current;
     lastPoll.current = Date.now();
     const run = (async () => {
@@ -414,9 +418,11 @@ export default function AdminDataProvider({
         if (freshContacts.length) setContacts((list) => [...freshContacts, ...list.filter((doc) => !freshContacts.some((f) => f.id === doc.id))]);
         if (freshLeads.length) setLeads((list) => [...freshLeads, ...list.filter((doc) => !freshLeads.some((f) => f.id === doc.id))]);
         if (freshContacts.length || freshLeads.length) announce(freshContacts, freshLeads);
+        return true;
       } catch (error) {
         // A failed check is retried on the next tick; only an expired session matters here.
         if (describeError(error).expired) onExpiredRef.current();
+        return false;
       }
     })().finally(() => {
       polling.current = null;

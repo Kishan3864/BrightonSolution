@@ -2,7 +2,11 @@
  * BrightonSolution Admin service worker (admin.brightonsolution.com only; copied into out-admin/ by
  * scripts/build-admin-site.mjs). The website keeps its own worker (public/sw.js).
  *
- *  - push: shows the alert sent by functions/index.js (wording: components/admin/data/notify.ts).
+ *  - push: shows the alert sent by the push server (push-server/index.js on the VPS; wording:
+ *    components/admin/data/notify.ts) and remembers its tag in the "bs-push-shown" cache, so the open
+ *    app does not show the same enquiry again (components/admin/data/push.ts shownByPush).
+ *  - pushsubscriptionchange: subscribes again when the browser drops the subscription; the app saves
+ *    the new one the next time it is opened or comes to the front (push.ts syncPush).
  *  - notificationclick: brings the open app forward and shows that enquiry (message "bs-admin-open",
  *    handled in components/admin/shell/AdminApp.tsx), or opens the app at it; the "whatsapp" action
  *    opens WhatsApp with the enquiry's number.
@@ -17,6 +21,9 @@ const VERSION = "2026-10-28.1";
 const CACHE = "bs-admin-" + VERSION;
 const SHELL = "/";
 const MAX_ENTRIES = 160;
+/** Tags of alerts shown by push; not a "bs-admin-" cache, so a new VERSION keeps it. */
+const SHOWN = "bs-push-shown";
+const SHOWN_MAX = 300;
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -121,7 +128,31 @@ self.addEventListener("push", (event) => {
   };
   if (payload.tag) options.tag = payload.tag;
   event.waitUntil(
-    self.registration.showNotification(typeof payload.title === "string" && payload.title ? payload.title : "New enquiry", options),
+    self.registration
+      .showNotification(typeof payload.title === "string" && payload.title ? payload.title : "New enquiry", options)
+      .then(() => rememberShown(payload.tag)),
+  );
+});
+
+async function rememberShown(tag) {
+  if (typeof tag !== "string" || !tag) return;
+  try {
+    const cache = await caches.open(SHOWN);
+    await cache.put(new Request("/__push-shown/" + encodeURIComponent(tag)), new Response(String(Date.now())));
+    const keys = await cache.keys();
+    for (let i = 0; i < keys.length - SHOWN_MAX; i += 1) await cache.delete(keys[i]);
+  } catch (_) {
+    /* storage unavailable: the app may show that enquiry once more */
+  }
+}
+
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(
+    (async () => {
+      const options = event.oldSubscription && event.oldSubscription.options;
+      if (!options || (await self.registration.pushManager.getSubscription())) return;
+      await self.registration.pushManager.subscribe(options);
+    })().catch(() => undefined),
   );
 });
 

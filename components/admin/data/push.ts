@@ -130,9 +130,13 @@ async function saveSubscription(subscription: PushSubscription, idToken: string)
   );
 }
 
+let lastSync = 0;
+const SYNC_EVERY_MS = 6 * 3600 * 1000;
+
 /**
- * Re-saves this device's subscription when the app starts (browsers may replace it), so alerts
- * keep reaching it. Does nothing unless push is on here; failures are retried on the next start.
+ * Re-saves this device's subscription when the app starts (browsers may replace it; admin-site/sw.js
+ * subscribes again on pushsubscriptionchange), so alerts keep reaching it. Does nothing unless push
+ * is on here; failures are retried on the next start.
  */
 export async function syncPush(): Promise<void> {
   try {
@@ -142,10 +146,41 @@ export async function syncPush(): Promise<void> {
     const subscription = reg ? await reg.pushManager.getSubscription() : null;
     if (!subscription) return;
     const token = await getValidIdToken();
-    if (token) await saveSubscription(subscription, token);
+    if (token) {
+      await saveSubscription(subscription, token);
+      lastSync = Date.now();
+    }
   } catch {
     /* retried on the next start */
   }
+}
+
+/** syncPush at most every 6 hours; for when the app comes back to the front. */
+export function syncPushSoon(): void {
+  if (Date.now() - lastSync >= SYNC_EVERY_MS) void syncPush();
+}
+
+/** Cache where admin-site/sw.js records the tag of every alert push showed on this device. */
+const SHOWN_CACHE = "bs-push-shown";
+
+/**
+ * The tags among `tags` whose alert background push already showed on this device, so the open
+ * app shows only the others (and still alerts when the push server is down). Empty when unknown.
+ */
+export async function shownByPush(tags: readonly string[]): Promise<Set<string>> {
+  const shown = new Set<string>();
+  if (typeof caches === "undefined" || !tags.length) return shown;
+  try {
+    const cache = await caches.open(SHOWN_CACHE);
+    await Promise.all(
+      tags.map(async (tag) => {
+        if (await cache.match(`/__push-shown/${encodeURIComponent(tag)}`)) shown.add(tag);
+      }),
+    );
+  } catch {
+    /* storage blocked: treat as not shown */
+  }
+  return shown;
 }
 
 /** Unsubscribes this browser and removes its stored subscription. */
@@ -178,9 +213,21 @@ export type PushServerStatus = {
   lastSeen: Date | null;
   version: string;
   label: string;
-  /** The last alert it sent: when, to how many devices, how many accepted it, and the push service's error code when none did. */
-  lastPush: { at: Date; devices: number; sent: number; error: string } | null;
+  /**
+   * The last alert it sent: when, to how many devices, how many accepted it, the outcome, and the
+   * error code ("403", "timeout", "network", ...) when some device did not get it.
+   */
+  lastPush: { at: Date; devices: number; sent: number; error: string; outcome: PushOutcome } | null;
 };
+
+/** delivered: every device; partial: some; temporary: none yet, the server retries; failed: refused; none: no device has push on. */
+export type PushOutcome = "delivered" | "partial" | "temporary" | "failed" | "none";
+
+function outcomeOf(value: unknown, devices: number, sent: number): PushOutcome {
+  if (value === "delivered" || value === "partial" || value === "temporary" || value === "failed" || value === "none") return value;
+  // Reports written before lastPushOutcome existed.
+  return devices === 0 ? "none" : sent === 0 ? "failed" : sent < devices ? "partial" : "delivered";
+}
 
 /** The push server's last report, or null when it has never run. Throws a FirestoreError. */
 export async function pushServerStatus(idToken: string): Promise<PushServerStatus | null> {
@@ -193,7 +240,13 @@ export async function pushServerStatus(idToken: string): Promise<PushServerStatu
     label: typeof doc.label === "string" ? doc.label : "",
     lastPush:
       doc.lastPushAt instanceof Date
-        ? { at: doc.lastPushAt, devices: count(doc.lastPushDevices), sent: count(doc.lastPushSent), error: typeof doc.lastPushError === "string" ? doc.lastPushError : "" }
+        ? {
+            at: doc.lastPushAt,
+            devices: count(doc.lastPushDevices),
+            sent: count(doc.lastPushSent),
+            error: typeof doc.lastPushError === "string" ? doc.lastPushError : "",
+            outcome: outcomeOf(doc.lastPushOutcome, count(doc.lastPushDevices), count(doc.lastPushSent)),
+          }
         : null,
   };
 }

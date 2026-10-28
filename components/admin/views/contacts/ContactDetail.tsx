@@ -252,9 +252,9 @@ export default function ContactDetail({
   /** Ids in list order, for previous / next. */
   order?: readonly string[];
 }) {
-  const { contacts } = useAdminData();
+  const { contacts, inboxError } = useAdminData();
   const found = contactId ? (contacts.find((c) => c.id === contactId) ?? null) : null;
-  const missing = useMissingCheck(contactId, Boolean(found));
+  const lookup = useMissingCheck(contactId, Boolean(found));
 
   // Keep the last contact while the drawer animates out.
   const [kept, setKept] = useState<ContactDoc | null>(found);
@@ -286,7 +286,7 @@ export default function ContactDetail({
       open={open}
       onClose={onClose}
       backLabel="Contacts"
-      title={contact ? contact.name || "(no name)" : missing ? "Contact not found" : "Loading…"}
+      title={contact ? contact.name || "(no name)" : lookup.state === "missing" ? "Contact not found" : lookup.state === "error" ? "Could not load the contact" : "Loading…"}
       subtitle={subtitle}
       headerActions={
         order && index >= 0 && order.length > 1 ? (
@@ -310,7 +310,18 @@ export default function ContactDetail({
     >
       {contact ? (
         <DetailBody key={contact.id} contact={contact} />
-      ) : !missing ? (
+      ) : lookup.state === "error" ? (
+        <EmptyState
+          icon="wifiOff"
+          title="Could not load this contact"
+          description={inboxError ?? "Check the connection, then try again."}
+          action={
+            <Button size="sm" icon="refresh" onClick={lookup.retry}>
+              Try again
+            </Button>
+          }
+        />
+      ) : lookup.state !== "missing" ? (
         <div className="space-y-4" aria-busy="true">
           <Skeleton className="h-6 w-1/3" />
           <Skeleton className="h-11 w-full" />

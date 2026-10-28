@@ -15,17 +15,20 @@
  *   listener stalled, Firestore reads failed for a while, a flood) is pushed: up to CATCH_UP_SINGLES
  *   one by one, more as one summary alert. The cursor only moves after a successful check, and is
  *   kept in state.json, so outages and restarts never lose an alert (up to 24 hours back).
- * - pushLog/{kind}-{id} records each enquiry dealt with, so nothing is pushed twice; a repeat would
- *   only replace the same notification (each enquiry has its own tag).
+ * - pushLog/{kind}-{id} records each enquiry dealt with, so nothing is pushed twice. Only a hard
+ *   crash between a push and its pushLog write can repeat one (pm2 restarts wait for pushes in
+ *   flight): a single alert then replaces itself silently (each enquiry has its own tag), while the
+ *   enquiries of an interrupted summary come again as their own alerts.
  * - pushTests/ (Settings > Send test push): a sample alert goes to every device, then the document
  *   is deleted.
- * - pushServer/status: `lastSeen` every 5 minutes plus the outcome of the last alert; Settings in
- *   the admin shows both. Subscriptions the push service reports as gone (404/410) are deleted.
+ * - pushServer/status: `lastSeen` every 5 minutes plus the outcome of the last alert (delivered,
+ *   partial, temporary, failed or none); Settings in the admin shows both. Subscriptions the push service reports as gone (404/410) are deleted.
  *
  * Needs two files next to this one, never in git: .env (VAPID keys, see .env.example) and
  * service-account.json (Firestore access; role Cloud Datastore User). Until both exist it waits and
  * checks again every 15 seconds. Logs never contain enquiry contents, only document ids and counts.
  */
+import { createHash } from "node:crypto";
 import { chmodSync, existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -219,7 +222,7 @@ async function sendTo(doc, body) {
         await sleep(attempt * 2000);
         continue;
       }
-      const code = String(status ?? error?.code ?? "error");
+      const code = status ? String(status) : typeof error?.code === "string" ? error.code : /timeout/i.test(errorText(error)) ? "timeout" : "network";
       log("warn", "Push failed", { device: doc.id.slice(0, 8), status: code, temporary });
       return { outcome: temporary ? "temporary" : "failed", code };
     }
@@ -233,10 +236,31 @@ async function pushToAll(payload) {
   const count = (value) => results.filter((result) => result.outcome === value).length;
   const result = { devices: subscriptions.size, sent: count("sent"), expired: count("expired"), temporary: count("temporary"), failed: count("failed") };
   const code = results.find((r) => r.code)?.code ?? "";
+  const missedSome = result.temporary + result.failed > 0;
+  const lastPushOutcome = !result.devices
+    ? "none"
+    : result.sent && !missedSome
+      ? "delivered"
+      : result.sent
+        ? "partial"
+        : result.failed
+          ? "failed"
+          : result.temporary
+            ? "temporary"
+            : "none";
   // Settings shows the outcome of the last alert; a failed write here only costs that line.
   db.collection("pushServer")
     .doc("status")
-    .set({ lastPushAt: FieldValue.serverTimestamp(), lastPushDevices: result.devices, lastPushSent: result.sent, lastPushError: result.sent ? "" : code }, { merge: true })
+    .set(
+      {
+        lastPushAt: FieldValue.serverTimestamp(),
+        lastPushOutcome,
+        lastPushDevices: result.devices,
+        lastPushSent: result.sent,
+        lastPushError: missedSome ? code : "",
+      },
+      { merge: true },
+    )
     .catch((error) => log("warn", "Could not record the push outcome", { error: errorText(error) }));
   return result;
 }
@@ -357,11 +381,23 @@ async function summarise(items) {
     const leads = items.filter(({ source }) => source.kind === "lead").length;
     const contacts = items.length - leads;
     const summary = summaryNotification(leads, contacts);
-    const result = await pushToAll({ ...summary, tag: `summary-${Date.now()}` });
-    const round = Math.max(0, ...keys.map((key) => rounds.get(key) ?? 0)) + 1;
-    if (retryLater(result) && round < MAX_ROUNDS) {
-      for (const key of keys) rounds.set(key, round);
-      log("warn", "Summary will be retried at the next check", { leads, contacts, round, ...result });
+    // The same set of enquiries always gets the same tag: a resend after a crash replaces the
+    // first summary silently, while a summary of other enquiries rings again.
+    const tag = `summary-${createHash("sha1").update([...keys].sort().join(",")).digest("hex").slice(0, 16)}`;
+    const result = await pushToAll({ ...summary, tag }).catch((error) => ({ error: errorText(error) }));
+    if (result.error || retryLater(result)) {
+      // Each enquiry keeps its own count: one that is older and has failed more often does not
+      // make the newer ones give up early.
+      const giveUp = [];
+      for (const item of items) {
+        const key = keyOf(item.source, item.doc);
+        const round = (rounds.get(key) ?? 0) + 1;
+        if (round < MAX_ROUNDS) rounds.set(key, round);
+        else giveUp.push(item);
+      }
+      log("warn", "Summary not delivered; the next check tries again", { leads, contacts, gaveUp: giveUp.length, ...result });
+      for (const { source, doc } of giveUp) settle(keyOf(source, doc));
+      if (giveUp.length) await record(giveUp.map(({ source, doc }) => [keyOf(source, doc), logEntry(source, doc, result.error ? { error: true } : result, { summary: true })]));
       return;
     }
     for (const key of keys) settle(key);
@@ -413,16 +449,19 @@ async function runCheck() {
   // Re-check after the awaits: a listener may have taken some meanwhile.
   const todo = missed.filter(({ source, doc }) => !handled.has(keyOf(source, doc)) && !inflight.has(keyOf(source, doc)));
 
-  if (todo.length > CATCH_UP_SINGLES || todo.some(({ source, doc }) => burstSkipped.has(keyOf(source, doc)))) {
+  // Enquiries already known (left by a flood, or waiting for a retry) do not mean a listener missed
+  // them; note them now, before handling clears those marks.
+  const known = new Set(todo.map(({ source, doc }) => keyOf(source, doc)).filter((key) => burstSkipped.has(key) || rounds.has(key)));
+  // Left over from a flood: one summary for several; a single leftover gets its full alert.
+  if (todo.length > CATCH_UP_SINGLES || (todo.length > 1 && todo.some(({ source, doc }) => burstSkipped.has(keyOf(source, doc))))) {
     await summarise(todo);
   } else {
     await Promise.all(todo.map(({ source, doc }) => handle(source, doc)));
   }
 
   const listenerMissed = todo.some(({ source, doc }) => {
-    const key = keyOf(source, doc);
     const created = createdMs(doc);
-    return !burstSkipped.has(key) && !rounds.has(key) && created > listeningSince + 5000 && Date.now() - created > MISSED_AFTER_MS;
+    return !known.has(keyOf(source, doc)) && created > listeningSince + 5000 && Date.now() - created > MISSED_AFTER_MS;
   });
   if (listenerMissed) scheduleRelisten("the check found an enquiry the listeners missed");
 

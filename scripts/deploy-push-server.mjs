@@ -49,7 +49,11 @@ before=$(pm2 jlist | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end"
 pm2 startOrReload ecosystem.config.cjs --update-env >/dev/null
 grep -q '"${APP}"' "$HOME/.pm2/dump.pm2" 2>/dev/null || { pm2 save >/dev/null && echo "deploy-push-server: added to pm2's saved list (starts after a reboot)"; }
 sleep 8
-pm2 jlist | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const p=JSON.parse(s).find(a=>a.name==="${APP}");if(!p){console.error("deploy-push-server: ${APP} is not in pm2");process.exit(1)}const restarts=p.pm2_env.restart_time-Math.max(0,'"$before"')-('"$before"'>=0?1:0);console.log("deploy-push-server: "+p.pm2_env.status+", node "+p.pm2_env.node_version+", unexpected restarts "+Math.max(0,restarts));if(p.pm2_env.status!=="online"||restarts>0)process.exit(1)})'
+if ! pm2 jlist | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const p=JSON.parse(s).find(a=>a.name==="${APP}");if(!p){console.error("deploy-push-server: ${APP} is not in pm2");process.exit(1)}const restarts=p.pm2_env.restart_time-Math.max(0,'"$before"')-('"$before"'>=0?1:0);console.log("deploy-push-server: "+p.pm2_env.status+", node "+p.pm2_env.node_version+", unexpected restarts "+Math.max(0,restarts));if(p.pm2_env.status!=="online"||restarts>0)process.exit(1)})'; then
+  echo "deploy-push-server: health check failed; recent logs:"
+  pm2 logs ${APP} --lines 30 --nostream --raw 2>/dev/null | tail -30
+  exit 1
+fi
 pm2 logs ${APP} --lines 6 --nostream --raw 2>/dev/null | tail -6
 `;
 

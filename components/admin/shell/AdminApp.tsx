@@ -13,7 +13,7 @@ import BottomNav from "./BottomNav";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import { navigate, useHashRoute, type Route } from "./router";
-import { syncPush } from "../data/push";
+import { syncPush, syncPushSoon } from "../data/push";
 
 /**
  * The signed-in admin app: toasts + data provider + a full-height shell (100dvh, no page scroll).
@@ -75,8 +75,9 @@ function Shell() {
     main.current?.scrollTo({ top: 0 });
   }, [section]);
 
-  // A tapped push alert (admin-site/sw.js) asks the open app to show that enquiry. On start, this
-  // device's push subscription is re-saved in case the browser replaced it.
+  // A tapped push alert (admin-site/sw.js) asks the open app to show that enquiry. On start, and when
+  // the app comes back to the front (at most every 6 hours), this device's push subscription is
+  // re-saved in case the browser replaced it.
   useEffect(() => {
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
     void syncPush();
@@ -86,8 +87,15 @@ function Shell() {
       const { type, url } = data as { type?: unknown; url?: unknown };
       if (type === "bs-admin-open" && typeof url === "string") navigate(url);
     };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") syncPushSoon();
+    };
     navigator.serviceWorker.addEventListener("message", onMessage);
-    return () => navigator.serviceWorker.removeEventListener("message", onMessage);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      navigator.serviceWorker.removeEventListener("message", onMessage);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   return (

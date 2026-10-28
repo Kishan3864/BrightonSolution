@@ -31,7 +31,17 @@ import { StepList } from "./parts";
 /** undefined while loading; "error" when the report could not be read. */
 type ServerReport = PushServerStatus | null | "error" | undefined;
 
-function serverLine(report: ServerReport, now: number): { tone: Tone; text: string } | null {
+function errorLabel(code: string): string {
+  if (/^d+$/.test(code)) return `push service error ${code}`;
+  return code === "network" ? "network error" : code;
+}
+
+/** When the last alert was recorded (0 if never): a change means a requested test has its result. */
+function lastPushAt(report: ServerReport): number {
+  return report && report !== "error" && report.lastPush ? report.lastPush.at.getTime() : 0;
+}
+
+function serverLine(report: ServerReport, now: number, waitingForTest: boolean): { tone: Tone; text: string } | null {
   if (report === undefined) return null;
   if (report === "error") return { tone: "muted", text: "Push server status could not be loaded." };
   if (!report || !report.lastSeen) return { tone: "yellow", text: "Push server not connected yet. Alerts start as soon as it runs." };
@@ -40,16 +50,24 @@ function serverLine(report: ServerReport, now: number): { tone: Tone; text: stri
     return { tone: "red", text: `Push server offline${where} since ${timeAgo(report.lastSeen, now)}. Alerts resume when it runs again.` };
   }
   const online = `Push server online${where}, last report ${timeAgo(report.lastSeen, now)}.`;
+  if (waitingForTest) return { tone: "green", text: `${online} Waiting for the test result…` };
   const last = report.lastPush;
   if (!last) return { tone: "green", text: online };
   const when = timeAgo(last.at, now);
-  if (last.devices === 0) return { tone: "yellow", text: `${online} The last alert (${when}) found no device with push on.` };
-  if (last.sent === 0) {
-    const code = last.error ? ` (push service error ${last.error})` : "";
-    return { tone: "red", text: `${online} The last alert (${when}) reached no device${code}. Turn push off and on again on your phone.` };
-  }
+  const code = last.error ? ` (${errorLabel(last.error)})` : "";
   const devices = `${last.sent} of ${last.devices} ${last.devices === 1 ? "device" : "devices"}`;
-  return { tone: "green", text: `${online} Last alert ${when}, delivered to ${devices}.` };
+  switch (last.outcome) {
+    case "none":
+      return { tone: "yellow", text: `${online} The last alert (${when}) found no device with push on.` };
+    case "temporary":
+      return { tone: "yellow", text: `${online} The last alert (${when}) could not reach the push service yet${code}; the server tries again.` };
+    case "failed":
+      return { tone: "red", text: `${online} The last alert (${when}) was refused${code}. Turn push off and on again on your phone.` };
+    case "partial":
+      return { tone: "yellow", text: `${online} Last alert ${when}, delivered to ${devices}; not to the others${code}.` };
+    default:
+      return { tone: "green", text: `${online} Last alert ${when}, delivered to ${devices}.` };
+  }
 }
 
 const STATE: Record<PushState, { label: string; tone: Tone; text: string }> = {
@@ -76,6 +94,19 @@ export default function PushControls() {
   const [now, setNow] = useState(() => Date.now());
   /** Bumped to read the push server's report again now (after a test push). */
   const [reload, setReload] = useState(0);
+  /** A test push asked for, and the last alert's time then; the result is in once that changes. */
+  const [pendingTest, setPendingTest] = useState<{ baseline: number } | null>(null);
+
+  // After a test push, read the report again until the result is in (or a minute has passed).
+  useEffect(() => {
+    if (!pendingTest) return;
+    const timers = [6_000, 15_000, 30_000].map((ms) => window.setTimeout(() => setReload((value) => value + 1), ms));
+    const done = window.setTimeout(() => setPendingTest(null), 60_000);
+    return () => {
+      for (const timer of timers) window.clearTimeout(timer);
+      window.clearTimeout(done);
+    };
+  }, [pendingTest]);
 
   useEffect(() => {
     let cancelled = false;
@@ -158,8 +189,7 @@ export default function PushControls() {
       await withToken(async (token) => {
         await sendTestPush(token);
         toast({ tone: "info", title: "Test push requested", description: "It reaches every device with push on within a few seconds. The result shows below." });
-        // The push server records the outcome; read it once the test has gone out.
-        window.setTimeout(() => setReload((value) => value + 1), 6000);
+        setPendingTest({ baseline: lastPushAt(server) });
       });
     } catch (error) {
       toast({ tone: "error", title: "Could not send the test", description: errorText(error) });
@@ -179,7 +209,7 @@ export default function PushControls() {
   }
 
   const info = state ? STATE[state] : null;
-  const serverInfo = mode === "live" ? serverLine(server, now) : null;
+  const serverInfo = mode === "live" ? serverLine(server, now, pendingTest !== null && lastPushAt(server) === pendingTest.baseline) : null;
 
   return (
     <div className="min-w-0 rounded-sharp border border-line bg-canvas/60 p-3 sm:p-4">
