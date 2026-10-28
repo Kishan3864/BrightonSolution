@@ -119,7 +119,7 @@ export default function NotificationsCard() {
       {notifications.permission === "unsupported" ? (
         <Notice tone="neutral" title="On iPhone or iPad?" className="mt-4">
           Safari shows notifications only for web apps added to the Home Screen (iOS 16.4 or later): open{" "}
-          <strong>admin.brightonsolution.com</strong> in Safari, tap Share, then Add to Home Screen.
+          this admin in Safari, tap Share, then Add to Home Screen.
         </Notice>
       ) : null}
 
@@ -174,7 +174,7 @@ export default function NotificationsCard() {
           </p>
           <IconList
             items={[
-              { icon: "smartphone", tone: "accent", text: <>Install <strong>admin.brightonsolution.com</strong> on your phone like an app, then turn push on above.</> },
+              { icon: "smartphone", tone: "accent", text: <>Install this admin on your phone like an app, then turn push on above.</> },
               { icon: "zap", tone: "accent", text: <><strong>Instant push</strong> the second a form is submitted, even when the app is closed or the phone is locked.</> },
               { icon: "pointer", tone: "accent", text: <>Tapping an alert opens that exact lead or contact; on Android, WhatsApp is one tap away.</> },
             ]}

@@ -190,7 +190,7 @@ export function AppCard() {
         }
       />
       <p className="text-[0.8125rem] leading-relaxed text-muted text-pretty">
-        Install <strong className="font-medium text-fg">admin.brightonsolution.com</strong> on your phone: it opens
+        Install this admin on your phone: it opens
         full-screen like an app and receives instant push alerts (turn push on under Enquiry alerts).
       </p>
 

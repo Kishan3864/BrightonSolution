@@ -28,7 +28,7 @@ const STATE: Record<PushState, { label: string; tone: Tone; text: string }> = {
   off: { label: "Push off", tone: "yellow", text: "Turn push on to get every new enquiry instantly on this device, even when the app is closed." },
   denied: { label: "Blocked", tone: "red", text: "Notifications are blocked for the admin in this browser's site settings." },
   "needs-install": { label: "Install first", tone: "accent", text: "On iPhone and iPad, push works only from the app on the Home Screen." },
-  "other-host": { label: "Admin app only", tone: "muted", text: "Background push runs in the admin app at admin.brightonsolution.com." },
+  "other-host": { label: "Admin app only", tone: "muted", text: "Background push runs in the admin app on its own address, not on this one." },
   unsupported: { label: "Not supported", tone: "muted", text: "This browser cannot receive push alerts. Use Chrome on Android, Safari on iPhone (Home Screen app) or a desktop browser." },
 };
 
@@ -166,7 +166,7 @@ export default function PushControls() {
         <div className="mt-3">
           <StepList
             steps={[
-              <>Open <strong>admin.brightonsolution.com</strong> in Safari.</>,
+              <>Open this admin in Safari (same address as now).</>,
               <>Tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</>,
               <>Open the app from the Home Screen, sign in and tap <strong>Turn on push</strong>.</>,
             ]}

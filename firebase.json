@@ -184,6 +184,23 @@
             }
           ]
         }
+      ],
+      "redirects": [
+        {
+          "source": "/admin",
+          "destination": "https://brightonsolution-admin.web.app/",
+          "type": 302
+        },
+        {
+          "source": "/admin/**",
+          "destination": "https://brightonsolution-admin.web.app/",
+          "type": 302
+        },
+        {
+          "source": "/admin.@(html|txt)",
+          "destination": "https://brightonsolution-admin.web.app/",
+          "type": 302
+        }
       ]
     },
     {

@@ -96,9 +96,11 @@ export function isLaunchPath(pathname: string): boolean {
 
 /**
  * The private admin app lives on its own Firebase Hosting site (target "admin" in firebase.json,
- * built by scripts/build-admin-site.mjs from the /admin page). The website's /admin redirects there.
+ * built by scripts/build-admin-site.mjs from the /admin page). The website's /admin redirects there
+ * (firebase.json). Until the Hostinger CNAME "admin" points at brightonsolution-admin.web.app, the
+ * live address is the Firebase default one; then switch this and the redirects to the custom domain.
  */
-export const ADMIN_ORIGIN = "https://admin.brightonsolution.com";
+export const ADMIN_ORIGIN = "https://brightonsolution-admin.web.app";
 
 /** Every address the admin site answers on (custom domain and the Firebase defaults). */
 export const ADMIN_HOSTS: readonly string[] = [
