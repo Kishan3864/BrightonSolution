@@ -68,7 +68,10 @@ export default function AdminDashboard() {
     let cancelled = false;
     void getValidSession().then((session) => {
       if (cancelled) return;
-      setPhase(session ? { kind: "signed-in", session } : { kind: "signed-out", notice: null });
+      // Offline start with an expired token: the stored session is kept (getValidSession only clears
+      // it when the refresh is rejected), so open the app with it; data loads retry once online.
+      const kept = session ?? loadSession();
+      setPhase(kept ? { kind: "signed-in", session: kept } : { kind: "signed-out", notice: null });
     });
     return () => {
       cancelled = true;

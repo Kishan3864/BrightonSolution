@@ -9,7 +9,8 @@
  * - sendPasswordReset(email)         → AuthResult<null>          (PASSWORD_RESET; always reports success to avoid account enumeration)
  * - decodeIdToken(idToken)           → IdTokenClaims | null      (unverified decode, for UI decisions only — rules enforce access)
  * - isAdminSession(session)          → true when email is in ADMIN_EMAILS and verified
- * - Session helpers (sessionStorage "bs_admin_session", cleared when the tab closes):
+ * - Session helpers (localStorage "bs_admin_session": the device stays signed in, also in the installed
+ *   app, until Sign out or a rejected refresh; a session left in sessionStorage by older builds moves over):
  *   saveSession(s), loadSession(), clearSession(), getValidSession() (auto-refreshes within 5 min of expiry),
  *   getValidIdToken() → string | null
  */
@@ -223,7 +224,7 @@ export async function sendPasswordReset(email: string): Promise<AuthResult<null>
 
 export function saveSession(session: AuthSession): void {
   try {
-    window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   } catch {
     /* storage unavailable — session lives only in memory for this page */
   }
@@ -231,7 +232,15 @@ export function saveSession(session: AuthSession): void {
 
 export function loadSession(): AuthSession | null {
   try {
-    const raw = window.sessionStorage.getItem(SESSION_KEY);
+    let raw = window.localStorage.getItem(SESSION_KEY);
+    if (!raw) {
+      // Signed in by an older build (sessionStorage): keep that session on this device.
+      raw = window.sessionStorage.getItem(SESSION_KEY);
+      if (raw) {
+        window.localStorage.setItem(SESSION_KEY, raw);
+        window.sessionStorage.removeItem(SESSION_KEY);
+      }
+    }
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<AuthSession>;
     if (typeof parsed.idToken !== "string" || typeof parsed.refreshToken !== "string") return null;
@@ -250,6 +259,7 @@ export function loadSession(): AuthSession | null {
 
 export function clearSession(): void {
   try {
+    window.localStorage.removeItem(SESSION_KEY);
     window.sessionStorage.removeItem(SESSION_KEY);
   } catch {
     /* ignore */

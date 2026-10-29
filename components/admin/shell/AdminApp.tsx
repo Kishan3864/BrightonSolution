@@ -14,6 +14,7 @@ import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import { navigate, useHashRoute, type Route } from "./router";
 import { syncPush, syncPushSoon } from "../data/push";
+import AlertsBanner from "./AlertsBanner";
 
 /**
  * The signed-in admin app: toasts + data provider + a full-height shell (100dvh, no page scroll).
@@ -123,6 +124,7 @@ function Shell() {
           className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] focus:outline-none [scrollbar-gutter:stable] md:pl-0"
         >
           <div className="mx-auto w-full max-w-[1440px] px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pt-6 md:pb-12 lg:px-8 lg:pt-7">
+            <AlertsBanner />
             <RouteView route={route} />
           </div>
         </div>

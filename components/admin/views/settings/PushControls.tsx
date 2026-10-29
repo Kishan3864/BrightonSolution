@@ -19,7 +19,7 @@ import {
 } from "../../data/push";
 import { timeAgo } from "../../data/records";
 import { Button, LinkButton, Notice, StatusPill, TONE_DOT, useToast, type Tone } from "../../kit";
-import { StepList } from "./parts";
+import { IosInstallSteps } from "../../shell/AlertsBanner";
 
 /**
  * Settings > Enquiry alerts > Background push on this device: turn push on or off, send a test
@@ -259,13 +259,7 @@ export default function PushControls() {
 
       {state === "needs-install" ? (
         <div className="mt-3">
-          <StepList
-            steps={[
-              <>Open this admin in Safari (same address as now).</>,
-              <>Tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</>,
-              <>Open the app from the Home Screen, sign in and tap <strong>Turn on push</strong>.</>,
-            ]}
-          />
+          <IosInstallSteps />
         </div>
       ) : null}
       {state === "denied" ? (
